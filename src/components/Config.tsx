@@ -15,51 +15,24 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import { ThemeProvider } from 'theming';
-import BoxList from './components/BoxList';
-import Config from './components/Config';
-import Links from './components/Links';
-import Metrics from './components/Metrics';
-import { theme } from './theme';
+import { Theme } from '../theme';
 
-const useStyles = createUseStyles({
-	'@global': {
-		'*': {
-			boxSizing: 'border-box',
-		},
-		body: {
-			height: '100vh',
-		},
-		'#root': {
-			height: '100%',
-		},
-	},
+const useStyles = createUseStyles((t: Theme) => ({
 	container: {
-		display: 'grid',
-		gridTemplateColumns: 'minmax(300px, 500px) 1fr 1fr',
-		gridTemplateRows: '1fr 400px',
-		gridTemplateAreas: `
-			"box-list config metrics"
-			"box-list links links"
-		`,
-		gap: 10,
-		height: '100%',
-		padding: 10,
+		border: '1px solid',
+		gridArea: 'config',
+		borderRadius: 6,
 	},
-});
+}));
 
-function App() {
+function Config() {
 	const classes = useStyles();
+
 	return (
-		<ThemeProvider theme={theme}>
-			<div className={classes.container}>
-				<BoxList />
-				<Config />
-				<Metrics />
-				<Links />
-			</div>
-		</ThemeProvider>
+		<div className={classes.container}>
+			<h2>Config</h2>
+		</div>
 	);
 }
 
-export default App;
+export default Config;

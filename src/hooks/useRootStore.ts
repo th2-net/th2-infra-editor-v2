@@ -11,26 +11,18 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ***************************************************************************** */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StoresProvider from './StoresProvider';
-import 'normalize.css';
+import RootStoreContext from '../contexts/rootStoreContext';
 
-ReactDOM.render(
-	<React.StrictMode>
-		<StoresProvider>
-			<App />
-		</StoresProvider>
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
+export const useRootStore = () => {
+	const rootStore = React.useContext(RootStoreContext);
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+	if (!rootStore) {
+		throw new Error('useRootStore should be used inside of RootStoreContextProvider');
+	}
+
+	return rootStore;
+};

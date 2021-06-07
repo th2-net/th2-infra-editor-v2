@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,26 +11,16 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StoresProvider from './StoresProvider';
-import 'normalize.css';
+import { RequestModel } from '../models/FileBase';
+import Schema from '../models/Schema';
 
-ReactDOM.render(
-	<React.StrictMode>
-		<StoresProvider>
-			<App />
-		</StoresProvider>
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+export default interface ApiSchema {
+	fetchSchemasList: () => Promise<string[]>;
+	fetchSchemaState: (schemaName: string, abortSignal: AbortSignal) => Promise<Schema>;
+	createSchema: (schemaName: string) => Promise<Schema>;
+	sendSchemaRequest: (schemaName: string, schema: RequestModel[]) => Promise<boolean>;
+	subscribeOnChanges: (schemaName: string) => EventSource;
+}

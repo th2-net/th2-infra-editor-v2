@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,25 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StoresProvider from './StoresProvider';
-import 'normalize.css';
+import { BoxEntity, ExtendedConnectionOwner } from './Box';
+import { DictionaryEntity } from './Dictionary';
+import { Link } from './LinksDefinition';
 
-ReactDOM.render(
-	<React.StrictMode>
-		<StoresProvider>
-			<App />
-		</StoresProvider>
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
+export interface Snapshot {
+	object: string;
+	type: 'box' | 'link' | 'dictionary';
+	operation: 'add' | 'remove' | 'change';
+	changeList: Change[];
+}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+export interface Change {
+	object: string;
+	from: BoxEntity | Link<ExtendedConnectionOwner> | DictionaryEntity | null;
+	to: BoxEntity | Link<ExtendedConnectionOwner> | DictionaryEntity | null;
+}
+
+export interface DetailedDiff {
+	added: BoxEntity | DictionaryEntity;
+	deleted: BoxEntity | DictionaryEntity;
+	updated: BoxEntity | DictionaryEntity;
+}

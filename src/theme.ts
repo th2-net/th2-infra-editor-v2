@@ -14,23 +14,9 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StoresProvider from './StoresProvider';
-import 'normalize.css';
+export const theme = {
+	colorPrimary: '#4d4d4d',
+} as const;
 
-ReactDOM.render(
-	<React.StrictMode>
-		<StoresProvider>
-			<App />
-		</StoresProvider>
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+export type Theme = typeof theme;
+ 

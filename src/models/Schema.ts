@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StoresProvider from './StoresProvider';
-import 'normalize.css';
+import FileBase from './FileBase';
 
-ReactDOM.render(
-	<React.StrictMode>
-		<StoresProvider>
-			<App />
-		</StoresProvider>
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
+export default interface Schema {
+	commitRef: string;
+	resources: FileBase[];
+}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+export interface SchemaSettings extends FileBase {
+	spec: {
+		'k8s-propagation': 'off' | 'deny' | 'sync' | 'rule';
+	};
+}
+
+export function isSettingsEntity(object: unknown): object is SchemaSettings {
+	return (
+		typeof object === 'object' &&
+		object !== null &&
+		(object as SchemaSettings).kind === 'SettingsFile'
+	);
+}
