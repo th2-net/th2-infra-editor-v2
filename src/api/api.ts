@@ -30,7 +30,7 @@ export default class Api implements ApiSchema {
 		return res.json();
 	}
 
-	async fetchSchemaState(schemaName: string, abortSignal: AbortSignal): Promise<Schema> {
+	async fetchSchemaState(schemaName: string, abortSignal?: AbortSignal): Promise<Schema> {
 		const res = await fetch(`backend/schema/${schemaName}`, { signal: abortSignal });
 
 		if (!res.ok) {

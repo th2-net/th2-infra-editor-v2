@@ -14,27 +14,25 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StoresProvider from './StoresProvider';
-import 'normalize.css';
-import { ThemeProvider } from 'theming';
-import { theme } from './styles/theme';
+import { createUseStyles } from 'react-jss';
+import { Theme } from '../../styles/theme';
 
-ReactDOM.render(
-	<React.StrictMode>
-		<StoresProvider>
-			<ThemeProvider theme={theme}>
-				<App />
-			</ThemeProvider>
-		</StoresProvider>
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
+const useStyles = createUseStyles((t: Theme) => ({
+	container: {
+		border: '1px solid',
+		gridArea: 'config',
+		borderRadius: 6,
+	},
+}));
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+function Config() {
+	const classes = useStyles();
+
+	return (
+		<div className={classes.container}>
+			<h2>Config</h2>
+		</div>
+	);
+}
+
+export default Config;

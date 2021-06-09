@@ -14,25 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { createUseStyles } from 'react-jss';
-import { Theme } from '../theme';
+import Links from './Links';
 
-const useStyles = createUseStyles((t: Theme) => ({
-	container: {
-		border: '1px solid',
-		gridArea: 'box-list',
-		borderRadius: 6,
-	},
-}));
-
-function BoxList() {
-	const classes = useStyles();
-
-	return (
-		<div className={classes.container}>
-			<h2>Box list</h2>
-		</div>
-	);
-}
-
-export default BoxList;
+export default Links;

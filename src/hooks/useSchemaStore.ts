@@ -11,12 +11,13 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ***************************************************************************** */
 
-export const theme = {
-	colorPrimary: '#4d4d4d',
-} as const;
+import { useRootStore } from './useRootStore'
 
-export type Theme = typeof theme;
- 
+export const useSchemaStore = () => {
+	const rootStore = useRootStore();
+
+	return rootStore.schemaStore;
+};

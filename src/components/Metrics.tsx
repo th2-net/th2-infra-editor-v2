@@ -15,15 +15,14 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import { Theme } from '../theme';
 
-const useStyles = createUseStyles((t: Theme) => ({
+const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
 		gridArea: 'metrics',
 		borderRadius: 6,
 	},
-}));
+});
 
 function Metrics() {
 	const classes = useStyles();
