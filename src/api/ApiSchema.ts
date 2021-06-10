@@ -19,7 +19,7 @@ import Schema from '../models/Schema';
 
 export default interface ApiSchema {
 	fetchSchemasList: () => Promise<string[]>;
-	fetchSchemaState: (schemaName: string, abortSignal: AbortSignal) => Promise<Schema>;
+	fetchSchemaState: (schemaName: string, abortSignal?: AbortSignal) => Promise<Schema>;
 	createSchema: (schemaName: string) => Promise<Schema>;
 	sendSchemaRequest: (schemaName: string, schema: RequestModel[]) => Promise<boolean>;
 	subscribeOnChanges: (schemaName: string) => EventSource;

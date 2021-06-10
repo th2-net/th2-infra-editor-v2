@@ -14,27 +14,25 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StoresProvider from './StoresProvider';
-import 'normalize.css';
-import { ThemeProvider } from 'theming';
-import { theme } from './styles/theme';
+import { Styles } from 'jss';
 
-ReactDOM.render(
-	<React.StrictMode>
-		<StoresProvider>
-			<ThemeProvider theme={theme}>
-				<App />
-			</ThemeProvider>
-		</StoresProvider>
-	</React.StrictMode>,
-	document.getElementById('root'),
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+export function scrollBar(thumbColor = 'rgba(0,0,0,.22)'): Styles {
+	return {
+		'&::-webkit-scrollbar': {
+			height: 6,
+			width: 6,
+			backgroundColor: 'rgba(0,0,0,0)',
+		},
+		'&::-webkit-scrollbar-track': {
+			backgroundColor: 'rgba(0,0,0,0)',
+		},
+		'&::-webkit-scrollbar-thumb': {
+			backgroundColor: thumbColor,
+			borderRadius: 40,
+			height: 40,
+		},
+		'&::-webkit-scrollbar-button': {
+			display: 'none',
+		},
+	};
+}

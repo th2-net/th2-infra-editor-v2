@@ -14,18 +14,35 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import { ThemeProvider } from 'theming';
-import BoxList from './components/BoxList';
-import Config from './components/Config';
-import Links from './components/Links';
+import Boxes from './components/boxes';
+import Config from './components/config';
+import Header from './components/Header';
+import Links from './components/links';
 import Metrics from './components/Metrics';
-import { theme } from './theme';
+import { useSchemaStore } from './hooks/useSchemaStore';
+import { Theme } from './styles/theme';
+import { useRootStore } from './hooks/useRootStore';
 
-const useStyles = createUseStyles({
+const useStyles = createUseStyles((theme: Theme) => ({
+	'@font-face': [
+		{
+			fontFamily: 'Open sans',
+			fontWeight: 'normal',
+			src: 'url(fonts/open-sans-v15-latin-regular.woff)',
+		},
+		{
+			fontFamily: 'Open sans',
+			fontWeight: 'bold',
+			src: 'url(fonts/open-sans-v15-latin-600.woff)',
+		},
+	] as any,
 	'@global': {
 		'*': {
 			boxSizing: 'border-box',
+			fontFamily: 'Open Sans',
 		},
 		body: {
 			height: '100vh',
@@ -34,32 +51,58 @@ const useStyles = createUseStyles({
 			height: '100%',
 		},
 	},
-	container: {
+	app: {
 		display: 'grid',
+		gridTemplateRows: '60px 1fr',
+		gridTemplateAreas: `
+			"header"
+			"content"
+		`,
+		gap: 10,
+		height: '100%',
+		backgroundColor: theme.appBackgroundColor,
+	},
+	content: {
+		gridArea: 'content',
+		display: 'grid',
+		gap: 10,
 		gridTemplateColumns: 'minmax(300px, 500px) 1fr 1fr',
 		gridTemplateRows: '1fr 400px',
 		gridTemplateAreas: `
 			"box-list config metrics"
 			"box-list links links"
 		`,
-		gap: 10,
-		height: '100%',
-		padding: 10,
+		padding: '0 15px',
 	},
-});
+	loader: {
+		placeSelf: 'center',
+	},
+}));
 
 function App() {
+	const rootStore = useRootStore();
+	const schemaStore = useSchemaStore();
 	const classes = useStyles();
+
+	useEffect(() => {
+		rootStore.init();
+	}, []);
+
 	return (
-		<ThemeProvider theme={theme}>
-			<div className={classes.container}>
-				<BoxList />
-				<Config />
-				<Metrics />
-				<Links />
-			</div>
-		</ThemeProvider>
+		<div className={classes.app}>
+			<Header />
+			{!schemaStore.isLoading ? (
+				<div className={classes.content}>
+					<Boxes />
+					<Config />
+					<Metrics />
+					<Links />
+				</div>
+			) : (
+				<div className={classes.loader}>Loading...</div>
+			)}
+		</div>
 	);
 }
 
-export default App;
+export default observer(App);

@@ -14,4 +14,21 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-export class RootStore {}
+import Api from '../api/api';
+import { SchemaStore } from './SchemaStore';
+
+export class RootStore {
+	schemaStore: SchemaStore;
+
+	constructor(private api: Api) {
+		this.schemaStore = new SchemaStore(api);
+	}
+
+	async init() {
+		try {
+			await this.schemaStore.fetchSchemas();
+		} catch (error) {
+			console.error(error);
+		}
+	}
+}

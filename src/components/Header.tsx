@@ -14,25 +14,42 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import { Theme } from '../theme';
+import { useSchemaStore } from '../hooks/useSchemaStore';
 
-const useStyles = createUseStyles((t: Theme) => ({
+const useStyles = createUseStyles({
 	container: {
-		border: '1px solid',
-		gridArea: 'config',
-		borderRadius: 6,
+		gridArea: 'header',
+		backgroundColor: '#7a99b8',
+		height: '60px',
+		boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.25)',
+		padding: '15px 60px',
+		display: 'flex',
+		alignItems: 'center',
 	},
-}));
+});
 
-function Config() {
+function Header() {
+	const schemaStore = useSchemaStore();
+
 	const classes = useStyles();
 
 	return (
 		<div className={classes.container}>
-			<h2>Config</h2>
+			{schemaStore.schemas.length !== 0 && (
+				<select
+					onChange={e => schemaStore.setSelectedSchema(e.target.value)}
+					value={schemaStore.selectedSchema || undefined}>
+					{schemaStore.schemas.map(schema => (
+						<option key={schema} value={schema}>
+							{schema}
+						</option>
+					))}
+				</select>
+			)}
 		</div>
 	);
 }
 
-export default Config;
+export default observer(Header);

@@ -15,12 +15,14 @@
  ***************************************************************************** */
 
 import React from "react";
+import Api from "../api/api";
 import { RootStore } from "../stores/RootStore";
 
 const RootStoreContext = React.createContext<RootStore | null>(null);
 
 export function createRootStore(): RootStore {
-  const rootStore = new RootStore();
+  const api = new Api();
+  const rootStore = new RootStore(api);
 
   return rootStore;
 }
