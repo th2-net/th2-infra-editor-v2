@@ -14,9 +14,10 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { useRef } from 'react';
 import { createUseStyles } from 'react-jss';
 import classNames from 'classnames';
-import { BoxEntity } from '../../models/Box';
+import { BoxEntity, BoxStatus } from '../../models/Box';
 import { Theme } from '../../styles/theme';
 
 const useStyles = createUseStyles(
@@ -37,7 +38,7 @@ const useStyles = createUseStyles(
 			alignItems: 'center',
 			padding: '0 10px',
 			backgroundColor: 'rgb(102, 204, 145)',
-			color: '#fff'
+			color: '#fff',
 		},
 		name: {
 			margin: '0 0 0 5px',
@@ -69,11 +70,16 @@ const useStyles = createUseStyles(
 interface Props {
 	box: BoxEntity;
 	color?: string;
+	onSelect: (box: BoxEntity) => void;
+	isSelected?: boolean;
 }
 
 function Box(props: Props) {
-	const { box, color } = props;
+	const { box, color, onSelect, isSelected = false } = props;
 	const classes = useStyles();
+
+	// TODO: fix status
+	const status = useRef(Object.values(BoxStatus)[Math.floor(Math.random() * 3)]);
 
 	const type = box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name;
 	const imageName = box.spec['image-name'];
@@ -81,9 +87,12 @@ function Box(props: Props) {
 	const slicedImageName = splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
 
 	return (
-		<div className={classes.container}>
+		<div
+			className={classes.container}
+			onClick={() => onSelect(box)}
+			style={{ border: isSelected ? '2px solid green' : 'none' }}>
 			<div className={classes.header} style={{ backgroundColor: color }}>
-				<Status status={['Running', 'Pending', 'Failed'][Math.floor(Math.random() * 3)] as any} />
+				<Status status={status.current} />
 				<h5 className={classes.name}>{box.name}</h5>
 			</div>
 			<div className={classes.body}>
@@ -109,13 +118,13 @@ const useStatusStyles = createUseStyles(
 			border: '1px solid #fff',
 			backgroundColor: '#8b8b8b',
 		},
-		running: {
+		Running: {
 			backgroundColor: '#14d314',
 		},
-		pending: {
+		Pending: {
 			backgroundColor: '#e0e013',
 		},
-		failed: {
+		Failed: {
 			backgroundColor: '#e61010',
 		},
 	},
@@ -123,17 +132,13 @@ const useStatusStyles = createUseStyles(
 );
 
 interface StatusProps {
-	status: 'Running' | 'Pending' | 'Failed';
+	status: BoxStatus;
 }
 
 function Status({ status }: StatusProps) {
 	const classes = useStatusStyles();
 
-	const statusClassaname = classNames(classes.status, {
-		[classes.failed]: status === 'Failed',
-		[classes.running]: status === 'Running',
-		[classes.pending]: status === 'Pending',
-	});
+	const statusClassaname = classNames(classes.status, classes[status]);
 
-	return <div className={statusClassaname}></div>;
+	return <div className={statusClassaname} />;
 }

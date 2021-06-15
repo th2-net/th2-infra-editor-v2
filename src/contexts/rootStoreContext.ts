@@ -20,8 +20,7 @@ import { RootStore } from "../stores/RootStore";
 
 const RootStoreContext = React.createContext<RootStore | null>(null);
 
-export function createRootStore(): RootStore {
-  const api = new Api();
+export function createRootStore(api: Api): RootStore {
   const rootStore = new RootStore(api);
 
   return rootStore;
