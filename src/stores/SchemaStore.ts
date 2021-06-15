@@ -60,6 +60,8 @@ export class SchemaStore {
 
 	isLoading = false;
 
+	selectedBox: BoxEntity | null = null;
+
 	constructor(private api: Api) {
 		makeObservable(this, {
 			boxes: observable,
@@ -67,6 +69,8 @@ export class SchemaStore {
 			schemas: observable,
 			selectedSchema: observable,
 			isLoading: observable,
+			selectedBox: observable,
+			selectBox: action,
 		});
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
@@ -96,9 +100,8 @@ export class SchemaStore {
 			this.boxes = result.resources.filter(isBoxEntity);
 		} catch (error) {
 			if (error.name !== 'AbortError') {
-				console.error(`Error occured while fetching schema ${schemaName}`);
+				console.error(`Error occured while fetching schema ${schemaName}`, error);
 			}
-			console.log(error);
 		} finally {
 			this.isLoading = false;
 		}
@@ -106,6 +109,10 @@ export class SchemaStore {
 
 	setSelectedSchema = (schema: string) => {
 		this.selectedSchema = schema;
+	};
+
+	selectBox = (selectedBox: BoxEntity | null) => {
+		this.selectedBox = selectedBox;
 	};
 
 	private currentSchemaRequest: CancellablePromise<void> | null = null;

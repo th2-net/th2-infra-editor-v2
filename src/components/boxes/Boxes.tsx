@@ -14,9 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useCallback } from 'react';
-import { action, computed } from 'mobx';
-import { observer, useLocalObservable, useLocalStore } from 'mobx-react-lite';
+import { useCallback, useState, useMemo } from 'react';
+import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
 import { toLower } from 'lodash';
@@ -35,6 +34,59 @@ const useStyles = createUseStyles(
 			flexDirection: 'column',
 			borderRadius: 6,
 		},
+		boxList: {
+			...scrollBar(),
+		},
+	},
+	{ name: 'Boxes' },
+);
+
+function Boxes() {
+	const schemaStore = useSchemaStore();
+
+	const [searchValue, setSearchValue] = useState('');
+
+	const boxes = useMemo(() => {
+		return searchValue
+			? schemaStore.boxes.filter(box => toLower(box.name).includes(toLower(searchValue)))
+			: schemaStore.boxes;
+	}, [schemaStore.boxes, searchValue]);
+
+	const renderBox = useCallback((index: number, box: BoxEntity) => {
+		const group = schemaStore.groupsConfig.find(group => group.types.includes(box.spec.type));
+		return (
+			<Observer>
+				{() => (
+					<Box
+						box={box}
+						color={group?.color}
+						onSelect={schemaStore.selectBox}
+						isSelected={schemaStore.selectedBox?.name === box.name}
+					/>
+				)}
+			</Observer>
+		);
+	}, []);
+
+	const classes = useStyles();
+
+	return (
+		<div className={classes.container}>
+			<BoxSearch setValue={setSearchValue} />
+			<Virtuoso
+				data={boxes}
+				itemContent={renderBox}
+				components={{ Item: props => <div style={{ paddingBottom: 6 }} {...props} /> }}
+				className={classes.boxList}
+			/>
+		</div>
+	);
+}
+
+export default observer(Boxes);
+
+const useBoxSearchStyles = createUseStyles(
+	{
 		search: {
 			flexShrink: 0,
 			height: 50,
@@ -47,72 +99,37 @@ const useStyles = createUseStyles(
 			outline: 'none',
 			padding: '0 15px',
 		},
-		boxList: {
-			...scrollBar(),
-		},
 	},
-	{ name: 'Boxes' },
+	{ name: 'BoxSearch' },
 );
-
-interface SearchState {
-	value: string;
-	debouncedValue: string;
-	setValue: (v: string) => void;
+interface BoxSearchProps {
+	setValue: (debouncedSearchValue: string) => void;
 }
 
-function Boxes() {
-	const schemaStore = useSchemaStore();
+function BoxSearch(props: BoxSearchProps) {
+	const classes = useBoxSearchStyles();
 
-	const search = useLocalObservable<SearchState>(() => ({
-		value: '',
-		debouncedValue: '',
-		setValue(searchValue: string) {
-			search.value = searchValue;
-		},
-	}));
-
-	const boxes = computed(() =>
-		search.debouncedValue
-			? schemaStore.boxes.filter(box => toLower(box.name).includes(toLower(search.debouncedValue)))
-			: schemaStore.boxes,
-	).get();
+	const [searchValue, setSearchValue] = useState('');
 
 	const setDebouncedValue = useDebouncedCallback((value: string) => {
-		action(() => (search.debouncedValue = value));
+		props.setValue(value);
 	}, 600);
 
 	function onSearchValueChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const { value } = e.target;
-		search.setValue(value);
+		setSearchValue(value);
 		setDebouncedValue(value);
 	}
 
-	const renderBox = useCallback((index: number, box: BoxEntity) => {
-		const group = schemaStore.groupsConfig.find(group => group.types.includes(box.spec.type));
-		return <Box box={box} color={group?.color} />;
-	}, []);
-
-	const classes = useStyles();
-
 	return (
-		<div className={classes.container}>
-			<div className={classes.search}>
-				<input
-					type='text'
-					placeholder='Box name'
-					value={search.value}
-					className={classes.searchInput}
-					onChange={onSearchValueChange}
-				/>
-			</div>
-			<Virtuoso
-				data={boxes}
-				itemContent={renderBox}
-				components={{ Item: props => <div style={{ paddingBottom: 6 }} {...props} /> }}
-				className={classes.boxList}
+		<div className={classes.search}>
+			<input
+				type='text'
+				placeholder='Box name'
+				value={searchValue}
+				className={classes.searchInput}
+				onChange={onSearchValueChange}
 			/>
 		</div>
 	);
 }
-
-export default observer(Boxes);

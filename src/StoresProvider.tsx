@@ -14,15 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from "react";
-import RootStoreContext, { createRootStore } from "./contexts/rootStoreContext";
+import React from 'react';
+import Api from './api/api';
+import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
 
-function StoresProvider({ children }: React.PropsWithChildren<{}>) {
-  return (
-    <RootStoreContext.Provider value={createRootStore()}>
-      {children}
-    </RootStoreContext.Provider>
-  );
+function StoresProvider({ children, api = new Api() }: React.PropsWithChildren<{ api?: Api }>) {
+	return (
+		<RootStoreContext.Provider value={createRootStore(api)}>{children}</RootStoreContext.Provider>
+	);
 }
 
 export default StoresProvider;

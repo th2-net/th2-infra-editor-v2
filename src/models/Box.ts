@@ -111,3 +111,9 @@ export function isPin(object: unknown): object is Pin {
 		(object as Pin)['connection-type'] !== undefined
 	);
 }
+
+export enum BoxStatus {
+	FAILED = 'Failed',
+	RUNNING = 'Running',
+	PENDING = 'Pending',
+}
