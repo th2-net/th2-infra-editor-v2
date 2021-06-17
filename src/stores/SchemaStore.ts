@@ -14,10 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable, flow, reaction } from 'mobx';
+import { action, makeObservable, observable, flow, reaction, computed } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
-import { BoxEntity, isBoxEntity } from '../models/Box';
+import { convertToExtendedLink } from '../helpers/link';
+import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
+import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
+import { isLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
+import { Schema } from '../models/Schema';
 
 export class SchemaStore {
 	readonly groupsConfig = [
@@ -62,18 +66,47 @@ export class SchemaStore {
 
 	selectedBox: BoxEntity | null = null;
 
+	dictionaryList: DictionaryEntity[] = [];
+
+	linkBoxes: LinksDefinition[] = [];
+
 	constructor(private api: Api) {
 		makeObservable(this, {
 			boxes: observable,
-			setSelectedSchema: action,
+			selectSchema: action,
 			schemas: observable,
 			selectedSchema: observable,
 			isLoading: observable,
 			selectedBox: observable,
 			selectBox: action,
+			dictionaryList: observable,
+			links: computed,
+			linkBoxes: observable,
 		});
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
+	}
+
+	public get links(): Link<ExtendedConnectionOwner>[] {
+		if (this.linkBoxes === null) return [];
+
+		return this.linkBoxes.flatMap(linkBox => {
+			if (linkBox.spec['boxes-relation']) {
+				return [
+					...(linkBox.spec['boxes-relation']['router-mq']
+						? linkBox.spec['boxes-relation']['router-mq'].map(link =>
+								convertToExtendedLink(link, 'mq'),
+						  )
+						: []),
+					...(linkBox.spec['boxes-relation']['router-grpc']
+						? linkBox.spec['boxes-relation']['router-grpc'].map(link =>
+								convertToExtendedLink(link, 'grpc'),
+						  )
+						: []),
+				];
+			}
+			return [];
+		});
 	}
 
 	fetchSchemas = flow(function* (this: SchemaStore) {
@@ -81,8 +114,9 @@ export class SchemaStore {
 
 		try {
 			this.schemas = yield this.api.fetchSchemasList();
+
 			if (this.schemas.length > 0) {
-				this.setSelectedSchema(this.schemas[0]);
+				this.selectSchema(this.schemas[0]);
 			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {
@@ -96,8 +130,10 @@ export class SchemaStore {
 		this.isLoading = true;
 
 		try {
-			const result = yield this.api.fetchSchemaState(schemaName);
-			this.boxes = result.resources.filter(isBoxEntity);
+			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
+			this.boxes = schema.resources.filter(isBoxEntity);
+			this.dictionaryList = schema.resources.filter(isDictionaryEntity);
+			this.linkBoxes = schema.resources.filter(isLinksDefinition);
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
@@ -107,7 +143,7 @@ export class SchemaStore {
 		}
 	});
 
-	setSelectedSchema = (schema: string) => {
+	selectSchema = (schema: string) => {
 		this.selectedSchema = schema;
 	};
 
@@ -120,5 +156,9 @@ export class SchemaStore {
 	private onSchemaChange = (selectedSchema: string | null) => {
 		this.currentSchemaRequest?.cancel();
 		this.currentSchemaRequest = selectedSchema ? this.fetchSchemaState(selectedSchema) : null;
+		this.selectedBox = null;
+		this.boxes = [];
+		this.linkBoxes = [];
+		this.dictionaryList = [];
 	};
 }

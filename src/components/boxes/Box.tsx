@@ -20,6 +20,10 @@ import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
 import { Theme } from '../../styles/theme';
 
+export function getBoxType(box: BoxEntity) {
+	return box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name
+}
+
 const useStyles = createUseStyles(
 	(theme: Theme) => ({
 		container: {
@@ -63,6 +67,15 @@ const useStyles = createUseStyles(
 			flexShrink: 0,
 			backgroundColor: 'rgb(102, 204, 145)',
 		},
+		selectable: {
+			cursor: 'pointer',
+			'&:hover': {
+				border: '2px solid',
+			},
+		},
+		selected: {
+			border: '2px solid',
+		},
 	}),
 	{ name: 'Box' },
 );
@@ -70,7 +83,7 @@ const useStyles = createUseStyles(
 interface Props {
 	box: BoxEntity;
 	color?: string;
-	onSelect: (box: BoxEntity) => void;
+	onSelect?: (box: BoxEntity) => void;
 	isSelected?: boolean;
 }
 
@@ -79,18 +92,19 @@ function Box(props: Props) {
 	const classes = useStyles();
 
 	// TODO: fix status
-	const status = useRef(Object.values(BoxStatus)[Math.floor(Math.random() * 3)]);
+	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
 
-	const type = box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name;
 	const imageName = box.spec['image-name'];
 	const splitedImageName = imageName.split('/');
 	const slicedImageName = splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
 
 	return (
 		<div
-			className={classes.container}
-			onClick={() => onSelect(box)}
-			style={{ border: isSelected ? '2px solid green' : 'none' }}>
+			className={classNames(classes.container, {
+				[classes.selectable]: typeof onSelect === 'function',
+				[classes.selected]: isSelected,
+			})}
+			onClick={() => onSelect && onSelect(box)}>
 			<div className={classes.header} style={{ backgroundColor: color }}>
 				<Status status={status.current} />
 				<h5 className={classes.name}>{box.name}</h5>
@@ -99,7 +113,7 @@ function Box(props: Props) {
 				<span
 					style={{ backgroundColor: color }}
 					className={classNames(classes.bodyValue, classes.type)}>
-					{type}
+					{getBoxType(box)}
 				</span>
 				<span className={classes.bodyValue}>{slicedImageName}</span>
 			</div>
@@ -135,7 +149,7 @@ interface StatusProps {
 	status: BoxStatus;
 }
 
-function Status({ status }: StatusProps) {
+export function Status({ status }: StatusProps) {
 	const classes = useStatusStyles();
 
 	const statusClassaname = classNames(classes.status, classes[status]);

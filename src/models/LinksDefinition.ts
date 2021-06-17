@@ -17,7 +17,7 @@
 import FileBase from './FileBase';
 import { ConnectionCoord, ConnectionOwner, ExtendedConnectionOwner } from './Box';
 
-export default interface LinksDefinition extends FileBase {
+export interface LinksDefinition extends FileBase {
 	spec: {
 		['boxes-relation']?: {
 			['router-mq']: Link<ConnectionOwner>[];

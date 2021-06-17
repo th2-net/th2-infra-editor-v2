@@ -1,5 +1,5 @@
-/** *****************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+/** ****************************************************************************
+ * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,20 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import FileBase from './FileBase';
+export function getHashCode(str: string): number {
+	let hash = 0;
+	let i;
+	let chr;
 
-export interface Schema {
-	commitRef: string;
-	resources: FileBase[];
-}
+	if (str.length === 0) {
+		return hash;
+	}
 
-export interface SchemaSettings extends FileBase {
-	spec: {
-		'k8s-propagation': 'off' | 'deny' | 'sync' | 'rule';
-	};
-}
+	for (i = 0; i < str.length; i++) {
+		chr = str.charCodeAt(i);
+		hash = (hash << 5) - hash + chr;
+		hash |= 0; // Convert to 32bit integer
+	}
 
-export function isSettingsEntity(object: unknown): object is SchemaSettings {
-	return (
-		typeof object === 'object' &&
-		object !== null &&
-		(object as SchemaSettings).kind === 'SettingsFile'
-	);
+	return hash;
 }
