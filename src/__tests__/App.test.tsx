@@ -5,7 +5,7 @@ import StoresProvider from '../StoresProvider';
 
 jest.mock('../api/api');
 
-test('renders box list', () => {
+test('loads schemas on mount', () => {
 	const fetchSchemasListMock = jest.fn().mockReturnValueOnce([]);
 	(Api as any).mockImplementation(() => {
 		return {
@@ -17,6 +17,6 @@ test('renders box list', () => {
 			<App />
 		</StoresProvider>,
 	);
-	const boxListTitle = screen.getByText(/loading/i);
-	expect(boxListTitle).toBeInTheDocument();
+	const loadingSchemas = screen.getByText(/loading/i);
+	expect(loadingSchemas).toBeInTheDocument();
 });

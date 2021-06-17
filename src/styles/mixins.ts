@@ -36,3 +36,11 @@ export function scrollBar(thumbColor = 'rgba(0,0,0,.22)'): Styles {
 		},
 	};
 }
+
+export function ellipsis(): Styles {
+	return {
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+	}
+}

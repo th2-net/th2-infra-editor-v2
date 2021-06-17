@@ -39,7 +39,7 @@ function Header() {
 		<div className={classes.container}>
 			{schemaStore.schemas.length !== 0 && (
 				<select
-					onChange={e => schemaStore.setSelectedSchema(e.target.value)}
+					onChange={e => schemaStore.selectSchema(e.target.value)}
 					value={schemaStore.selectedSchema || undefined}>
 					{schemaStore.schemas.map(schema => (
 						<option key={schema} value={schema}>

@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { RequestModel } from '../models/FileBase';
-import Schema from '../models/Schema';
+import { Schema } from '../models/Schema';
 import ApiSchema from './ApiSchema';
 
 export default class Api implements ApiSchema {
