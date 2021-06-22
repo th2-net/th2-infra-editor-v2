@@ -19,11 +19,13 @@ import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
 import { toLower } from 'lodash';
-import { BoxEntity } from '../../models/Box';
+import { BoxEntity, isBoxEntity } from '../../models/Box';
 import { scrollBar } from '../../styles/mixins';
 import Box from './Box';
+import Dictionary from './Dictionary';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { useDebouncedCallback } from 'use-debounce/lib';
+import { DictionaryEntity } from '../../models/Dictionary';
 
 const useStyles = createUseStyles(
 	{
@@ -53,19 +55,24 @@ function Boxes() {
 	}, [schemaStore.boxes, searchValue]);
 
 	const renderBox = useCallback((index: number, box: BoxEntity) => {
-		const group = schemaStore.groupsConfig.find(group => group.types.includes(box.spec.type));
-		return (
-			<Observer>
-				{() => (
-					<Box
-						box={box}
-						color={group?.color}
-						onSelect={schemaStore.selectBox}
-						isSelected={schemaStore.selectedBox?.name === box.name}
-					/>
-				)}
-			</Observer>
-		);
+		if (isBoxEntity(box)) {
+			const group = schemaStore.groupsConfig.find(group => group.types.includes(box.spec.type));
+			return (
+				<Observer>
+					{() => (
+						<Box
+							box={box}
+							color={group?.color}
+							onSelect={schemaStore.selectBox}
+							isSelected={schemaStore.selectedBox?.name === box.name}
+						/>
+					)}
+				</Observer>
+			);
+		}
+		return <Dictionary dictionary={box} onClick={() => {
+			schemaStore.selectDictionary(box);
+		}}/>;
 	}, []);
 
 	const classes = useStyles();

@@ -56,11 +56,13 @@ export class SchemaStore {
 			color: '#CACC66',
 		},
 	];
-	boxes: BoxEntity[] = [];
+	boxes: Array<BoxEntity | DictionaryEntity> = [];
 
 	schemas: string[] = [];
 
 	selectedSchema: string | null = null;
+
+	selectedDictionary: DictionaryEntity | null = null;
 
 	isLoading = false;
 
@@ -76,6 +78,7 @@ export class SchemaStore {
 			selectSchema: action,
 			schemas: observable,
 			selectedSchema: observable,
+			selectedDictionary: observable,
 			isLoading: observable,
 			selectedBox: observable,
 			selectBox: action,
@@ -149,6 +152,10 @@ export class SchemaStore {
 
 	selectBox = (selectedBox: BoxEntity | null) => {
 		this.selectedBox = selectedBox;
+	};
+	
+	selectDictionary = (dictionary: DictionaryEntity | null) => {
+		this.selectedDictionary = dictionary;
 	};
 
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
