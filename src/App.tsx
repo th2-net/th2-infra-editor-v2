@@ -47,6 +47,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 		},
 		body: {
 			height: '100vh',
+			overflow: 'hidden'
 		},
 		'#root': {
 			height: '100%',

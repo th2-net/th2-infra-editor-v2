@@ -31,7 +31,7 @@ const useStyle = createUseStyles({
 		backgroundColor: '#fff',
 		border: (props: InputConfig) =>  props.isValid ? '1px solid #7a99b8' : '2px solid red',
 		borderRadius: 4,
-		height: 300,
+		height: '100%',
 		resize: 'none',
 		padding: 0,
 		fontSize: 13,
@@ -47,8 +47,7 @@ const useStyle = createUseStyles({
 	textarea_label: {
 		color: '#666666',
 		fontSize: 11,
-		lineHeight: 14,
-		marginBottom: 6,
+		margin: '6px 0',
 	}
 })
 
@@ -61,7 +60,7 @@ const ConfigEditor = ({ configInput }: ConfigEditorProps) => {
 				{configInput.label}
 			</label>
 			<Editor
-				height={300}
+				height={800}
 				width='auto'
 				language={defineFileFormat(configInput.value)}
 				value={configInput.value}

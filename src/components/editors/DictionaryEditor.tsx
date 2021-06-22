@@ -35,7 +35,7 @@ const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
 	});
 
 	const dictionaryInputConfig = useInput({
-		initialValue: dictionaryData.value,
+		initialValue: dictionary.spec.data,
 		id: 'dictionary-editor',
 		validate: value => {
 			if (value.length === 0) return true;
@@ -51,7 +51,7 @@ const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
 					return true;
 			}
 		},
-		label: 'Content',
+		label: dictionary.name,
 	});
 
 	React.useEffect(() => {
