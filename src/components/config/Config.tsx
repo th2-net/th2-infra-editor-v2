@@ -44,7 +44,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 	},
 	inputGroup: {
 		display: 'grid',
-		gridTemplateColumns: '1fr 1fr 1fr',
+		gridTemplateColumns: 'repeat(2, 1fr)',
 		gap: '10px',
 		marginBottom: 10,
 	},
@@ -70,6 +70,11 @@ function Config() {
 		id: 'custom-config',
 	});
 
+	const extendedSettings = useInput({
+		initialValue: '',
+		id: 'extended-settings',
+	});
+
 	const imageName = useInput({
 		initialValue: '',
 		validate: name => name.length > 0,
@@ -82,13 +87,6 @@ function Config() {
 		validate: version => version.length > 0,
 		id: 'imageVersion',
 		label: 'Image version',
-	});
-
-	const port = useInput({
-		initialValue: '',
-		validate: value => (value.trim().length === 0 ? true : /^\d+$/.test(value)),
-		id: 'port',
-		label: 'Port',
 	});
 
 	const name = useInput({
@@ -110,8 +108,6 @@ function Config() {
 		const boxSubscription = reaction(
 			() => schemaStore.selectedBox,
 			box => {
-				console.log('() => schemaStore.selectedBox');
-
 				customConfig.setValue(
 					box && box?.spec['custom-config']
 						? JSON.stringify(box?.spec['custom-config'], null, 4)
@@ -120,7 +116,11 @@ function Config() {
 				pinsConfig.setValue(box && box.spec.pins ? JSON.stringify(box.spec.pins, null, 4) : '');
 				imageName.setValue(box?.spec['image-name'] || '');
 				imageVersion.setValue(box?.spec['image-version'] || '');
-				port.setValue(box?.spec['node-port']?.toString() || '');
+				extendedSettings.setValue(
+					box?.spec['extended-settings']
+						? JSON.stringify(box?.spec['extended-settings'], null, 4)
+						: '',
+				);
 				name.setValue(box?.name || '');
 				type.setValue(box?.kind || '');
 			},
@@ -130,18 +130,8 @@ function Config() {
 	}, []);
 
 	function saveChanges() {
-		console.log('save changes', toJS(schemaStore.selectedBox), {
-			customConfig: customConfig.isValid,
-			pinsConfig: pinsConfig.isValid,
-			imageName: imageName.isValid,
-			imageVersion: imageVersion.isValid,
-			port: port.isValid,
-			name: name.isValid,
-			type: type.isValid,
-		});
-
 		const isConfigValid =
-			[customConfig, pinsConfig, imageName, imageVersion, port, name, type].every(
+			[customConfig, pinsConfig, imageName, imageVersion, name, type].every(
 				input => input.isValid,
 			) &&
 			isValidJSONArray(pinsConfig.value) &&
@@ -153,24 +143,23 @@ function Config() {
 				kind: type.value,
 				name: name.value,
 				spec: {
+					...originalBox.spec,
 					'custom-config': customConfig.value ? JSON.parse(customConfig.value) : '',
 					'image-name': imageName.value,
 					'image-version': imageVersion.value,
-					// 'node-port': port.value.trim() ? parseInt(port.value.trim()) : undefined,
+					'extended-settings': extendedSettings.value ? JSON.parse(extendedSettings.value) : '',
 					pins: JSON.parse(pinsConfig.value),
 				},
 			});
-			// TODO: schemaStore.saveBoxChanges(originalBox, updatedBox);
+			schemaStore.saveBoxChanges(originalBox, updatedBox);
 		}
 	}
 
 	return schemaStore.selectedBox ? (
 		<div className={classes.container}>
-			<button onClick={saveChanges}>Submit</button>
 			<div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
 				<Input inputConfig={imageVersion} />
-				<Input inputConfig={port} />
 				<Input inputConfig={name} />
 				<Input inputConfig={type} />
 			</div>
@@ -178,6 +167,9 @@ function Config() {
 			<ConfigEditor value={customConfig.value} setValue={customConfig.setValue} />
 			<h5 className={classes.codeEditorLabel}>Pins</h5>
 			<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} />
+			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
+			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
+			<button onClick={saveChanges}>Save</button>
 		</div>
 	) : (
 		<div className={classnames(classes.container, classes.noBoxSelected)}>
@@ -195,7 +187,7 @@ interface ConfigurableBoxOptions {
 		'custom-config': BoxEntity['spec']['custom-config'];
 		'image-name': BoxEntity['spec']['image-name'];
 		'image-version': BoxEntity['spec']['image-version'];
-		// 'node-port': BoxEntity['spec']['node-port'];
+		'extended-settings': BoxEntity['spec']['extended-settings'];
 		pins: BoxEntity['spec']['pins'];
 	};
 }
