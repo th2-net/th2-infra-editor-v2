@@ -110,13 +110,13 @@ function Links() {
 			const boxesMap = mapValues(keyBy(schemaStore.boxes, 'name'));
 
 			return [
-				resolveBoxLinks(selectedBox, boxesMap, schemaStore.links, 'to', 2),
-				resolveBoxLinks(selectedBox, boxesMap, schemaStore.links, 'from', 2),
+				resolveBoxLinks(selectedBox, boxesMap, schemaStore.boxesRelation, 'to', 2),
+				resolveBoxLinks(selectedBox, boxesMap, schemaStore.boxesRelation, 'from', 2),
 			];
 		}
 
 		return [null, null];
-	}, [schemaStore.selectedBox, schemaStore.links, schemaStore.boxes]);
+	}, [schemaStore.selectedBox, schemaStore.boxesRelation, schemaStore.boxes]);
 
 	if (!schemaStore.selectedBox) return null;
 

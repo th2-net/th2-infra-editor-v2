@@ -61,6 +61,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 		gap: 10,
 		height: '100%',
 		backgroundColor: theme.appBackgroundColor,
+		overflow: 'hidden',
 	},
 	content: {
 		gridArea: 'content',
@@ -71,6 +72,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 			"box-list layout"
 		`,
 		padding: '0 15px',
+		overflow: 'hidden',
 	},
 	loader: {
 		placeSelf: 'center',
