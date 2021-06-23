@@ -56,7 +56,9 @@ export class SchemaStore {
 			color: '#CACC66',
 		},
 	];
-	boxes: Array<BoxEntity | DictionaryEntity> = [];
+	boxes: BoxEntity[] = [];
+
+	dictionaries: DictionaryEntity[] = [];
 
 	schemas: string[] = [];
 
@@ -68,21 +70,20 @@ export class SchemaStore {
 
 	selectedBox: BoxEntity | null = null;
 
-	dictionaryList: DictionaryEntity[] = [];
-
 	linkBoxes: LinksDefinition[] = [];
 
 	constructor(private api: Api) {
 		makeObservable(this, {
 			boxes: observable,
+			dictionaries: observable,
 			selectSchema: action,
+			selectDictionary: action,
 			schemas: observable,
 			selectedSchema: observable,
 			selectedDictionary: observable,
 			isLoading: observable,
 			selectedBox: observable,
 			selectBox: action,
-			dictionaryList: observable,
 			links: computed,
 			linkBoxes: observable,
 		});
@@ -135,7 +136,7 @@ export class SchemaStore {
 		try {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
 			this.boxes = schema.resources.filter(isBoxEntity);
-			this.dictionaryList = schema.resources.filter(isDictionaryEntity);
+			this.dictionaries = schema.resources.filter(isDictionaryEntity);
 			this.linkBoxes = schema.resources.filter(isLinksDefinition);
 		} catch (error) {
 			if (error.name !== 'AbortError') {
@@ -166,6 +167,6 @@ export class SchemaStore {
 		this.selectedBox = null;
 		this.boxes = [];
 		this.linkBoxes = [];
-		this.dictionaryList = [];
+		this.dictionaries = [];
 	};
 }

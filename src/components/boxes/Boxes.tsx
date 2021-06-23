@@ -26,6 +26,7 @@ import Dictionary from './Dictionary';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity } from '../../models/Dictionary';
+import { computed } from 'mobx';
 
 const useStyles = createUseStyles(
 	{
@@ -49,10 +50,11 @@ function Boxes() {
 	const [searchValue, setSearchValue] = useState('');
 
 	const boxes = useMemo(() => {
+		const allEntities = [...schemaStore.boxes, ...schemaStore.dictionaries]
 		return searchValue
-			? schemaStore.boxes.filter(box => toLower(box.name).includes(toLower(searchValue)))
-			: schemaStore.boxes;
-	}, [schemaStore.boxes, searchValue]);
+			? allEntities.filter(box => toLower(box.name).includes(toLower(searchValue)))
+			: allEntities;
+	}, [schemaStore.boxes, schemaStore.dictionaries, searchValue]);
 
 	const renderBox = useCallback((index: number, box: BoxEntity) => {
 		if (isBoxEntity(box)) {

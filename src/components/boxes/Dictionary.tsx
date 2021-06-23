@@ -45,7 +45,7 @@ const useStyles = createUseStyles(
             fontSize: 12,
         },
     }),
-    { name: 'Box' },
+    { name: 'Dictionary' },
 );
 
 interface Props {

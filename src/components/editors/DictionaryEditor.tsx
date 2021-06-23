@@ -16,12 +16,12 @@
 
 import React from 'react';
 import { useInput } from '../../hooks/useInput';
-import { defineFileFormat, isJSONValid, isXMLValid, isYAMLValid } from '../../helpers/files';
+import { isXMLValid } from '../../helpers/files';
 import ConfigEditor from './ConfigEditor';
 import { DictionaryEntity } from '../../models/Dictionary';
 
 interface DictionaryEditorProps {
-	dictionary: DictionaryEntity;
+	dictionary: DictionaryEntity | null;
 }
 
 const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
@@ -35,23 +35,13 @@ const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
 	});
 
 	const dictionaryInputConfig = useInput({
-		initialValue: dictionary.spec.data,
+		initialValue: dictionary?.spec.data,
 		id: 'dictionary-editor',
 		validate: value => {
 			if (value.length === 0) return true;
-			const contentFormat = defineFileFormat(value);
-			switch (contentFormat) {
-				case 'xml':
-					return isXMLValid(value);
-				case 'json':
-					return isJSONValid(value);
-				case 'yaml':
-					return isYAMLValid();
-				default:
-					return true;
-			}
+			return isXMLValid(value);
 		},
-		label: dictionary.name,
+		label: dictionary?.name,
 	});
 
 	React.useEffect(() => {

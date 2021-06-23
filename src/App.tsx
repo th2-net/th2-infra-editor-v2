@@ -17,15 +17,12 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import Boxes from './components/boxes';
-import Config from './components/config';
 import Header from './components/Header';
-import Links from './components/links';
-import Metrics from './components/Metrics';
+import Boxes from './components/boxes';
+import Window from './components/layouts/Window';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
-import DictionaryEditor from './components/editors/DictionaryEditor'
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -79,34 +76,10 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 }));
 
-interface WindowProps {
-	isEditing: boolean;
-}
-
-const useWindowStyles = createUseStyles({
-	window: {
-		display: 'grid',
-		gridArea: 'window',
-		gap: (props: WindowProps) => props.isEditing ? 0 : 10,
-		gridTemplateColumns: (props: WindowProps) => props.isEditing ? '1fr' : 'auto',
-		gridTemplateRows: (props: WindowProps) => props.isEditing ? '1fr' : '1fr 400px',
-		gridTemplateAreas: (props: WindowProps) => props.isEditing
-		? `
-				"window window"
-				"window window"
-			`
-		: `
-				"config metrics"
-				"links links"
-			`
-	}
-})
-
 function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
 	const classes = useStyles();
-	const windowClasses = useWindowStyles({isEditing: Boolean(schemaStore.selectedDictionary)})
 
 	useEffect(() => {
 		rootStore.init();
@@ -118,21 +91,7 @@ function App() {
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
 					<Boxes />
-					{
-						schemaStore.selectedDictionary
-							? <div className={windowClasses.window}>
-									<div>
-										<button onClick={() => {schemaStore.selectDictionary(null)}}>back</button>
-										<DictionaryEditor dictionary={schemaStore.selectedDictionary}/>
-									</div>
-								</div>
-							: <div className={windowClasses.window}>
-									<Config />
-									<Metrics />
-									<Links />
-								</div>
-					}
-					
+					<Window />
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>
