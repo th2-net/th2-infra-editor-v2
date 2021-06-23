@@ -14,9 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
 import { useInput } from '../../hooks/useInput';
-import { isXMLValid } from '../../helpers/files';
 import ConfigEditor from './ConfigEditor';
 import { DictionaryEntity } from '../../models/Dictionary';
 
@@ -26,30 +24,11 @@ interface DictionaryEditorProps {
 
 const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
 
-	const [dictionaryData, setDictionaryData] = React.useState<{
-		value: string;
-		isValid: boolean;
-	}>({
-		value: dictionary?.spec.data ?? '',
-		isValid: true,
-	});
-
 	const dictionaryInputConfig = useInput({
 		initialValue: dictionary?.spec.data,
 		id: 'dictionary-editor',
-		validate: value => {
-			if (value.length === 0) return true;
-			return isXMLValid(value);
-		},
 		label: dictionary?.name,
 	});
-
-	React.useEffect(() => {
-		setDictionaryData({
-			value: dictionaryInputConfig.value,
-			isValid: isXMLValid(dictionaryInputConfig.value),
-		});
-	}, [dictionaryInputConfig.value, setDictionaryData]);
 
 	return <ConfigEditor configInput={dictionaryInputConfig} />;
 };
