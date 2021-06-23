@@ -152,10 +152,12 @@ export class SchemaStore {
 	};
 
 	selectBox = (selectedBox: BoxEntity | null) => {
+		this.selectedDictionary = null;
 		this.selectedBox = selectedBox;
 	};
 	
 	selectDictionary = (dictionary: DictionaryEntity | null) => {
+		this.selectedBox = null;
 		this.selectedDictionary = dictionary;
 	};
 

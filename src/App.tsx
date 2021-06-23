@@ -66,7 +66,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 		gridArea: 'content',
 		display: 'grid',
 		gap: 10,
-		gridTemplateColumns: 'minmax(250px, 350px) 1fr 1fr',
+		gridTemplateColumns: 'minmax(250px, 350px) 1fr',
 		gridTemplateAreas: `
 			"box-list layout"
 		`,
