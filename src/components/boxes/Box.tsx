@@ -34,6 +34,7 @@ const useStyles = createUseStyles(
 			overflow: 'hidden',
 			display: 'grid',
 			gridTemplateRows: '25px 1fr',
+			cursor: 'pointer'
 		},
 		header: {
 			height: 25,

@@ -17,11 +17,10 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import Boxes from './components/boxes';
-import Config from './components/config';
 import Header from './components/Header';
-import Links from './components/links';
-import Metrics from './components/Metrics';
+import Boxes from './components/boxes';
+import DictionaryLayout from './components/layouts/DictionaryLayout';
+import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
@@ -46,6 +45,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 		},
 		body: {
 			height: '100vh',
+			overflow: 'hidden'
 		},
 		'#root': {
 			height: '100%',
@@ -66,11 +66,9 @@ const useStyles = createUseStyles((theme: Theme) => ({
 		gridArea: 'content',
 		display: 'grid',
 		gap: 10,
-		gridTemplateColumns: 'minmax(250px, 350px) 1fr 1fr',
-		gridTemplateRows: '1fr 400px',
+		gridTemplateColumns: 'minmax(250px, 350px) 1fr',
 		gridTemplateAreas: `
-			"box-list config metrics"
-			"box-list links links"
+			"box-list layout"
 		`,
 		padding: '0 15px',
 	},
@@ -79,10 +77,34 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 }));
 
+interface LayoutProps {
+	layout: 'box' | 'dictionary';
+}
+
+const useLayoutStyles = createUseStyles({
+	layout: {
+		display: 'grid',
+		gridArea: 'layout',
+		gap: (props: LayoutProps) => props.layout === 'dictionary' ? 0 : 10,
+		gridTemplateColumns: (props: LayoutProps) => props.layout === 'dictionary' ? '1fr' : 'auto',
+		gridTemplateRows: (props: LayoutProps) => props.layout === 'dictionary' ? '1fr' : '1fr 400px',
+		gridTemplateAreas: (props: LayoutProps) => props.layout === 'dictionary'
+		? `
+				"layout layout"
+				"layout layout"
+			`
+		: `
+				"config metrics"
+				"links links"
+			`
+	}
+})
+
 function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
 	const classes = useStyles();
+	const layoutClasses = useLayoutStyles({layout: schemaStore.selectedDictionary ? 'dictionary' : 'box'})
 
 	useEffect(() => {
 		rootStore.init();
@@ -94,9 +116,16 @@ function App() {
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
 					<Boxes />
-					<Config />
-					<Metrics />
-					<Links />
+					<div className={layoutClasses.layout}>
+						{
+							schemaStore.selectedDictionary
+								? <DictionaryLayout
+										dictionary={schemaStore.selectedDictionary}
+										resetDictionary={() => {schemaStore.selectDictionary(null)}}
+									/>
+								: <BoxLayout />
+						}
+					</div>
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>

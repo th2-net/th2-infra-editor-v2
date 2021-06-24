@@ -58,28 +58,32 @@ export class SchemaStore {
 	];
 	boxes: BoxEntity[] = [];
 
+	dictionaries: DictionaryEntity[] = [];
+
 	schemas: string[] = [];
 
 	selectedSchema: string | null = null;
 
+	selectedDictionary: DictionaryEntity | null = null;
+
 	isLoading = false;
 
 	selectedBox: BoxEntity | null = null;
-
-	dictionaryList: DictionaryEntity[] = [];
 
 	linkBoxes: LinksDefinition[] = [];
 
 	constructor(private api: Api) {
 		makeObservable(this, {
 			boxes: observable,
+			dictionaries: observable,
 			selectSchema: action,
+			selectDictionary: action,
 			schemas: observable,
 			selectedSchema: observable,
+			selectedDictionary: observable,
 			isLoading: observable,
 			selectedBox: observable,
 			selectBox: action,
-			dictionaryList: observable,
 			links: computed,
 			linkBoxes: observable,
 		});
@@ -132,7 +136,7 @@ export class SchemaStore {
 		try {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
 			this.boxes = schema.resources.filter(isBoxEntity);
-			this.dictionaryList = schema.resources.filter(isDictionaryEntity);
+			this.dictionaries = schema.resources.filter(isDictionaryEntity);
 			this.linkBoxes = schema.resources.filter(isLinksDefinition);
 		} catch (error) {
 			if (error.name !== 'AbortError') {
@@ -148,7 +152,13 @@ export class SchemaStore {
 	};
 
 	selectBox = (selectedBox: BoxEntity | null) => {
+		this.selectedDictionary = null;
 		this.selectedBox = selectedBox;
+	};
+	
+	selectDictionary = (dictionary: DictionaryEntity | null) => {
+		this.selectedBox = null;
+		this.selectedDictionary = dictionary;
 	};
 
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
@@ -159,6 +169,6 @@ export class SchemaStore {
 		this.selectedBox = null;
 		this.boxes = [];
 		this.linkBoxes = [];
-		this.dictionaryList = [];
+		this.dictionaries = [];
 	};
 }
