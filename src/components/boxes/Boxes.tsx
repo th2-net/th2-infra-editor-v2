@@ -26,6 +26,7 @@ import Dictionary from './Dictionary';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity } from '../../models/Dictionary';
+import { AppView } from '../../App';
 
 const useStyles = createUseStyles(
 	{
@@ -43,13 +44,17 @@ const useStyles = createUseStyles(
 	{ name: 'Boxes' },
 );
 
-function Boxes() {
+interface Props {
+	setViewType: (viewType: AppView) => void;
+}
+
+function Boxes(props: Props) {
 	const schemaStore = useSchemaStore();
 
 	const [searchValue, setSearchValue] = useState('');
 
 	const boxes = useMemo(() => {
-		const allEntities = [...schemaStore.boxes, ...schemaStore.dictionaries]
+		const allEntities = [...schemaStore.boxes, ...schemaStore.dictionaries];
 		return searchValue
 			? allEntities.filter(box => toLower(box.name).includes(toLower(searchValue)))
 			: allEntities;
@@ -64,16 +69,29 @@ function Boxes() {
 						<Box
 							box={box}
 							color={group?.color}
-							onSelect={schemaStore.selectBox}
+							onSelect={box => {
+								props.setViewType('box');
+								schemaStore.selectBox(box);
+							}}
 							isSelected={schemaStore.selectedBox?.name === box.name}
 						/>
 					)}
 				</Observer>
 			);
 		}
-		return <Dictionary dictionary={box} onClick={() => {
-			schemaStore.selectDictionary(box);
-		}}/>;
+		return (
+			<Observer>
+				{() => (
+					<Dictionary
+						dictionary={box}
+						onClick={() => {
+							props.setViewType('dictionary');
+							schemaStore.selectDictionary(box);
+						}}
+					/>
+				)}
+			</Observer>
+		);
 	}, []);
 
 	const classes = useStyles();

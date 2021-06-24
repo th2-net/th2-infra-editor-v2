@@ -14,20 +14,36 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { createUseStyles } from 'react-jss';
 import Config from '../config';
 import Links from '../links';
 import Metrics from '../Metrics';
 
+const useStyles = createUseStyles({
+	container: {
+		display: 'grid',
+		gridTemplateAreas: `
+			"config metrics"
+			"links links"
+		`,
+		gridTemplateRows: '1fr 350px',
+		gridTemplateColumns: '1fr 1fr',
+		gap: 8,
+		height: '100%',
+    overflow: 'hidden',
+	},
+});
 
 function BoxLayout() {
+	const classes = useStyles();
+
 	return (
-		<>
+		<div className={classes.container}>
 			<Config />
 			<Metrics />
 			<Links />
-		</>
+		</div>
 	);
 }
 
 export default BoxLayout;
- 

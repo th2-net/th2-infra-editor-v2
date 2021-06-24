@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import Header from './components/Header';
@@ -45,7 +45,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 		},
 		body: {
 			height: '100vh',
-			overflow: 'hidden'
+			overflow: 'hidden',
 		},
 		'#root': {
 			height: '100%',
@@ -77,34 +77,16 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 }));
 
-interface LayoutProps {
-	layout: 'box' | 'dictionary';
-}
-
-const useLayoutStyles = createUseStyles({
-	layout: {
-		display: 'grid',
-		gridArea: 'layout',
-		gap: (props: LayoutProps) => props.layout === 'dictionary' ? 0 : 10,
-		gridTemplateColumns: (props: LayoutProps) => props.layout === 'dictionary' ? '1fr' : 'auto',
-		gridTemplateRows: (props: LayoutProps) => props.layout === 'dictionary' ? '1fr' : '1fr 400px',
-		gridTemplateAreas: (props: LayoutProps) => props.layout === 'dictionary'
-		? `
-				"layout layout"
-				"layout layout"
-			`
-		: `
-				"config metrics"
-				"links links"
-			`
-	}
-})
+export type AppView = 'dictionary' | 'box';
 
 function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
 	const classes = useStyles();
-	const layoutClasses = useLayoutStyles({layout: schemaStore.selectedDictionary ? 'dictionary' : 'box'})
+
+	const [viewType, setViewType] = useState<AppView>(
+		schemaStore.selectedDictionary ? 'dictionary' : 'box',
+	);
 
 	useEffect(() => {
 		rootStore.init();
@@ -115,17 +97,17 @@ function App() {
 			<Header />
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
-					<Boxes />
-					<div className={layoutClasses.layout}>
-						{
-							schemaStore.selectedDictionary
-								? <DictionaryLayout
-										dictionary={schemaStore.selectedDictionary}
-										resetDictionary={() => {schemaStore.selectDictionary(null)}}
-									/>
-								: <BoxLayout />
-						}
-					</div>
+					<Boxes setViewType={setViewType} />
+					{viewType === 'dictionary' && (
+						<DictionaryLayout
+							setViewType={setViewType}
+							dictionary={schemaStore.selectedDictionary}
+							resetDictionary={() => {
+								schemaStore.selectDictionary(null);
+							}}
+						/>
+					)}
+					{viewType === 'box' && <BoxLayout />}
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>
