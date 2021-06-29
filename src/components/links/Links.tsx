@@ -24,6 +24,7 @@ import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../../models/Bo
 import { Link } from '../../models/LinksDefinition';
 import { scrollBar } from '../../styles/mixins';
 import BoxConnections, { IBoxConnections, IPinConnections } from './BoxConnections';
+import { DictionaryRelation } from '../../models/Dictionary';
 
 const useStyles = createUseStyles({
 	container: {
@@ -118,6 +119,12 @@ function Links() {
 		return [null, null];
 	}, [schemaStore.selectedBox, schemaStore.links, schemaStore.boxes]);
 
+	const linkDictionaries: DictionaryRelation[] = useMemo(
+		() => schemaStore.linkDictionaries
+			.filter(rel => rel?.box === schemaStore.selectedBox?.name),
+		[schemaStore.linkDictionaries, schemaStore.selectedBox]
+	);	
+
 	if (!schemaStore.selectedBox) return null;
 
 	return (
@@ -131,7 +138,7 @@ function Links() {
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				<Box box={schemaStore.selectedBox} />
+				<Box box={schemaStore.selectedBox} linkDictionaries={linkDictionaries}/>
 			</div>
 			{outgoing && (
 				<BoxConnections

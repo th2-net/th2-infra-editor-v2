@@ -14,13 +14,15 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { diff } from 'deep-object-diff';
 import { action, makeObservable, observable, flow, reaction, computed } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { convertToExtendedLink } from '../helpers/link';
 import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
-import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
-import { isLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
+import { DictionaryEntity, DictionaryLinksEntity, DictionaryRelation, isDictionaryEntity, isDictionaryLinksEntity } from '../models/Dictionary';
+import { RequestModel } from '../models/FileBase';
+import { isBoxLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
 import { Schema } from '../models/Schema';
 
 export class SchemaStore {
@@ -60,6 +62,8 @@ export class SchemaStore {
 
 	dictionaries: DictionaryEntity[] = [];
 
+	preparedRequests: RequestModel[] = [];
+
 	schemas: string[] = [];
 
 	selectedSchema: string | null = null;
@@ -71,6 +75,8 @@ export class SchemaStore {
 	selectedBox: BoxEntity | null = null;
 
 	linkBoxes: LinksDefinition[] = [];
+	
+	linkDictionaries: DictionaryRelation[] = [];
 
 	constructor(private api: Api) {
 		makeObservable(this, {
@@ -86,6 +92,7 @@ export class SchemaStore {
 			selectBox: action,
 			links: computed,
 			linkBoxes: observable,
+			linkDictionaries: observable,
 		});
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
@@ -137,7 +144,8 @@ export class SchemaStore {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
 			this.boxes = schema.resources.filter(isBoxEntity);
 			this.dictionaries = schema.resources.filter(isDictionaryEntity);
-			this.linkBoxes = schema.resources.filter(isLinksDefinition);
+			this.linkBoxes = schema.resources.filter(isBoxLinksDefinition);
+			this.linkDictionaries = schema.resources.filter(isDictionaryLinksEntity)[0].spec['dictionaries-relation'];
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
@@ -146,6 +154,29 @@ export class SchemaStore {
 			this.isLoading = false;
 		}
 	});
+
+	saveEntityChanges = (
+		entity: BoxEntity | LinksDefinition | DictionaryLinksEntity | DictionaryEntity,
+		operation: 'add' | 'update' | 'remove',
+	) => {
+		if (
+			!this.preparedRequests.some(
+				request =>
+					request.payload.name === entity.name &&
+					request.operation === operation &&
+					!hasChanges(request.payload, entity),
+			)
+		) {
+			this.preparedRequests.push({
+				operation,
+				payload: entity,
+			});
+		}
+
+		function hasChanges<T extends object>(obj1: T, obj2: T) {
+			return Object.keys(diff(obj1, obj2)).length > 0;
+		}
+	};
 
 	selectSchema = (schema: string) => {
 		this.selectedSchema = schema;

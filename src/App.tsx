@@ -102,9 +102,6 @@ function App() {
 						<DictionaryLayout
 							setViewType={setViewType}
 							dictionary={schemaStore.selectedDictionary}
-							resetDictionary={() => {
-								schemaStore.selectDictionary(null);
-							}}
 						/>
 					)}
 					{viewType === 'box' && <BoxLayout />}
