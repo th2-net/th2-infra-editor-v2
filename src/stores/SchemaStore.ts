@@ -93,6 +93,8 @@ export class SchemaStore {
 			links: computed,
 			linkBoxes: observable,
 			linkDictionaries: observable,
+			deleteLinkDictionary: action,
+			addLinkDictionary: action
 		});
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
@@ -189,6 +191,16 @@ export class SchemaStore {
 	selectDictionary = (dictionary: DictionaryEntity | null) => {
 		this.selectedDictionary = dictionary;
 	};
+
+	addLinkDictionary = (link: DictionaryRelation) => {
+		if (this.linkDictionaries.findIndex(existedLink => link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name) === -1) {
+			this.linkDictionaries = [...this.linkDictionaries, link];
+		}
+	}
+
+	deleteLinkDictionary = (link: DictionaryRelation) => {
+		this.linkDictionaries = this.linkDictionaries.filter(existedLink => link !== existedLink);
+	}
 
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 

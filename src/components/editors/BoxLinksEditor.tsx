@@ -14,23 +14,23 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { observer } from "mobx-react-lite";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { createUseStyles } from "react-jss";
+import useOutsideClickListener from "../../hooks/useOutsideClickListener";
+import { useSchemaStore } from "../../hooks/useSchemaStore";
 import { DictionaryRelation } from "../../models/Dictionary";
 import Icon from "../Icon";
+import Select from "../util/Select";
+import { useLinksStyles } from "./DictionaryLinksEditor";
 
 interface BoxLinksEditorProps {
 	links?: DictionaryRelation[];
 };
 
-const useLinksStyles = createUseStyles({
-		links: {
-			width: '100%',
-			fontSize: 12,
-		},
-});
-
 interface DictionaryLinkProps {
 	link: DictionaryRelation;
+	deleteLink: () => void;
 }
 
 const useLinkStyle = createUseStyles({
@@ -61,7 +61,7 @@ const useLinkStyle = createUseStyles({
 	}
 })
 
-const Link = ({link}: DictionaryLinkProps) => {
+const Link = ({link, deleteLink}: DictionaryLinkProps) => {
 	const classes = useLinkStyle();
 	return (
 		<div className={classes.link}>
@@ -69,22 +69,64 @@ const Link = ({link}: DictionaryLinkProps) => {
 				<Icon id='box' stroke='black' />
 				<p>{link.box}</p>
 			</div>
-			<button className={classes.delete}><Icon id='cross' stroke='black' width={8} height={8}/></button>
+			<button className={classes.delete} onClick={deleteLink}><Icon id='cross' stroke='black' width={8} height={8}/></button>
 		</div>
 	)
 }
 
 const BoxLinksEditor = ({ links }: BoxLinksEditorProps) => {
 	const classes = useLinksStyles();
+	const schemaStore = useSchemaStore();
+
+	const options = useMemo(() => {
+		return schemaStore.boxes
+			.filter(box => !links?.some(link => link.box === box.name))
+			.map(box => box.name)
+	}, [schemaStore.boxes, links]);
+
+	const [newLinkedBoxName, setNewLinkedBoxName] = useState(options[0]);
+	const [showAddBox, setShowAddBox] = useState(false);
+
+	const ref = useRef<HTMLDivElement>(null);
+	useOutsideClickListener(ref, () => {
+		setShowAddBox(false);
+	})
+
+	const applyNewLink = useCallback(() => {
+		setShowAddBox(false)
+		if (schemaStore.selectedDictionary) {
+			const newLinkDictionary: DictionaryRelation = {
+				name: `${newLinkedBoxName}-dictionary`,
+				box: newLinkedBoxName,
+				dictionary: {
+					name: schemaStore.selectedDictionary.name,
+					type: 'MAIN'
+				}
+			}
+			schemaStore.addLinkDictionary(newLinkDictionary);
+		}
+	}, [newLinkedBoxName, schemaStore.selectedDictionary])
+
 	return links 
-		? <div className={classes.links}>
+		? <div className={classes.links} ref={ref}>
 				<p>Linked boxes:</p>
 				{links.map((link, i) => (
-					<Link link={link} key={`${link.name}-${i}`} />
+					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {schemaStore.deleteLinkDictionary(link)}}/>
 				))}
+				{showAddBox 
+					? <div>
+							<Select
+								options={options}
+								selected={newLinkedBoxName}
+								onChange={setNewLinkedBoxName}
+							/>
+							<button onClick={applyNewLink}><Icon id='check' stroke='black' /></button>
+						</div>
+					: <button className={classes.add} onClick={() => setShowAddBox(true)}>+</button>
+				}
 			</div>
 		: null;
 };
 
-export default BoxLinksEditor;
+export default observer(BoxLinksEditor);
 	
