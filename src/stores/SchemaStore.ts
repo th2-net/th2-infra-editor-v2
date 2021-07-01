@@ -14,11 +14,11 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { diff } from 'deep-object-diff';
 import { action, makeObservable, observable, flow, reaction, computed } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { convertToExtendedLink } from '../helpers/link';
+import { hasChanges } from '../helpers/object';
 import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
 import { DictionaryEntity, DictionaryLinksEntity, DictionaryRelation, isDictionaryEntity, isDictionaryLinksEntity } from '../models/Dictionary';
 import { RequestModel } from '../models/FileBase';
@@ -58,6 +58,9 @@ export class SchemaStore {
 			color: '#CACC66',
 		},
 	];
+
+	isSaving = false;
+
 	boxes: BoxEntity[] = [];
 
 	dictionaries: DictionaryEntity[] = [];
@@ -76,11 +79,15 @@ export class SchemaStore {
 
 	linkBoxes: LinksDefinition[] = [];
 	
-	linkDictionaries: DictionaryRelation[] = [];
+	dictionaryLinksEntity: DictionaryLinksEntity | null = null;
 
 	constructor(private api: Api) {
 		makeObservable(this, {
+			isSaving: observable,
+			saveChanges: action,
 			boxes: observable,
+			dictionaryLinksEntity: observable,
+			preparedRequests: observable,
 			dictionaries: observable,
 			selectSchema: action,
 			selectDictionary: action,
@@ -92,12 +99,13 @@ export class SchemaStore {
 			selectBox: action,
 			links: computed,
 			linkBoxes: observable,
-			linkDictionaries: observable,
+			linkDictionaries: computed,
 			deleteLinkDictionary: action,
 			addLinkDictionary: action
 		});
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
+		reaction(() => this.dictionaryLinksEntity, this.saveLinkDictionaries);
 	}
 
 	public get links(): Link<ExtendedConnectionOwner>[] {
@@ -120,6 +128,13 @@ export class SchemaStore {
 			}
 			return [];
 		});
+	}
+
+	public get linkDictionaries(): DictionaryRelation[] {
+		if (!this.dictionaryLinksEntity) {
+			return [];
+		}
+		return this.dictionaryLinksEntity.spec['dictionaries-relation'];
 	}
 
 	fetchSchemas = flow(function* (this: SchemaStore) {
@@ -147,7 +162,10 @@ export class SchemaStore {
 			this.boxes = schema.resources.filter(isBoxEntity);
 			this.dictionaries = schema.resources.filter(isDictionaryEntity);
 			this.linkBoxes = schema.resources.filter(isBoxLinksDefinition);
-			this.linkDictionaries = schema.resources.filter(isDictionaryLinksEntity)[0].spec['dictionaries-relation'];
+			const dictionaryLinksEntity = schema.resources.filter(isDictionaryLinksEntity);
+			if (dictionaryLinksEntity.length > 0) {
+				this.dictionaryLinksEntity = dictionaryLinksEntity[0];
+			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
@@ -164,19 +182,28 @@ export class SchemaStore {
 		if (
 			!this.preparedRequests.some(
 				request =>
-					request.payload.name === entity.name &&
-					request.operation === operation &&
-					!hasChanges(request.payload, entity),
+				request.payload.name === entity.name &&
+				request.operation === operation &&
+				!hasChanges(request.payload, entity)
 			)
-		) {
+				) {
 			this.preparedRequests.push({
 				operation,
 				payload: entity,
 			});
 		}
+	};
 
-		function hasChanges<T extends object>(obj1: T, obj2: T) {
-			return Object.keys(diff(obj1, obj2)).length > 0;
+	saveChanges = async () => {
+		if (!this.selectedSchema || this.preparedRequests.length === 0) return;
+		try {
+			this.isSaving = true;
+			await this.api.sendSchemaRequest(this.selectedSchema, this.preparedRequests);
+			this.preparedRequests = [];
+		} catch (error) {
+			alert("Couldn't save changes");
+		} finally {
+			this.isSaving = false;
 		}
 	};
 
@@ -193,13 +220,34 @@ export class SchemaStore {
 	};
 
 	addLinkDictionary = (link: DictionaryRelation) => {
-		if (this.linkDictionaries.findIndex(existedLink => link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name) === -1) {
-			this.linkDictionaries = [...this.linkDictionaries, link];
+		if (
+			this.dictionaryLinksEntity && 
+			this.linkDictionaries.findIndex(existedLink => link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name) === -1
+		) {
+			this.dictionaryLinksEntity = {
+				...this.dictionaryLinksEntity,
+				spec: {
+					"dictionaries-relation": [...this.dictionaryLinksEntity.spec['dictionaries-relation'], link]
+				}
+			}
+			this.saveEntityChanges(this.dictionaryLinksEntity, 'update');
 		}
 	}
 
 	deleteLinkDictionary = (link: DictionaryRelation) => {
-		this.linkDictionaries = this.linkDictionaries.filter(existedLink => link !== existedLink);
+		if (this.dictionaryLinksEntity) {
+			this.dictionaryLinksEntity = {
+				...this.dictionaryLinksEntity,
+				spec: {
+					"dictionaries-relation": this.dictionaryLinksEntity.spec['dictionaries-relation'].filter(existedLink => link !== existedLink)
+				}
+			}
+			this.saveEntityChanges(this.dictionaryLinksEntity, 'update');
+		}
+	}
+
+	saveLinkDictionaries = () => {
+		this.saveChanges()
 	}
 
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
