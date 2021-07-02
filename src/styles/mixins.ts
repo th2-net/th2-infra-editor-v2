@@ -44,3 +44,27 @@ export function ellipsis(): Styles {
 		textOverflow: 'ellipsis',
 	}
 }
+
+export function visuallyHidden(): Styles {
+	return {
+		position: 'absolute',
+		overflow: 'hidden',
+		clip: 'rect(1px, 1px, 1px, 1px)',
+		width: '1px',
+		height: '1px',
+		margin: '-1px',
+		padding: '0',
+		clipPath: 'inset(50%)'
+	}
+}
+
+
+export function buttonReset(): Styles {
+	return {
+		padding: '0',
+		border: 'none',
+		outline: 'none',
+		cursor: 'pointer',
+		backgroundColor: 'transparent'
+	}
+}
