@@ -20,13 +20,14 @@ import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
 import { toLower } from 'lodash';
 import { BoxEntity, isBoxEntity } from '../../models/Box';
-import { scrollBar } from '../../styles/mixins';
+import { scrollBar, visuallyHidden } from '../../styles/mixins';
 import Box from './Box';
 import Dictionary from './Dictionary';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity } from '../../models/Dictionary';
 import { AppView } from '../../App';
+import Icon from '../Icon';
 
 const useStyles = createUseStyles(
 	{
@@ -52,13 +53,25 @@ function Boxes(props: Props) {
 	const schemaStore = useSchemaStore();
 
 	const [searchValue, setSearchValue] = useState('');
+	const [filter, setFilter] = useState<BoxFilters>('all');
 
 	const boxes = useMemo(() => {
-		const allEntities = [...schemaStore.boxes, ...schemaStore.dictionaries];
+		let allEntities;
+		switch (filter) {
+			case 'box':
+				allEntities = schemaStore.boxes;
+				break;
+			case 'dictionary':
+				allEntities = schemaStore.dictionaries;
+				break;
+			default:
+				allEntities = [...schemaStore.boxes, ...schemaStore.dictionaries]
+				break;
+		}
 		return searchValue
 			? allEntities.filter(box => toLower(box.name).includes(toLower(searchValue)))
 			: allEntities;
-	}, [schemaStore.boxes, schemaStore.dictionaries, searchValue]);
+	}, [schemaStore.boxes, schemaStore.dictionaries, searchValue, filter]);
 
 	const renderBox = useCallback((index: number, box: BoxEntity | DictionaryEntity) => {
 		if (isBoxEntity(box)) {
@@ -98,6 +111,7 @@ function Boxes(props: Props) {
 
 	return (
 		<div className={classes.container}>
+			<BoxFilter filter={filter} setFilter={setFilter}/>
 			<BoxSearch setValue={setSearchValue} />
 			<Virtuoso
 				data={boxes}
@@ -158,4 +172,85 @@ function BoxSearch(props: BoxSearchProps) {
 			/>
 		</div>
 	);
+}
+
+type BoxFilters = 'all' | 'box' | 'dictionary';
+
+interface BoxFiltersProps {
+	filter: BoxFilters;
+	setFilter: (filter: BoxFilters) => void;
+}
+
+const useBoxFiltersStyles = createUseStyles(
+	{
+		filters: {
+			display: 'flex'
+		},
+		filtersInput: {
+			...visuallyHidden(),
+			'&:checked': {
+				'&+label': {
+					backgroundColor: '#fff'
+				}
+			}
+		},
+		filtersLabel: {
+			display: 'inline-flex',
+			verticalAlign: 'middle',
+			padding: 6,
+			cursor: 'pointer',
+		}
+	},
+);
+
+function BoxFilter({filter, setFilter}: BoxFiltersProps) {
+	const classes = useBoxFiltersStyles();
+	return (
+		<div className={classes.filters}>
+			<input
+				className={classes.filtersInput}
+				type='radio' 
+				name='filter' 
+				onClick={() => {setFilter('all')}} 
+				id='all' 
+				checked={filter === 'all'}
+			/>
+			<label 
+				htmlFor='all' 
+				className={classes.filtersLabel}
+			>
+				all
+			</label>
+			<input
+				className={classes.filtersInput}
+				type='radio' 
+				name='filter' 
+				id='box' 
+				onClick={() => {setFilter('box')}}
+				checked={filter === 'box'}
+			/>
+			<label
+				title="Box"
+				htmlFor='box'
+				className={classes.filtersLabel}
+			>
+				<Icon id='box' stroke='black' />
+			</label>
+			<input
+				className={classes.filtersInput}
+				type='radio' 
+				name='filter' 
+				id='dictionary' 
+				onClick={() => {setFilter('dictionary')}}
+				checked={filter === 'dictionary'}
+			/>
+			<label
+				title="Dictionary"
+				htmlFor='dictionary'
+				className={classes.filtersLabel}
+			>
+				<Icon id='book' stroke='black' />
+			</label>
+		</div>
+	)
 }
