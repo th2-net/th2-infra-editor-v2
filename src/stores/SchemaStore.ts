@@ -101,7 +101,8 @@ export class SchemaStore {
 			linkBoxes: observable,
 			linkDictionaries: computed,
 			deleteLinkDictionary: action,
-			addLinkDictionary: action
+			addLinkDictionary: action,
+			editDictionary: action
 		});
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
@@ -218,6 +219,19 @@ export class SchemaStore {
 	selectDictionary = (dictionary: DictionaryEntity | null) => {
 		this.selectedDictionary = dictionary;
 	};
+
+	editDictionary = (data: string) => {
+		if (this.selectedDictionary) {
+			this.selectedDictionary = {
+				...this.selectedDictionary,
+				spec: {
+					data
+				}
+			}
+			this.saveEntityChanges(this.selectedDictionary, 'update');
+			this.saveChanges();
+		}
+	}
 
 	addLinkDictionary = (link: DictionaryRelation) => {
 		if (
