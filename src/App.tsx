@@ -24,6 +24,7 @@ import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
+import { useSelectedDictionaryStore } from './hooks/useSelectedDictionaryStore';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -82,10 +83,11 @@ export type AppView = 'dictionary' | 'box';
 function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
+	const selectedDictionaryStore = useSelectedDictionaryStore();
 	const classes = useStyles();
 
 	const [viewType, setViewType] = useState<AppView>(
-		schemaStore.selectedDictionary ? 'dictionary' : 'box',
+		selectedDictionaryStore.dictionary ? 'dictionary' : 'box',
 	);
 
 	useEffect(() => {
@@ -99,10 +101,7 @@ function App() {
 				<div className={classes.content}>
 					<Boxes setViewType={setViewType} />
 					{viewType === 'dictionary' && (
-						<DictionaryLayout
-							setViewType={setViewType}
-							dictionary={schemaStore.selectedDictionary}
-						/>
+						<DictionaryLayout setViewType={setViewType}/>
 					)}
 					{viewType === 'box' && <BoxLayout />}
 				</div>

@@ -15,17 +15,15 @@
  ***************************************************************************** */
 
 import { observer } from "mobx-react-lite";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { createUseStyles } from "react-jss";
+import { useBoxesStore } from "../../hooks/useBoxesStore";
+import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
 import useOutsideClickListener from "../../hooks/useOutsideClickListener";
-import { useSchemaStore } from "../../hooks/useSchemaStore";
+import { useSelectedBoxStore } from "../../hooks/useSelectedBoxStore";
 import { DictionaryRelation } from "../../models/Dictionary";
 import Icon from "../Icon";
 import Select from "../util/Select";
-
-interface DictionaryLinksEditorProps {
-	links?: DictionaryRelation[];
-};
 
 export const useLinksStyles = createUseStyles({
 		links: {
@@ -93,15 +91,17 @@ const Link = ({link, deleteLink}: DictionaryLinkProps) => {
 	)
 }
 
-const DictionaryLinksEditor = ({ links }: DictionaryLinksEditorProps) => {
+const DictionaryLinksEditor = () => {
 	const classes = useLinksStyles();
-	const schemaStore = useSchemaStore();
+	const boxesStore = useBoxesStore();
+	const selectedBoxStore = useSelectedBoxStore();
+	const dictionaryLinksStore = useDictionaryLinksStore();
 
 	const options = useMemo(() => {
-		return schemaStore.dictionaries
-			.filter(dict => !links?.some(link => link.dictionary.name === dict.name))
+		return boxesStore.dictionaries
+			.filter(dict => !dictionaryLinksStore.linkedDictionaries?.some(link => link.dictionary.name === dict.name))
 			.map(dict => dict.name)
-	}, [schemaStore.dictionaries, links])
+	}, [boxesStore.dictionaries, dictionaryLinksStore.linkedDictionaries])
 
 	const [showAddDictionary, setShowAddDictionary] = useState(false);
 	const [newLinkedDictionaryName, setNewLinkedDictionaryName] = useState(options[0]);
@@ -114,24 +114,24 @@ const DictionaryLinksEditor = ({ links }: DictionaryLinksEditorProps) => {
 	
 	const applyNewLink = useCallback(() => {
 		setShowAddDictionary(false)
-		if (schemaStore.selectedBox) {
+		if (selectedBoxStore.box) {
 			const newLinkDictionary: DictionaryRelation = {
-				name: `${schemaStore.selectedBox.name}-dictionary`,
-				box: schemaStore.selectedBox.name,
+				name: `${selectedBoxStore.box.name}-dictionary`,
+				box: selectedBoxStore.box.name,
 				dictionary: {
 					name: newLinkedDictionaryName,
 					type: 'MAIN'
 				}
 			}
-			schemaStore.addLinkDictionary(newLinkDictionary);
+			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
-	}, [newLinkedDictionaryName, schemaStore.selectedBox])
+	}, [newLinkedDictionaryName, selectedBoxStore.box])
 
-	return links 
+	return dictionaryLinksStore.linkedDictionaries 
 		? <div className={classes.links} ref={ref}>
 				<p>Linked dictionaries:</p>
-				{links.map((link, i) => (
-					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {schemaStore.deleteLinkDictionary(link)}}/>
+				{dictionaryLinksStore.linkedDictionaries.map((link, i) => (
+					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
 				))}
 				{showAddDictionary 
 					? <div>

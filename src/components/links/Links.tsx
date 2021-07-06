@@ -14,17 +14,13 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import { chain, Dictionary, keyBy, mapValues, sortBy, uniqBy } from 'lodash';
-import { useSchemaStore } from '../../hooks/useSchemaStore';
 import Box from '../boxes/Box';
-import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../../models/Box';
-import { Link } from '../../models/LinksDefinition';
 import { scrollBar } from '../../styles/mixins';
-import BoxConnections, { IBoxConnections, IPinConnections } from './BoxConnections';
-import { DictionaryRelation } from '../../models/Dictionary';
+import BoxConnections from './BoxConnections';
+import { useSelectedBoxStore } from '../../hooks/useSelectedBoxStore';
+import { useBoxLinksStore } from '../../hooks/useBoxLinksStore';
 
 const useStyles = createUseStyles({
 	container: {
@@ -54,96 +50,30 @@ const useStyles = createUseStyles({
 function Links() {
 	const classes = useStyles();
 
-	const schemaStore = useSchemaStore();
+	const selectedBoxStore = useSelectedBoxStore();
+	const boxLinksStore = useBoxLinksStore();
 
-	function resolveBoxLinks(
-		box: BoxEntity,
-		boxesMap: Dictionary<BoxEntity>,
-		links: Link<ExtendedConnectionOwner>[],
-		direction: 'to' | 'from',
-		depth = 2,
-		currentDepth = 0,
-	): IBoxConnections {
-		const oppositeDirection = direction === 'to' ? 'from' : 'to';
-		const connectedLinks = links.filter(
-			link => link[direction].box === box.name && boxesMap[link[oppositeDirection].box],
-		);
-		const connectedPins = connectedLinks.map(link => link[direction].pin);
-		const pins = (box.spec.pins || []).filter(pin => connectedPins.includes(pin.name));
+	const [incoming, outgoing] = boxLinksStore.separatedLinks;
 
-		let boxes: IPinConnections[] =
-			currentDepth === depth
-				? []
-				: pins.map(pin => ({
-						pin,
-						boxes: chain(connectedLinks)
-							.filter(link => link[direction].pin === pin.name)
-							.map(link => boxesMap[link[oppositeDirection].box])
-							.uniqBy('name')
-							.filter(isBoxEntity)
-							.sortBy('name')
-							.map(box => resolveBoxLinks(box, boxesMap, links, direction, depth, currentDepth + 1))
-							.value(),
-				  }));
-
-		boxes = boxes.reduce((acc, curr) => {
-			const pin = acc.find(b => b.pin.name === curr.pin.name);
-			if (pin) {
-				pin.boxes = uniqBy([...pin.boxes, ...curr.boxes], 'name');
-				return acc;
-			}
-			return [...acc, curr];
-		}, [] as IPinConnections[]);
-
-		const boxLinks: IBoxConnections = {
-			box,
-			direction,
-			pins: sortBy(boxes, 'pin.name').filter(pinConnections => pinConnections.boxes.length > 0),
-		};
-
-		return boxLinks;
-	}
-
-	const [incoming, outgoing] = useMemo(() => {
-		const selectedBox = schemaStore.selectedBox;
-
-		if (selectedBox) {
-			const boxesMap = mapValues(keyBy(schemaStore.boxes, 'name'));
-
-			return [
-				resolveBoxLinks(selectedBox, boxesMap, schemaStore.links, 'to', 2),
-				resolveBoxLinks(selectedBox, boxesMap, schemaStore.links, 'from', 2),
-			];
-		}
-
-		return [null, null];
-	}, [schemaStore.selectedBox, schemaStore.links, schemaStore.boxes]);
-
-	const linkDictionaries: DictionaryRelation[] = useMemo(
-		() => schemaStore.linkDictionaries
-			.filter(rel => rel?.box === schemaStore.selectedBox?.name),
-		[schemaStore.linkDictionaries, schemaStore.selectedBox]
-	);	
-
-	if (!schemaStore.selectedBox) return null;
+	if (!selectedBoxStore.box) return null;
 
 	return (
 		<div className={classes.container}>
 			{incoming && (
 				<BoxConnections
 					pinConnections={incoming.pins}
-					onBoxSelect={schemaStore.selectBox}
+					onBoxSelect={selectedBoxStore.selectBox}
 					direction='to'
 					maxDepth={2}
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				<Box box={schemaStore.selectedBox} linkDictionaries={linkDictionaries}/>
+				<Box box={selectedBoxStore.box} editableDictionaryRelations={true}/>
 			</div>
 			{outgoing && (
 				<BoxConnections
 					pinConnections={outgoing.pins}
-					onBoxSelect={schemaStore.selectBox}
+					onBoxSelect={selectedBoxStore.selectBox}
 					direction='from'
 					maxDepth={2}
 				/>

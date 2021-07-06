@@ -17,16 +17,14 @@
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { createUseStyles } from "react-jss";
+import { useBoxesStore } from "../../hooks/useBoxesStore";
+import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
 import useOutsideClickListener from "../../hooks/useOutsideClickListener";
-import { useSchemaStore } from "../../hooks/useSchemaStore";
+import { useSelectedDictionaryStore } from "../../hooks/useSelectedDictionaryStore";
 import { DictionaryRelation } from "../../models/Dictionary";
 import Icon from "../Icon";
 import Select from "../util/Select";
 import { useLinksStyles } from "./DictionaryLinksEditor";
-
-interface BoxLinksEditorProps {
-	links?: DictionaryRelation[];
-};
 
 interface DictionaryLinkProps {
 	link: DictionaryRelation;
@@ -74,15 +72,17 @@ const Link = ({link, deleteLink}: DictionaryLinkProps) => {
 	)
 }
 
-const BoxLinksEditor = ({ links }: BoxLinksEditorProps) => {
+const BoxLinksEditor = () => {
 	const classes = useLinksStyles();
-	const schemaStore = useSchemaStore();
+	const boxesStore = useBoxesStore();
+	const selectedDictionaryStore = useSelectedDictionaryStore();
+	const dictionaryLinksStore = useDictionaryLinksStore();
 
 	const options = useMemo(() => {
-		return schemaStore.boxes
-			.filter(box => !links?.some(link => link.box === box.name))
+		return boxesStore.boxes
+			.filter(box => !dictionaryLinksStore.linkedBoxes?.some(link => link.box === box.name))
 			.map(box => box.name)
-	}, [schemaStore.boxes, links]);
+	}, [boxesStore.boxes, dictionaryLinksStore.linkedBoxes]);
 
 	const [newLinkedBoxName, setNewLinkedBoxName] = useState(options[0]);
 	const [showAddBox, setShowAddBox] = useState(false);
@@ -94,24 +94,24 @@ const BoxLinksEditor = ({ links }: BoxLinksEditorProps) => {
 
 	const applyNewLink = useCallback(() => {
 		setShowAddBox(false)
-		if (schemaStore.selectedDictionary) {
+		if (selectedDictionaryStore.dictionary) {
 			const newLinkDictionary: DictionaryRelation = {
 				name: `${newLinkedBoxName}-dictionary`,
 				box: newLinkedBoxName,
 				dictionary: {
-					name: schemaStore.selectedDictionary.name,
+					name: selectedDictionaryStore.dictionary.name,
 					type: 'MAIN'
 				}
 			}
-			schemaStore.addLinkDictionary(newLinkDictionary);
+			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
-	}, [newLinkedBoxName, schemaStore.selectedDictionary])
+	}, [newLinkedBoxName, selectedDictionaryStore.dictionary])
 
-	return links 
+	return dictionaryLinksStore.linkedBoxes 
 		? <div className={classes.links} ref={ref}>
 				<p>Linked boxes:</p>
-				{links.map((link, i) => (
-					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {schemaStore.deleteLinkDictionary(link)}}/>
+				{dictionaryLinksStore.linkedBoxes.map((link, i) => (
+					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
 				))}
 				{showAddBox 
 					? <div>

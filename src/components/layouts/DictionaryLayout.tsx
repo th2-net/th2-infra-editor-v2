@@ -14,16 +14,12 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { AppView } from '../../App';
-import { useSchemaStore } from '../../hooks/useSchemaStore';
-import { DictionaryEntity, DictionaryRelation } from '../../models/Dictionary';
 import BoxLinksEditor from '../editors/BoxLinksEditor';
 import DictionaryEditor from '../editors/DictionaryEditor';
 
 interface Props {
-	dictionary: DictionaryEntity | null;
 	setViewType: (viewType: AppView) => void;
 }
 
@@ -31,20 +27,16 @@ const useStyles = createUseStyles({
 	dictionaryLayout: {},
 });
 
-function DictionaryLayout({ dictionary, setViewType }: Props) {
+function DictionaryLayout({ setViewType }: Props) {
 	const classes = useStyles();
-	const schemaStore = useSchemaStore();
-
-	const linkBoxes: DictionaryRelation[] = schemaStore.linkDictionaries
-		.filter(rel => rel?.dictionary.name === dictionary?.name)
 
 	return (
 		<div className={classes.dictionaryLayout}>
 			<button onClick={() => setViewType('box')}>back</button>
-			<DictionaryEditor dictionary={dictionary} />
-			<BoxLinksEditor links={linkBoxes}/>
+			<DictionaryEditor />
+			<BoxLinksEditor />
 		</div>
 	);
 }
 
-export default observer(DictionaryLayout);
+export default DictionaryLayout;

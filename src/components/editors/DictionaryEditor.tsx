@@ -16,18 +16,13 @@
 
 import { useInput } from '../../hooks/useInput';
 import ConfigEditor from './ConfigEditor';
-import { DictionaryEntity } from '../../models/Dictionary';
 import { downloadFile, isXMLValid } from '../../helpers/files';
 import { usePrevious } from '../../hooks/usePrevious';
 import { observer } from 'mobx-react-lite';
-import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { createUseStyles } from 'react-jss';
 import Icon from '../Icon';
 import { buttonReset, visuallyHidden } from '../../styles/mixins';
-
-interface DictionaryEditorProps {
-	dictionary: DictionaryEntity | null;
-}
+import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 
 const useStyle = createUseStyles({
 	controls: {
@@ -54,9 +49,9 @@ const useStyle = createUseStyles({
 	}
 })
 
-const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
+const DictionaryEditor = () => {
 
-	const schemaStore = useSchemaStore();
+	const { dictionary, editDictionary } = useSelectedDictionaryStore();
 	const classes = useStyle();
 
 	const dictionaryInputConfig = useInput({
@@ -93,7 +88,7 @@ const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
 						if (!dictionaryInputConfig.isValid) {
 							return;
 						}
-						schemaStore.editDictionary(dictionaryInputConfig.value);
+						editDictionary(dictionaryInputConfig.value);
 					}}
 				>
 					Apply changes

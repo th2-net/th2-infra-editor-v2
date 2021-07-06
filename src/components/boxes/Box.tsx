@@ -19,7 +19,6 @@ import { createUseStyles } from 'react-jss';
 import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
 import { Theme } from '../../styles/theme';
-import { DictionaryRelation } from '../../models/Dictionary';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 
 export function getBoxType(box: BoxEntity) {
@@ -87,14 +86,14 @@ const useStyles = createUseStyles(
 
 interface Props {
 	box: BoxEntity;
-	linkDictionaries?: DictionaryRelation[];
+	editableDictionaryRelations?: boolean
 	color?: string;
 	onSelect?: (box: BoxEntity) => void;
 	isSelected?: boolean;
 }
 
 function Box(props: Props) {
-	const { box, color, linkDictionaries, onSelect, isSelected = false } = props;
+	const { box, color, onSelect, editableDictionaryRelations, isSelected = false } = props;
 	const classes = useStyles();
 
 	// TODO: fix status
@@ -124,7 +123,7 @@ function Box(props: Props) {
 					</span>
 					<span className={classes.bodyValue}>{slicedImageName}</span>
 				</div>
-				<DictionaryLinksEditor links={linkDictionaries} />
+				{editableDictionaryRelations && <DictionaryLinksEditor />}
 			</div>
 		</div>
 	);

@@ -14,128 +14,66 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable, flow, reaction, computed } from 'mobx';
+import { action, makeObservable, observable, flow, reaction } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
-import { convertToExtendedLink } from '../helpers/link';
-import { hasChanges } from '../helpers/object';
-import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
-import { DictionaryEntity, DictionaryLinksEntity, DictionaryRelation, isDictionaryEntity, isDictionaryLinksEntity } from '../models/Dictionary';
-import { RequestModel } from '../models/FileBase';
-import { isBoxLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
 import { Schema } from '../models/Schema';
+import { BoxesStore } from './BoxesStore';
+import { BoxLinksStore } from './BoxLinksStore';
+import { DictionaryLinksStore } from './DictionaryLinksStore';
+import { RequestsStore } from './RequestsStore';
+import { SelectedBoxStore } from './SelectedBoxStore';
+import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 
 export class SchemaStore {
-	readonly groupsConfig = [
-		{
-			title: 'conn',
-			types: ['th2-conn', 'th2-read', 'th2-hand'],
-			color: '#FF9966',
-		},
-		{
-			title: 'codec',
-			types: ['th2-codec'],
-			color: '#66CC91',
-		},
-		{
-			title: 'act',
-			types: ['th2-act'],
-			color: '#666DCC',
-		},
-		{
-			title: 'check',
-			types: ['th2-check1', 'th2-check2-recon'],
-			color: '#C066CC',
-		},
-		{
-			title: 'script',
-			types: ['th2-script'],
-			color: '#669966',
-		},
-		{
-			title: 'Th2Resources',
-			types: ['th2-rpt-viewer', 'th2-rpt-provider'],
-			color: '#CACC66',
-		},
-	];
 
-	isSaving = false;
+	requestsStore: RequestsStore;
 
-	boxes: BoxEntity[] = [];
+	selectedBoxStore: SelectedBoxStore;
 
-	dictionaries: DictionaryEntity[] = [];
+	selectedDictionaryStore: SelectedDictionaryStore;
 
-	preparedRequests: RequestModel[] = [];
+	boxLinksStore: BoxLinksStore;
+
+	dictionaryLinksStore: DictionaryLinksStore;
+
+	boxesStore: BoxesStore;
 
 	schemas: string[] = [];
 
 	selectedSchema: string | null = null;
 
-	selectedDictionary: DictionaryEntity | null = null;
-
 	isLoading = false;
-
-	selectedBox: BoxEntity | null = null;
-
-	linkBoxes: LinksDefinition[] = [];
-	
-	dictionaryLinksEntity: DictionaryLinksEntity | null = null;
 
 	constructor(private api: Api) {
 		makeObservable(this, {
-			isSaving: observable,
-			saveChanges: action,
-			boxes: observable,
-			dictionaryLinksEntity: observable,
-			preparedRequests: observable,
-			dictionaries: observable,
 			selectSchema: action,
-			selectDictionary: action,
 			schemas: observable,
 			selectedSchema: observable,
-			selectedDictionary: observable,
-			isLoading: observable,
-			selectedBox: observable,
-			selectBox: action,
-			links: computed,
-			linkBoxes: observable,
-			linkDictionaries: computed,
-			deleteLinkDictionary: action,
-			addLinkDictionary: action,
-			editDictionary: action
+			isLoading: observable
 		});
+
+		this.requestsStore = new RequestsStore(api, this);
+
+		this.boxesStore = new BoxesStore();
+
+		this.selectedBoxStore = new SelectedBoxStore(this.requestsStore);
+
+		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
+
+		this.boxLinksStore = new BoxLinksStore(
+			this.requestsStore,
+			this.selectedBoxStore,
+			this.boxesStore
+		);
+
+		this.dictionaryLinksStore = new DictionaryLinksStore(
+			this.requestsStore,
+			this.selectedBoxStore,
+			this.selectedDictionaryStore
+		);
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
-		reaction(() => this.dictionaryLinksEntity, this.saveLinkDictionaries);
-	}
-
-	public get links(): Link<ExtendedConnectionOwner>[] {
-		if (this.linkBoxes === null) return [];
-
-		return this.linkBoxes.flatMap(linkBox => {
-			if (linkBox.spec['boxes-relation']) {
-				return [
-					...(linkBox.spec['boxes-relation']['router-mq']
-						? linkBox.spec['boxes-relation']['router-mq'].map(link =>
-								convertToExtendedLink(link, 'mq'),
-						  )
-						: []),
-					...(linkBox.spec['boxes-relation']['router-grpc']
-						? linkBox.spec['boxes-relation']['router-grpc'].map(link =>
-								convertToExtendedLink(link, 'grpc'),
-						  )
-						: []),
-				];
-			}
-			return [];
-		});
-	}
-
-	public get linkDictionaries(): DictionaryRelation[] {
-		if (!this.dictionaryLinksEntity) {
-			return [];
-		}
-		return this.dictionaryLinksEntity.spec['dictionaries-relation'];
 	}
 
 	fetchSchemas = flow(function* (this: SchemaStore) {
@@ -160,13 +98,10 @@ export class SchemaStore {
 
 		try {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
-			this.boxes = schema.resources.filter(isBoxEntity);
-			this.dictionaries = schema.resources.filter(isDictionaryEntity);
-			this.linkBoxes = schema.resources.filter(isBoxLinksDefinition);
-			const dictionaryLinksEntity = schema.resources.filter(isDictionaryLinksEntity);
-			if (dictionaryLinksEntity.length > 0) {
-				this.dictionaryLinksEntity = dictionaryLinksEntity[0];
-			}
+			this.boxesStore.setBoxes(schema.resources);
+			this.boxesStore.setDictionaries(schema.resources);
+			this.boxLinksStore.setLinkBoxes(schema.resources);
+			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
@@ -176,102 +111,19 @@ export class SchemaStore {
 		}
 	});
 
-	saveEntityChanges = (
-		entity: BoxEntity | LinksDefinition | DictionaryLinksEntity | DictionaryEntity,
-		operation: 'add' | 'update' | 'remove',
-	) => {
-		if (
-			!this.preparedRequests.some(
-				request =>
-				request.payload.name === entity.name &&
-				request.operation === operation &&
-				!hasChanges(request.payload, entity)
-			)
-				) {
-			this.preparedRequests.push({
-				operation,
-				payload: entity,
-			});
-		}
-	};
-
-	saveChanges = async () => {
-		if (!this.selectedSchema || this.preparedRequests.length === 0) return;
-		try {
-			this.isSaving = true;
-			await this.api.sendSchemaRequest(this.selectedSchema, this.preparedRequests);
-			this.preparedRequests = [];
-		} catch (error) {
-			alert("Couldn't save changes");
-		} finally {
-			this.isSaving = false;
-		}
-	};
-
 	selectSchema = (schema: string) => {
 		this.selectedSchema = schema;
 	};
-
-	selectBox = (selectedBox: BoxEntity | null) => {
-		this.selectedBox = selectedBox;
-	};
 	
-	selectDictionary = (dictionary: DictionaryEntity | null) => {
-		this.selectedDictionary = dictionary;
-	};
-
-	editDictionary = (data: string) => {
-		if (this.selectedDictionary) {
-			this.selectedDictionary = {
-				...this.selectedDictionary,
-				spec: {
-					data
-				}
-			}
-			this.saveEntityChanges(this.selectedDictionary, 'update');
-			this.saveChanges();
-		}
-	}
-
-	addLinkDictionary = (link: DictionaryRelation) => {
-		if (
-			this.dictionaryLinksEntity && 
-			this.linkDictionaries.findIndex(existedLink => link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name) === -1
-		) {
-			this.dictionaryLinksEntity = {
-				...this.dictionaryLinksEntity,
-				spec: {
-					"dictionaries-relation": [...this.dictionaryLinksEntity.spec['dictionaries-relation'], link]
-				}
-			}
-			this.saveEntityChanges(this.dictionaryLinksEntity, 'update');
-		}
-	}
-
-	deleteLinkDictionary = (link: DictionaryRelation) => {
-		if (this.dictionaryLinksEntity) {
-			this.dictionaryLinksEntity = {
-				...this.dictionaryLinksEntity,
-				spec: {
-					"dictionaries-relation": this.dictionaryLinksEntity.spec['dictionaries-relation'].filter(existedLink => link !== existedLink)
-				}
-			}
-			this.saveEntityChanges(this.dictionaryLinksEntity, 'update');
-		}
-	}
-
-	saveLinkDictionaries = () => {
-		this.saveChanges()
-	}
-
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
 	private onSchemaChange = (selectedSchema: string | null) => {
 		this.currentSchemaRequest?.cancel();
 		this.currentSchemaRequest = selectedSchema ? this.fetchSchemaState(selectedSchema) : null;
-		this.selectedBox = null;
-		this.boxes = [];
-		this.linkBoxes = [];
-		this.dictionaries = [];
+		this.boxesStore.setBoxes([]);
+		this.boxesStore.setDictionaries([]);
+		this.selectedBoxStore.selectBox(null);
+		this.selectedDictionaryStore.selectDictionary(null);
+		this.boxLinksStore.setLinkBoxes([]);
 	};
 }
