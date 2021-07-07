@@ -61,7 +61,7 @@ function Boxes(props: Props) {
 		return searchValue
 			? boxesStore.allEntities.filter(box => toLower(box.name).includes(toLower(searchValue)))
 			: boxesStore.allEntities;
-	}, []);
+	}, [searchValue, boxesStore.allEntities]);
 
 	const renderBox = useCallback((index: number, box: BoxEntity | DictionaryEntity) => {
 		if (isBoxEntity(box)) {
