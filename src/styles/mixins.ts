@@ -42,5 +42,18 @@ export function ellipsis(): Styles {
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
+	};
+}
+
+export function visuallyHidden(): Styles {
+	return {
+		position: 'absolute',
+		overflow: 'hidden',
+		clip: 'rect(1px, 1px, 1px, 1px)',
+		width: '1px',
+		height: '1px',
+		margin: '-1px',
+		padding: '0',
+		clipPath: 'inset(50%)'
 	}
 }
