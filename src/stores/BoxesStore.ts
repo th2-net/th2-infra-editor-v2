@@ -14,12 +14,26 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { BoxEntity, isBoxEntity } from "../models/Box";
 import { DictionaryEntity, isDictionaryEntity } from "../models/Dictionary";
+import { RequestsStore } from "./RequestsStore";
 import FileBase from "../models/FileBase";
 
 export class BoxesStore {
+	
+	constructor(private requestsStore: RequestsStore) {
+		makeObservable(this, {
+			selectedBox: observable,
+			selectBox: action,
+			boxes: observable,
+			dictionaries: observable,
+			allEntities: computed,
+			setBoxes: action,
+			setDictionaries: action
+		});
+	}
+
 	readonly groupsConfig = [
 		{
 			title: 'conn',
@@ -53,21 +67,18 @@ export class BoxesStore {
 		},
 	];
 
+	selectedBox: BoxEntity | null = null;
+	
+	selectBox = (box: BoxEntity | null) => {
+		this.selectedBox = box;
+	};
+
 	boxes: BoxEntity[] = [];
 
 	dictionaries: DictionaryEntity[] = [];
 
 	public get allEntities() {
 		return [...this.boxes, ...this.dictionaries];
-	}
-
-	constructor() {
-		makeObservable(this, {
-			boxes: observable,
-			dictionaries: observable,
-			setBoxes: action,
-			setDictionaries: action
-		});
 	}
 
 	setBoxes = (allEntites: FileBase[]) => {

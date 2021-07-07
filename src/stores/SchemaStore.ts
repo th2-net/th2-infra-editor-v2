@@ -22,14 +22,11 @@ import { BoxesStore } from './BoxesStore';
 import { BoxLinksStore } from './BoxLinksStore';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
 import { RequestsStore } from './RequestsStore';
-import { SelectedBoxStore } from './SelectedBoxStore';
 import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 
 export class SchemaStore {
 
 	requestsStore: RequestsStore;
-
-	selectedBoxStore: SelectedBoxStore;
 
 	selectedDictionaryStore: SelectedDictionaryStore;
 
@@ -39,12 +36,7 @@ export class SchemaStore {
 
 	boxesStore: BoxesStore;
 
-	schemas: string[] = [];
-
-	selectedSchema: string | null = null;
-
-	isLoading = false;
-
+	
 	constructor(private api: Api) {
 		makeObservable(this, {
 			selectSchema: action,
@@ -55,26 +47,29 @@ export class SchemaStore {
 
 		this.requestsStore = new RequestsStore(api, this);
 
-		this.boxesStore = new BoxesStore();
-
-		this.selectedBoxStore = new SelectedBoxStore(this.requestsStore);
+		this.boxesStore = new BoxesStore(this.requestsStore);
 
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
 
 		this.boxLinksStore = new BoxLinksStore(
 			this.requestsStore,
-			this.selectedBoxStore,
 			this.boxesStore
 		);
 
 		this.dictionaryLinksStore = new DictionaryLinksStore(
 			this.requestsStore,
-			this.selectedBoxStore,
-			this.selectedDictionaryStore
+			this.selectedDictionaryStore,
+			this.boxesStore,
 		);
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
 	}
+
+	schemas: string[] = [];
+
+	selectedSchema: string | null = null;
+
+	isLoading = false;
 
 	fetchSchemas = flow(function* (this: SchemaStore) {
 		this.isLoading = true;
@@ -100,7 +95,7 @@ export class SchemaStore {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
 			this.boxesStore.setBoxes(schema.resources);
 			this.boxesStore.setDictionaries(schema.resources);
-			this.boxLinksStore.setLinkBoxes(schema.resources);
+			this.boxLinksStore.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 		} catch (error) {
 			if (error.name !== 'AbortError') {
@@ -121,9 +116,9 @@ export class SchemaStore {
 		this.currentSchemaRequest?.cancel();
 		this.currentSchemaRequest = selectedSchema ? this.fetchSchemaState(selectedSchema) : null;
 		this.boxesStore.setBoxes([]);
+		this.boxesStore.selectBox(null);
 		this.boxesStore.setDictionaries([]);
-		this.selectedBoxStore.selectBox(null);
 		this.selectedDictionaryStore.selectDictionary(null);
-		this.boxLinksStore.setLinkBoxes([]);
+		this.boxLinksStore.setLinkDefinitions([]);
 	};
 }

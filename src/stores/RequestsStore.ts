@@ -14,9 +14,9 @@
  *  limitations under the License.
  ***************************************************************************** */
 
+import { isEqual } from "lodash";
 import { action, computed, makeObservable, observable } from "mobx";
 import Api from "../api/api";
-import { hasChanges } from "../helpers/object";
 import { BoxEntity } from "../models/Box";
 import { DictionaryEntity, DictionaryLinksEntity } from "../models/Dictionary";
 import { RequestModel } from "../models/FileBase";
@@ -24,14 +24,6 @@ import { LinksDefinition } from "../models/LinksDefinition";
 import { SchemaStore } from "./SchemaStore";
 
 export class RequestsStore {
-
-	isSaving = false;
-
-	preparedRequests: RequestModel[] = [];
-
-	public get selectedSchema(): string | null {
-		return this.schemaStore.selectedSchema;
-	}
 
 	constructor(private api: Api, private schemaStore: SchemaStore) {
 		makeObservable(this, {
@@ -43,6 +35,14 @@ export class RequestsStore {
 		});
 	}
 
+	isSaving = false;
+
+	preparedRequests: RequestModel[] = [];
+
+	public get selectedSchema(): string | null {
+		return this.schemaStore.selectedSchema;
+	}
+
 	saveEntityChanges = (
 		entity: BoxEntity | LinksDefinition | DictionaryLinksEntity | DictionaryEntity,
 		operation: 'add' | 'update' | 'remove',
@@ -52,7 +52,7 @@ export class RequestsStore {
 				request =>
 				request.payload.name === entity.name &&
 				request.operation === operation &&
-				!hasChanges(request.payload, entity)
+				!isEqual(request.payload, entity)
 			)
 				) {
 			this.preparedRequests.push({

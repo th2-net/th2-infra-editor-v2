@@ -17,11 +17,28 @@
 import { action, computed, makeObservable, observable, reaction } from "mobx";
 import { DictionaryLinksEntity, DictionaryRelation, isDictionaryLinksEntity } from "../models/Dictionary";
 import FileBase from "../models/FileBase";
+import { BoxesStore } from "./BoxesStore";
 import { RequestsStore } from "./RequestsStore";
-import { SelectedBoxStore } from "./SelectedBoxStore";
 import { SelectedDictionaryStore } from "./SelectedDictionaryStore";
 
 export class DictionaryLinksStore {
+
+	constructor(
+		private requestsStore: RequestsStore,
+		private selectedDictionaryStore: SelectedDictionaryStore,
+		private boxesStore: BoxesStore
+	) {
+		makeObservable(this, {
+			dictionaryLinksEntity: observable,
+			dictionaryRelations: computed,
+			linkedBoxes: computed,
+			linkedDictionaries: computed,
+			addLinkDictionary: action,
+			deleteLinkDictionary: action,
+			setLinkDictionaries: action
+		});
+		reaction(() => this.dictionaryLinksEntity, this.saveLinkDictionaries);
+	}
 
 	dictionaryLinksEntity: DictionaryLinksEntity | null = null;
 
@@ -37,24 +54,7 @@ export class DictionaryLinksStore {
 	}
 
 	public get linkedDictionaries(): DictionaryRelation[] {
-		return this.dictionaryRelations.filter(rel => rel.box === this.selectedBoxStore.box?.name);
-	}
-
-	constructor(
-		private requestsStore: RequestsStore,
-		private selectedBoxStore: SelectedBoxStore, 
-		private selectedDictionaryStore: SelectedDictionaryStore
-	) {
-		makeObservable(this, {
-			dictionaryLinksEntity: observable,
-			dictionaryRelations: computed,
-			linkedBoxes: computed,
-			linkedDictionaries: computed,
-			addLinkDictionary: action,
-			deleteLinkDictionary: action,
-			setLinkDictionaries: action
-		});
-		reaction(() => this.dictionaryLinksEntity, this.saveLinkDictionaries);
+		return this.dictionaryRelations.filter(rel => rel.box === this.boxesStore.selectedBox?.name);
 	}
 
 	addLinkDictionary = (link: DictionaryRelation) => {

@@ -27,7 +27,6 @@ import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity } from '../../models/Dictionary';
 import { AppView } from '../../App';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
-import { useSelectedBoxStore } from '../../hooks/useSelectedBoxStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 
 const useStyles = createUseStyles(
@@ -52,7 +51,6 @@ interface Props {
 
 function Boxes(props: Props) {
 	const boxesStore = useBoxesStore();
-	const selectedBoxStore = useSelectedBoxStore();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
 
 	const [searchValue, setSearchValue] = useState('');
@@ -74,9 +72,9 @@ function Boxes(props: Props) {
 							color={group?.color}
 							onSelect={box => {
 								props.setViewType('box');
-								selectedBoxStore.selectBox(box);
+								boxesStore.selectBox(box);
 							}}
-							isSelected={selectedBoxStore.box?.name === box.name}
+							isSelected={boxesStore.selectedBox?.name === box.name}
 						/>
 					)}
 				</Observer>

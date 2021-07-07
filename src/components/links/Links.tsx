@@ -19,8 +19,8 @@ import { createUseStyles } from 'react-jss';
 import Box from '../boxes/Box';
 import { scrollBar } from '../../styles/mixins';
 import BoxConnections from './BoxConnections';
-import { useSelectedBoxStore } from '../../hooks/useSelectedBoxStore';
 import { useBoxLinksStore } from '../../hooks/useBoxLinksStore';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
 
 const useStyles = createUseStyles({
 	container: {
@@ -50,30 +50,30 @@ const useStyles = createUseStyles({
 function Links() {
 	const classes = useStyles();
 
-	const selectedBoxStore = useSelectedBoxStore();
+	const boxesStore = useBoxesStore();
 	const boxLinksStore = useBoxLinksStore();
 
-	const [incoming, outgoing] = boxLinksStore.separatedLinks;
+	const [incoming, outgoing] = boxLinksStore.selectedBoxConnections;
 
-	if (!selectedBoxStore.box) return null;
+	if (!boxesStore.selectedBox) return null;
 
 	return (
 		<div className={classes.container}>
 			{incoming && (
 				<BoxConnections
 					pinConnections={incoming.pins}
-					onBoxSelect={selectedBoxStore.selectBox}
+					onBoxSelect={boxesStore.selectBox}
 					direction='to'
 					maxDepth={2}
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				<Box box={selectedBoxStore.box} editableDictionaryRelations={true}/>
+				<Box box={boxesStore.selectedBox} editableDictionaryRelations={true}/>
 			</div>
 			{outgoing && (
 				<BoxConnections
 					pinConnections={outgoing.pins}
-					onBoxSelect={selectedBoxStore.selectBox}
+					onBoxSelect={boxesStore.selectBox}
 					direction='from'
 					maxDepth={2}
 				/>
