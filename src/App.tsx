@@ -24,6 +24,7 @@ import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
+import NewEntityLayout from './components/layouts/NewEntityLayout';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -77,7 +78,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 }));
 
-export type AppView = 'dictionary' | 'box';
+export type AppView = 'dictionary' | 'box' | 'new';
 
 function App() {
 	const rootStore = useRootStore();
@@ -108,6 +109,7 @@ function App() {
 						/>
 					)}
 					{viewType === 'box' && <BoxLayout />}
+					{viewType === 'new' && <NewEntityLayout />}
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>

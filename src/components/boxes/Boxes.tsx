@@ -98,7 +98,7 @@ function Boxes(props: Props) {
 
 	return (
 		<div className={classes.container}>
-			<BoxSearch setValue={setSearchValue} />
+			<BoxSearch setValue={setSearchValue} setViewType={props.setViewType}/>
 			<Virtuoso
 				data={boxes}
 				itemContent={renderBox}
@@ -114,9 +114,19 @@ export default observer(Boxes);
 const useBoxSearchStyles = createUseStyles(
 	{
 		search: {
+			display: 'flex',
 			flexShrink: 0,
 			height: 50,
 			borderBottom: '1px solid',
+		},
+		add: {
+			border: 'none',
+			outline: 'none',
+			backgroundColor: '#fff',
+			cursor: 'pointer',
+			'&:hover': {
+				backgroundColor: '#e5e5e5'
+			}
 		},
 		searchInput: {
 			width: '100%',
@@ -130,6 +140,7 @@ const useBoxSearchStyles = createUseStyles(
 );
 interface BoxSearchProps {
 	setValue: (debouncedSearchValue: string) => void;
+	setViewType: (type: AppView) => void;
 }
 
 function BoxSearch(props: BoxSearchProps) {
@@ -156,6 +167,12 @@ function BoxSearch(props: BoxSearchProps) {
 				className={classes.searchInput}
 				onChange={onSearchValueChange}
 			/>
+			<button 
+				className={classes.add}
+				onClick={() => props.setViewType('new')}
+			>
+				+
+			</button>
 		</div>
 	);
 }
