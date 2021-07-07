@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createUseStyles } from "react-jss";
 import { useBoxesStore } from "../../hooks/useBoxesStore";
 import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
@@ -90,11 +90,11 @@ const BoxLinksEditor = () => {
 	const ref = useRef<HTMLDivElement>(null);
 	useOutsideClickListener(ref, () => {
 		setShowAddBox(false);
-	})
+	});
 
-	const applyNewLink = useCallback(() => {
-		setShowAddBox(false)
-		if (selectedDictionaryStore.dictionary) {
+	const applyNewLink = () => {
+		setShowAddBox(false);
+		if (selectedDictionaryStore.dictionary && newLinkedBoxName) {
 			const newLinkDictionary: DictionaryRelation = {
 				name: `${newLinkedBoxName}-dictionary`,
 				box: newLinkedBoxName,
@@ -105,27 +105,34 @@ const BoxLinksEditor = () => {
 			}
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
-	}, [newLinkedBoxName, selectedDictionaryStore.dictionary])
+	};
 
-	return dictionaryLinksStore.linkedBoxes 
-		? <div className={classes.links} ref={ref}>
-				<p>Linked boxes:</p>
-				{dictionaryLinksStore.linkedBoxes.map((link, i) => (
-					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
-				))}
-				{showAddBox 
-					? <div>
-							<Select
-								options={options}
-								selected={newLinkedBoxName}
-								onChange={setNewLinkedBoxName}
-							/>
-							<button onClick={applyNewLink}><Icon id='check' stroke='black' /></button>
-						</div>
-					: <button className={classes.add} onClick={() => setShowAddBox(true)}>+</button>
-				}
-			</div>
-		: null;
+	return (
+		<div className={classes.links} ref={ref}>
+			<p>Linked boxes:</p>
+			{dictionaryLinksStore.linkedBoxes.map((link, i) => (
+				<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
+			))}
+			{showAddBox 
+				? <div>
+						<Select
+							options={options}
+							selected={newLinkedBoxName}
+							onChange={setNewLinkedBoxName}
+						/>
+						<button onClick={applyNewLink}>
+							<Icon id='check' stroke='black' />
+						</button>
+					</div>
+				: <button 
+						className={classes.add}
+						onClick={() => setShowAddBox(true)}
+					>
+						+
+					</button>
+			}
+		</div>
+	);
 };
 
 export default observer(BoxLinksEditor);

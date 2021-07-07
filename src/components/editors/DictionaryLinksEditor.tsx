@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createUseStyles } from "react-jss";
 import { useBoxesStore } from "../../hooks/useBoxesStore";
 import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
@@ -109,12 +109,11 @@ const DictionaryLinksEditor = () => {
 	const ref = useRef<HTMLDivElement>(null);
 	useOutsideClickListener(ref, () => {
 		setShowAddDictionary(false);
-	})
+	});
 
-	
-	const applyNewLink = useCallback(() => {
-		setShowAddDictionary(false)
-		if (selectedBoxStore.box) {
+	const applyNewLink = () => {
+		setShowAddDictionary(false);
+		if (selectedBoxStore.box && newLinkedDictionaryName) {
 			const newLinkDictionary: DictionaryRelation = {
 				name: `${selectedBoxStore.box.name}-dictionary`,
 				box: selectedBoxStore.box.name,
@@ -125,10 +124,10 @@ const DictionaryLinksEditor = () => {
 			}
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
-	}, [newLinkedDictionaryName, selectedBoxStore.box])
+	};
 
-	return dictionaryLinksStore.linkedDictionaries 
-		? <div className={classes.links} ref={ref}>
+	return (
+		<div className={classes.links} ref={ref}>
 				<p>Linked dictionaries:</p>
 				{dictionaryLinksStore.linkedDictionaries.map((link, i) => (
 					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
@@ -142,10 +141,17 @@ const DictionaryLinksEditor = () => {
 							/>
 							<button onClick={applyNewLink}><Icon id='check' stroke='black' /></button>
 						</div>
-					: options.length ? <button className={classes.add} onClick={() => setShowAddDictionary(true)}>+</button> : null
+					: options.length 
+						? <button 
+								className={classes.add}
+								onClick={() => setShowAddDictionary(true)}
+							>
+								+
+							</button>
+						: null
 				}
 			</div>
-		: null;
+	);
 };
 
 export default observer(DictionaryLinksEditor);

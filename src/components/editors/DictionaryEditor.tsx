@@ -85,15 +85,18 @@ const DictionaryEditor = () => {
 					className={classes.applyChanges}
 					disabled={prevValue === dictionaryInputConfig.value}
 					onClick={() => {
-						if (!dictionaryInputConfig.isValid) {
-							return;
+						if (dictionaryInputConfig.isValid) {
+							editDictionary(dictionaryInputConfig.value);
 						}
-						editDictionary(dictionaryInputConfig.value);
 					}}
 				>
 					Apply changes
 				</button>
-				<label className={classes.upload} htmlFor='dictionary-file-input' title='Upload'>
+				<label 
+					className={classes.upload} 
+					htmlFor='dictionary-file-input'
+					title='Upload'
+				>
 					<Icon id='download' fill='black'/>
 				</label>
 				<input
@@ -103,7 +106,11 @@ const DictionaryEditor = () => {
 					className={classes.input}
 					id='dictionary-file-input'
 				/>
-				<button onClick={downloadDictionary} className={classes.download} title='Download'>
+				<button 
+					onClick={downloadDictionary}
+					className={classes.download}
+					title='Download'
+				>
 					<Icon id='download' fill='black'/>
 				</button>
 			</div>
