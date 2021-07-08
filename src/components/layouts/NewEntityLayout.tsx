@@ -14,10 +14,13 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { visuallyHidden } from '../../styles/mixins';
+import { EntityTypes } from '../../stores/NewEntityStore';
+import Switcher, { SwitcherCase } from '../utils/Switcher';
 import Icon from '../Icon';
+import { useNewEntityStore } from '../../hooks/useNewEntityStore';
+import { observer } from 'mobx-react-lite';
+import DictionaryEditor from '../editors/DictionaryEditor';
 
 const useStyles = createUseStyles({
 	container: {
@@ -25,83 +28,30 @@ const useStyles = createUseStyles({
 	}
 });
 
-type EntityType = 'box' | 'dictionary';
-
-interface SwitcherProps {
-	entityType: EntityType;
-	setEntityType: (entity: EntityType) => void;
-}
-
-const useSwitcherStyles = createUseStyles(
-	{
-		switcher: {
-			display: 'flex'
-		},
-		switcherInput: {
-			...visuallyHidden(),
-			'&:checked': {
-				'&+label': {
-					backgroundColor: '#fff'
-				}
-			}
-		},
-		switcherLabel: {
-			display: 'inline-flex',
-			verticalAlign: 'middle',
-			padding: 6,
-			cursor: 'pointer',
-		}
-	},
-);
-
-function Switcher({entityType, setEntityType}: SwitcherProps) {
-	const classes = useSwitcherStyles();
-	return (
-		<div className={classes.switcher}>
-			<input
-				className={classes.switcherInput}
-				type='radio' 
-				name='filter' 
-				id='box' 
-				onClick={() => {setEntityType('box')}}
-				checked={entityType === 'box'}
-			/>
-			<label
-				title="Box"
-				htmlFor='box'
-				className={classes.switcherLabel}
-			>
-				<Icon id='box' stroke='black' />
-			</label>
-			<input
-				className={classes.switcherInput}
-				type='radio' 
-				name='filter' 
-				id='dictionary' 
-				onClick={() => {setEntityType('dictionary')}}
-				checked={entityType === 'dictionary'}
-			/>
-			<label
-				title="Dictionary"
-				htmlFor='dictionary'
-				className={classes.switcherLabel}
-			>
-				<Icon id='book' stroke='black' />
-			</label>
-		</div>
-	)
-}
+const switcherConfig: SwitcherCase<EntityTypes>[] = Object.values(EntityTypes).map(value => ({
+	id: value,
+	name: 'entities',
+	label: <Icon id={value} stroke='black' />
+}))
 
 function NewEntityLayout() {
 	const classes = useStyles();
-	const [entity, setEntity] = useState<EntityType>('box');
+	const { entityType, setEntityType, newDictionary } = useNewEntityStore();
 	return (
 		<div className={classes.container}>
-			<Switcher entityType={entity} setEntityType={setEntity}/>
-			new entity
+			<Switcher 
+				cases={switcherConfig}
+				currentCase={entityType}
+				setCurrentCase={setEntityType}
+			/>
+			{
+				entityType === 'dictionary'
+					? <DictionaryEditor dictionary={newDictionary} />
+					: 'new box'
+			}
 		</div>
 	);
 }
 
-export default NewEntityLayout;
+export default observer(NewEntityLayout);
  

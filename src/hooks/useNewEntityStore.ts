@@ -11,27 +11,13 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ***************************************************************************** */
 
-import { useInput } from '../../hooks/useInput';
-import ConfigEditor from './ConfigEditor';
-import { DictionaryEntity } from '../../models/Dictionary';
+import { useSchemaStore } from "./useSchemaStore";
 
-interface DictionaryEditorProps {
-	dictionary: DictionaryEntity | null;
-}
+export const useNewEntityStore = () => {
+	const rootStore = useSchemaStore();
 
-const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
-
-	const dictionaryInputConfig = useInput({
-		initialValue: dictionary?.spec.data,
-		id: 'dictionary-editor',
-		label: 'Config',
-	});
-
-	return <ConfigEditor configInput={dictionaryInputConfig} />;
+	return rootStore.newEntityStore;
 };
-
-export default DictionaryEditor;
- 

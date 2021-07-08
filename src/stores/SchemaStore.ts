@@ -22,6 +22,8 @@ import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
 import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
 import { isLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
 import { Schema } from '../models/Schema';
+import { RequestsStore } from './RequestsStore';
+import { NewEntityStore } from './NewEntityStore';
 
 export class SchemaStore {
 	readonly groupsConfig = [
@@ -56,6 +58,11 @@ export class SchemaStore {
 			color: '#CACC66',
 		},
 	];
+
+	requestsStore: RequestsStore;
+
+	newEntityStore: NewEntityStore;
+
 	boxes: BoxEntity[] = [];
 
 	dictionaries: DictionaryEntity[] = [];
@@ -87,6 +94,10 @@ export class SchemaStore {
 			links: computed,
 			linkBoxes: observable,
 		});
+
+		this.requestsStore = new RequestsStore(this.api, this);
+
+		this.newEntityStore = new NewEntityStore(this.requestsStore);
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
 	}
