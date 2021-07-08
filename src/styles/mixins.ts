@@ -57,3 +57,13 @@ export function visuallyHidden(): Styles {
 		clipPath: 'inset(50%)'
 	}
 }
+
+export function buttonReset(): Styles {
+	return {
+		padding: '0',
+		border: 'none',
+		outline: 'none',
+		cursor: 'pointer',
+		backgroundColor: 'transparent'
+	}
+}

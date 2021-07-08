@@ -29,13 +29,13 @@ const useStyles = createUseStyles({
 	dictionaryLayout: {},
 });
 
-function DictionaryLayout({ dictionary, resetDictionary, setViewType }: Props) {
+function DictionaryLayout({ dictionary, setViewType }: Props) {
 	const classes = useStyles();
 
 	return (
 		<div className={classes.dictionaryLayout}>
 			<button onClick={() => setViewType('box')}>back</button>
-			<DictionaryEditor dictionary={dictionary} />
+			<DictionaryEditor dictionary={dictionary} apply={() => {}}/>
 		</div>
 	);
 }

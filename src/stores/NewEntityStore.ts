@@ -14,13 +14,13 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable, reaction, computed } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 import { DictionaryEntity } from '../models/Dictionary';
 import { RequestsStore } from './RequestsStore';
 
 const defaultNewDictionary: DictionaryEntity = {
 	name: '',
-	kind: 'TH2Dictionary',
+	kind: 'Th2Dictionary',
 	spec: {
 		data: ''
 	}
@@ -40,7 +40,8 @@ export class NewEntityStore {
 			setEntityType: action,
 			setNewDictionaryName: action,
 			setNewDictionaryConfig: action,
-			resetNewDictionary: action
+			resetNewDictionary: action,
+			addNewDictionary: action
 		})
 	}
 
@@ -69,5 +70,6 @@ export class NewEntityStore {
 	addNewDictionary = () => {
 		this.requestsStore.saveEntityChanges(this.newDictionary, 'add');
 		this.requestsStore.saveChanges();
+		this.resetNewDictionary();
 	}
 }

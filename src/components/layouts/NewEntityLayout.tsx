@@ -36,7 +36,15 @@ const switcherConfig: SwitcherCase<EntityTypes>[] = Object.values(EntityTypes).m
 
 function NewEntityLayout() {
 	const classes = useStyles();
-	const { entityType, setEntityType, newDictionary } = useNewEntityStore();
+	const {
+		entityType,
+		setEntityType,
+		newDictionary,
+		setNewDictionaryConfig,
+		setNewDictionaryName,
+		addNewDictionary
+	} = useNewEntityStore();
+
 	return (
 		<div className={classes.container}>
 			<Switcher 
@@ -46,7 +54,12 @@ function NewEntityLayout() {
 			/>
 			{
 				entityType === 'dictionary'
-					? <DictionaryEditor dictionary={newDictionary} />
+					? <DictionaryEditor 
+							dictionary={newDictionary}
+							setConfigValue={setNewDictionaryConfig}
+							setNameValue={setNewDictionaryName}
+							apply={addNewDictionary}
+						/>
 					: 'new box'
 			}
 		</div>

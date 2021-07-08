@@ -18,6 +18,7 @@ import React from 'react';
 
 interface UseInputProps {
 	initialValue?: string;
+	setInitialValue?: (v: string) => void;
 	label?: string;
 	id: string;
 	name?: string;
@@ -53,6 +54,7 @@ export interface InputConfig {
 
 export const useInput = ({
 	initialValue = '',
+	setInitialValue = undefined,
 	label,
 	validate,
 	id,
@@ -78,6 +80,9 @@ export const useInput = ({
 	const onValueChange = (newValue: string) => {
 		setIsDirty(true);
 		setValue(newValue);
+		if (setInitialValue) {
+			setInitialValue(newValue);
+		}
 	};
 
 	return {

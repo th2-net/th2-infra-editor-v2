@@ -15,22 +15,119 @@
  ***************************************************************************** */
 
 import { useInput } from '../../hooks/useInput';
+import { createUseStyles } from 'react-jss';
+import Icon from '../Icon';
 import ConfigEditor from './ConfigEditor';
 import { DictionaryEntity } from '../../models/Dictionary';
+import { downloadFile, isXMLValid } from '../../helpers/files';
+import { buttonReset, visuallyHidden } from '../../styles/mixins';
+import Input from '../utils/Input';
 
 interface DictionaryEditorProps {
 	dictionary: DictionaryEntity | null;
+	setConfigValue?: (v: string) => void;
+	setNameValue?: (v: string) => void;
+	apply: () => void;
 }
 
-const DictionaryEditor = ({ dictionary }: DictionaryEditorProps) => {
+const useStyle = createUseStyles({
+	controls: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		alignItems: 'center'
+	},
+	applyChanges: {
+		...buttonReset(),
+		'&:disabled': {
+			backgroundColor: 'gray',
+			cursor: 'not-allowed'
+		}
+	},
+	download: {
+		...buttonReset(),
+		display: 'inline-flex',
+		marginLeft: 10,
+	},
+	upload: {
+		display: 'inline-flex',
+		marginLeft: 10,
+		cursor: 'pointer',
+		transform: 'rotate(180deg)'
+	},
+	input: {
+		...visuallyHidden()
+	}
+})
+
+const DictionaryEditor = ({ dictionary, setConfigValue, setNameValue, apply }: DictionaryEditorProps) => {
+
+	const classes = useStyle();
+
+	const dictionaryInputName = useInput({
+		setInitialValue: setNameValue,
+		initialValue: dictionary?.name,
+		id: 'dictionary-name',
+		label: 'Name',
+		validate: (v: string) => !!v
+	})
 
 	const dictionaryInputConfig = useInput({
 		initialValue: dictionary?.spec.data,
-		id: 'dictionary-editor',
+		id: 'dictionary-config',
 		label: 'Config',
+		validate: (v: string) => isXMLValid(v)
 	});
 
-	return <ConfigEditor configInput={dictionaryInputConfig} />;
+	
+	const uploadDictionary = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.files) {
+			const file = e.target.files[0];
+			const data = await file.text();
+			dictionaryInputConfig.setValue(data);
+		}
+	}
+
+	const downloadDictionary = () => {
+		if (dictionary) {
+			downloadFile(dictionaryInputConfig.value, dictionary.name, 'text/xml');
+		}
+	}
+
+	return (
+		<>
+			<Input inputConfig={dictionaryInputName}
+			/>
+			<ConfigEditor 
+				configInput={
+					setConfigValue 
+						? {...dictionaryInputConfig, setValue: setConfigValue}
+						: dictionaryInputConfig
+				}
+			/>
+			<div className={classes.controls}>
+				<button
+					className={classes.applyChanges}
+					disabled={!dictionaryInputConfig.isValid || !dictionaryInputName.isValid}
+					onClick={apply}
+				>
+					Apply
+				</button>
+				<label className={classes.upload} htmlFor='dictionary-file-input' title='Upload'>
+					<Icon id='download' fill='black'/>
+				</label>
+				<input
+					onChange={uploadDictionary}
+					type='file'
+					accept='.xml'
+					className={classes.input}
+					id='dictionary-file-input'
+				/>
+				<button onClick={downloadDictionary} className={classes.download} title='Download'>
+					<Icon id='download' fill='black'/>
+				</button>
+			</div>
+		</>
+	);
 };
 
 export default DictionaryEditor;
