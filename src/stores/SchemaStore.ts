@@ -97,7 +97,7 @@ export class SchemaStore {
 
 		this.requestsStore = new RequestsStore(this.api, this);
 
-		this.newEntityStore = new NewEntityStore(this.requestsStore);
+		this.newEntityStore = new NewEntityStore(this.requestsStore, this);
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
 	}

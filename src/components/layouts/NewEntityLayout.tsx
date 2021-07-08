@@ -21,6 +21,7 @@ import Icon from '../Icon';
 import { useNewEntityStore } from '../../hooks/useNewEntityStore';
 import { observer } from 'mobx-react-lite';
 import DictionaryEditor from '../editors/DictionaryEditor';
+import NewBoxEditor from '../editors/NewBoxEditor';
 
 const useStyles = createUseStyles({
 	container: {
@@ -60,7 +61,7 @@ function NewEntityLayout() {
 							setNameValue={setNewDictionaryName}
 							apply={addNewDictionary}
 						/>
-					: 'new box'
+					: <NewBoxEditor />
 			}
 		</div>
 	);

@@ -14,9 +14,11 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable } from 'mobx';
+import { action, computed, makeObservable, observable } from 'mobx';
+import { BoxEntity } from '../models/Box';
 import { DictionaryEntity } from '../models/Dictionary';
 import { RequestsStore } from './RequestsStore';
+import { SchemaStore } from './SchemaStore';
 
 const defaultNewDictionary: DictionaryEntity = {
 	name: '',
@@ -26,6 +28,22 @@ const defaultNewDictionary: DictionaryEntity = {
 	}
 };
 
+const defaultNewBox: BoxEntity = {
+	name: '',
+	kind: 'Th2Box',
+	spec: {
+		type: '',
+		"image-name": '',
+		"image-version": '',
+		"node-port": undefined,
+		'extended-settings': {
+			service: {
+				enabled: false,
+			},
+		}
+	}
+}
+
 export enum EntityTypes {
 	BOX = 'box',
 	DICTIONARY = 'dictionary'
@@ -33,16 +51,35 @@ export enum EntityTypes {
 
 export class NewEntityStore {
 
-	constructor(private requestsStore: RequestsStore) {
+	constructor(private requestsStore: RequestsStore, private schemaStore: SchemaStore) {
 		makeObservable(this, {
 			entityType: observable,
 			newDictionary: observable,
+			newBox: observable,
+			boxTypes: computed,
+			boxNames: computed,
 			setEntityType: action,
 			setNewDictionaryName: action,
 			setNewDictionaryConfig: action,
 			resetNewDictionary: action,
-			addNewDictionary: action
+			addNewDictionary: action,
+			setNewBoxName: action,
+			setNewBoxImageName: action,
+			setNewBoxImageVersion: action,
+			setNewBoxType: action,
+			setNewBoxNodePort: action,
+			resetNewBox: action,
+			addNewBox: action
 		})
+	}
+
+	
+	public get boxTypes(): string[] {
+		return this.schemaStore.groupsConfig.flatMap(group => group.types)
+	}
+
+	public get boxNames(): string[] {
+		return this.schemaStore.boxes.map(box => box.name)
 	}
 
 	entityType: EntityTypes = EntityTypes.BOX;
@@ -71,5 +108,37 @@ export class NewEntityStore {
 		this.requestsStore.saveEntityChanges(this.newDictionary, 'add');
 		this.requestsStore.saveChanges();
 		this.resetNewDictionary();
+	}
+
+	newBox: BoxEntity = defaultNewBox;
+
+	setNewBoxName = (value: string) => {
+		this.newBox = {...this.newBox, name: value}
+	}
+
+	setNewBoxImageName = (value: string) => {
+		this.newBox = {...this.newBox, spec: {...this.newBox.spec, "image-name": value}}
+	}
+
+	setNewBoxImageVersion = (value: string) => {
+		this.newBox = {...this.newBox, spec: {...this.newBox.spec, "image-version": value}}
+	}
+
+	setNewBoxType = (value: string) => {
+		this.newBox = {...this.newBox, spec: {...this.newBox.spec, type: value}}
+	}
+
+	setNewBoxNodePort = (value: string) => {
+		this.newBox = {...this.newBox, spec: {...this.newBox.spec, "node-port": +value}}
+	}
+
+	resetNewBox = () => {
+		this.newBox = defaultNewBox;
+	}
+
+	addNewBox = () => {
+		this.requestsStore.saveEntityChanges(this.newBox, 'add');
+		this.requestsStore.saveChanges();
+		this.resetNewBox();
 	}
 }
