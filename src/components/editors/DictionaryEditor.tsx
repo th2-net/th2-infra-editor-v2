@@ -20,6 +20,7 @@ import { downloadFile, isXMLValid } from '../../helpers/files';
 import { usePrevious } from '../../hooks/usePrevious';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
+import { DictionaryEntity } from '../../models/Dictionary';
 import Icon from '../Icon';
 import { buttonReset, visuallyHidden } from '../../styles/mixins';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
@@ -49,9 +50,12 @@ const useStyle = createUseStyles({
 	}
 })
 
-const DictionaryEditor = () => {
+interface DictionaryEditorProps {
+	dictionary: DictionaryEntity | null;
+	editDictionary: (v: string) => void;
+}
 
-	const { dictionary, editDictionary } = useSelectedDictionaryStore();
+const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps) => {
 	const classes = useStyle();
 
 	const dictionaryInputConfig = useInput({
@@ -118,5 +122,5 @@ const DictionaryEditor = () => {
 	)
 };
 
-export default observer(DictionaryEditor);
+export default DictionaryEditor;
  

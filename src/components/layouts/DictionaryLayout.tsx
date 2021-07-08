@@ -16,6 +16,7 @@
 
 import { createUseStyles } from 'react-jss';
 import { AppView } from '../../App';
+import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import BoxLinksEditor from '../editors/BoxLinksEditor';
 import DictionaryEditor from '../editors/DictionaryEditor';
 
@@ -29,11 +30,12 @@ const useStyles = createUseStyles({
 
 function DictionaryLayout({ setViewType }: Props) {
 	const classes = useStyles();
+	const { dictionary, editDictionary } = useSelectedDictionaryStore();
 
 	return (
 		<div className={classes.dictionaryLayout}>
 			<button onClick={() => setViewType('box')}>back</button>
-			<DictionaryEditor />
+			<DictionaryEditor dictionary={dictionary} editDictionary={editDictionary}/>
 			<BoxLinksEditor />
 		</div>
 	);
