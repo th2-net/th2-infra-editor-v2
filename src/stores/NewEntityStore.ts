@@ -106,7 +106,7 @@ export class NewEntityStore {
 
 	addNewDictionary = () => {
 		this.requestsStore.saveEntityChanges(this.newDictionary, 'add');
-		this.requestsStore.saveChanges();
+		this.requestsStore.saveChanges().then(() => this.schemaStore.addDictionary(this.newDictionary));
 		this.resetNewDictionary();
 	}
 
@@ -138,7 +138,7 @@ export class NewEntityStore {
 
 	addNewBox = () => {
 		this.requestsStore.saveEntityChanges(this.newBox, 'add');
-		this.requestsStore.saveChanges();
+		this.requestsStore.saveChanges().then(() => this.schemaStore.addBox(this.newBox));
 		this.resetNewBox();
 	}
 }

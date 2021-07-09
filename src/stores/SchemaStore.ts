@@ -170,6 +170,15 @@ export class SchemaStore {
 		this.selectedDictionary = dictionary;
 	};
 
+	addBox = (box: BoxEntity) => {
+		this.boxes = [box, ...this.boxes]
+	}
+
+	addDictionary = (dictionary: DictionaryEntity) => {
+		this.dictionaries = [dictionary, ...this.dictionaries]
+	}
+
+
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
 	private onSchemaChange = (selectedSchema: string | null) => {
