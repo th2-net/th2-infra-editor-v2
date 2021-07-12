@@ -61,16 +61,16 @@ const useStyles = createUseStyles((theme: Theme) => ({
 		gap: 10,
 		height: '100%',
 		backgroundColor: theme.appBackgroundColor,
+		overflow: 'hidden',
 	},
 	content: {
 		gridArea: 'content',
 		display: 'grid',
 		gap: 10,
 		gridTemplateColumns: 'minmax(250px, 350px) 1fr',
-		gridTemplateAreas: `
-			"box-list layout"
-		`,
+		gridTemplateAreas: '"box-list ."',
 		padding: '0 15px',
+		overflow: 'hidden',
 	},
 	loader: {
 		placeSelf: 'center',

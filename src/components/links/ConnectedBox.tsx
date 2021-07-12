@@ -45,6 +45,7 @@ const useConnectionBoxStyles = createUseStyles({
 		flexGrow: 1,
 		flexShrink: 0,
 		marginRight: 8,
+		lineHeight: '16px',
 		...ellipsis(),
 	},
 	arrowIcon: {
@@ -69,13 +70,13 @@ const useConnectionBoxStyles = createUseStyles({
 	type: {
 		textAlign: 'center',
 		fontSize: 11,
-		lineHeight: '15px',
 		fontWeight: 'bold',
 		borderRadius: 9,
 		padding: '0 4px 2px',
 		color: '#fff',
 		backgroundColor: 'rgb(102, 204, 145)',
 		minWidth: 30,
+		lineHeight: '16px',
 		...ellipsis(),
 	},
 	values: {

@@ -14,14 +14,18 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable, flow, reaction, computed } from 'mobx';
+import { isEqual } from 'lodash';
+import { action, makeObservable, observable, flow, reaction, computed, toJS } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { convertToExtendedLink } from '../helpers/link';
 import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
-import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
+import { DictionaryEntity, DictionaryLinksEntity, isDictionaryEntity } from '../models/Dictionary';
+import { RequestModel } from '../models/FileBase';
 import { isLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
 import { Schema } from '../models/Schema';
+import HistoryStore from './HistoryStore';
+import { SchemaUpdater } from './SchemaUpdater';
 
 export class SchemaStore {
 	readonly groupsConfig = [
@@ -56,6 +60,13 @@ export class SchemaStore {
 			color: '#CACC66',
 		},
 	];
+
+	schemaUpdater = new SchemaUpdater(this);
+
+	history = new HistoryStore(this);
+
+	preparedRequests: RequestModel[] = [];
+
 	boxes: BoxEntity[] = [];
 
 	dictionaries: DictionaryEntity[] = [];
@@ -84,14 +95,16 @@ export class SchemaStore {
 			isLoading: observable,
 			selectedBox: observable,
 			selectBox: action,
-			links: computed,
+			boxesRelation: computed,
 			linkBoxes: observable,
+			saveBoxChanges: action,
+			preparedRequests: observable,
 		});
 
 		reaction(() => this.selectedSchema, this.onSchemaChange);
 	}
 
-	public get links(): Link<ExtendedConnectionOwner>[] {
+	public get boxesRelation(): Link<ExtendedConnectionOwner>[] {
 		if (this.linkBoxes === null) return [];
 
 		return this.linkBoxes.flatMap(linkBox => {
@@ -118,7 +131,6 @@ export class SchemaStore {
 
 		try {
 			this.schemas = yield this.api.fetchSchemasList();
-
 			if (this.schemas.length > 0) {
 				this.selectSchema(this.schemas[0]);
 			}
@@ -135,6 +147,7 @@ export class SchemaStore {
 
 		try {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
+
 			this.boxes = schema.resources.filter(isBoxEntity);
 			this.dictionaries = schema.resources.filter(isDictionaryEntity);
 			this.linkBoxes = schema.resources.filter(isLinksDefinition);
@@ -159,6 +172,29 @@ export class SchemaStore {
 		this.selectedDictionary = dictionary;
 	};
 
+	saveBoxChanges = (box: BoxEntity, updatedBox: BoxEntity) => {
+		if (box.name !== updatedBox.name && this.boxes.find(box => box.name === updatedBox.name)) {
+			alert(`Box "${updatedBox.name}" already exists`);
+			return;
+		}
+
+		const hasChanges = !isEqual(toJS(box), updatedBox);
+
+		if (hasChanges) {
+			if (box.name !== updatedBox.name) {
+				this.boxes = [...this.boxes.filter(b => b.name !== box.name), updatedBox];
+				this.schemaUpdater.updateLinks(box.name, updatedBox.name);
+				// TODO: update dictionaries
+			}
+
+			if (box.name === this.selectedBox?.name) {
+				this.selectBox(observable(updatedBox));
+			}
+		}
+
+		// TODO: add changes to change list
+	};
+
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
 	private onSchemaChange = (selectedSchema: string | null) => {
@@ -168,5 +204,24 @@ export class SchemaStore {
 		this.boxes = [];
 		this.linkBoxes = [];
 		this.dictionaries = [];
+	};
+
+	saveEntityChanges = (
+		entity: BoxEntity | LinksDefinition | DictionaryLinksEntity | DictionaryEntity,
+		operation: 'add' | 'update' | 'remove',
+	) => {
+		if (
+			!this.preparedRequests.some(
+				request =>
+					request.payload.name === entity.name &&
+					request.operation === operation &&
+					isEqual(request.payload, entity),
+			)
+		) {
+			this.preparedRequests.push({
+				operation,
+				payload: entity,
+			});
+		}
 	};
 }
