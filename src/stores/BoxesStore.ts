@@ -14,15 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable, toJS } from "mobx";
 import { BoxEntity, isBoxEntity } from "../models/Box";
 import { DictionaryEntity, isDictionaryEntity } from "../models/Dictionary";
-import { RequestsStore } from "./RequestsStore";
 import FileBase from "../models/FileBase";
 
 export class BoxesStore {
 	
-	constructor(private requestsStore: RequestsStore) {
+	constructor() {
 		makeObservable(this, {
 			selectedBox: observable,
 			selectBox: action,

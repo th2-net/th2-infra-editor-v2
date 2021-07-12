@@ -52,7 +52,7 @@ export class RequestsStore {
 				request =>
 				request.payload.name === entity.name &&
 				request.operation === operation &&
-				!isEqual(request.payload, entity)
+				isEqual(request.payload, entity)
 			)
 				) {
 			this.preparedRequests.push({

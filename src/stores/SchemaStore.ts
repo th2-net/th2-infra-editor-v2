@@ -19,24 +19,26 @@ import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { Schema } from '../models/Schema';
 import { BoxesStore } from './BoxesStore';
-import { BoxLinksStore } from './BoxLinksStore';
+import { BoxUpdater } from './BoxUpdater';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
 import { RequestsStore } from './RequestsStore';
 import { SelectedDictionaryStore } from './SelectedDictionaryStore';
+import HistoryStore from './HistoryStore';
 
 export class SchemaStore {
 
+	boxesStore = new BoxesStore();
+
+	history = new HistoryStore(this);
+
 	requestsStore: RequestsStore;
-
+	
 	selectedDictionaryStore: SelectedDictionaryStore;
-
-	boxLinksStore: BoxLinksStore;
+	
+	boxUpdater: BoxUpdater;
 
 	dictionaryLinksStore: DictionaryLinksStore;
 
-	boxesStore: BoxesStore;
-
-	
 	constructor(private api: Api) {
 		makeObservable(this, {
 			selectSchema: action,
@@ -46,14 +48,13 @@ export class SchemaStore {
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
-
-		this.boxesStore = new BoxesStore(this.requestsStore);
-
+		
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
-
-		this.boxLinksStore = new BoxLinksStore(
+		
+		this.boxUpdater = new BoxUpdater(
 			this.requestsStore,
-			this.boxesStore
+			this.boxesStore,
+			this.history
 		);
 
 		this.dictionaryLinksStore = new DictionaryLinksStore(
@@ -76,7 +77,6 @@ export class SchemaStore {
 
 		try {
 			this.schemas = yield this.api.fetchSchemasList();
-
 			if (this.schemas.length > 0) {
 				this.selectSchema(this.schemas[0]);
 			}
@@ -95,7 +95,7 @@ export class SchemaStore {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
 			this.boxesStore.setBoxes(schema.resources);
 			this.boxesStore.setDictionaries(schema.resources);
-			this.boxLinksStore.setLinkDefinitions(schema.resources);
+			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 		} catch (error) {
 			if (error.name !== 'AbortError') {
@@ -109,7 +109,7 @@ export class SchemaStore {
 	selectSchema = (schema: string) => {
 		this.selectedSchema = schema;
 	};
-	
+
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
 	private onSchemaChange = (selectedSchema: string | null) => {
@@ -119,6 +119,6 @@ export class SchemaStore {
 		this.boxesStore.selectBox(null);
 		this.boxesStore.setDictionaries([]);
 		this.selectedDictionaryStore.selectDictionary(null);
-		this.boxLinksStore.setLinkDefinitions([]);
+		this.boxUpdater.setLinkDefinitions([]);
 	};
 }

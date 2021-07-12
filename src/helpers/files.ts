@@ -14,7 +14,9 @@
  * limitations under the License.
  ***************************************************************************** */
 
- export function downloadFile(content: string, filename: string, extension: string) {
+import { isArray, isPlainObject } from "lodash";
+
+export function downloadFile(content: string, filename: string, extension: string) {
 	const file = new Blob([content], { type: extension });
 
 	if (window.navigator.msSaveOrOpenBlob) {
@@ -57,6 +59,22 @@ export const isJSONValid = (json: string) => {
 	}
 };
 
-export const isYAMLValid = () => {
-	return true;
+export const isValidJSONObject = (json: string) => {
+	if (json.length === 0) return true;
+	try {
+		const parsedData = JSON.parse(json);
+		return isPlainObject(parsedData);
+	} catch {
+		return false;
+	}
+};
+
+export const isValidJSONArray = (json: string) => {
+	if (json.length === 0) return true;
+	try {
+		const parsedData = JSON.parse(json);
+		return isArray(parsedData);
+	} catch {
+		return false;
+	}
 };

@@ -19,7 +19,7 @@ import { createUseStyles } from 'react-jss';
 import Box from '../boxes/Box';
 import { scrollBar } from '../../styles/mixins';
 import BoxConnections from './BoxConnections';
-import { useBoxLinksStore } from '../../hooks/useBoxLinksStore';
+import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 
 const useStyles = createUseStyles({
@@ -51,9 +51,9 @@ function Links() {
 	const classes = useStyles();
 
 	const boxesStore = useBoxesStore();
-	const boxLinksStore = useBoxLinksStore();
+	const boxUpdater = useBoxUpdater();
 
-	const [incoming, outgoing] = boxLinksStore.selectedBoxConnections;
+	const [incoming, outgoing] = boxUpdater.selectedBoxConnections;
 
 	if (!boxesStore.selectedBox) return null;
 

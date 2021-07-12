@@ -16,9 +16,9 @@
 
  import { useSchemaStore } from "./useSchemaStore";
 
- export const useBoxLinksStore = () => {
+ export const useBoxUpdater = () => {
 	 const schemaStore = useSchemaStore();
  
-	 return schemaStore.boxLinksStore;
+	 return schemaStore.boxUpdater;
  };
  

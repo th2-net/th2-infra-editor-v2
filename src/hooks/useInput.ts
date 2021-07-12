@@ -17,7 +17,7 @@
 import React from 'react';
 
 interface UseInputProps {
-	initialValue?: string;
+	initialValue?: string | (() => string);
 	label?: string;
 	id: string;
 	name?: string;
@@ -73,7 +73,7 @@ export const useInput = ({
 		if (validate) {
 			setIsValid(validate(value));
 		}
-	}, [value]);
+	}, [value, validate]);
 
 	const onValueChange = (newValue: string) => {
 		setIsDirty(true);
