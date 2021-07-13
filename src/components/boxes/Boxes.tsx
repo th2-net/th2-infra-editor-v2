@@ -19,16 +19,33 @@ import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
 import { toLower } from 'lodash';
-import { BoxEntity, isBoxEntity } from '../../models/Box';
+import Switcher, { SwitcherCase } from '../util/Switcher';
+import { isBoxEntity } from '../../models/Box';
 import { scrollBar, visuallyHidden } from '../../styles/mixins';
 import Box from './Box';
 import Dictionary from './Dictionary';
+import OtherBox from './OtherBox';
 import { useDebouncedCallback } from 'use-debounce/lib';
-import { DictionaryEntity } from '../../models/Dictionary';
+import { isDictionaryEntity } from '../../models/Dictionary';
 import { AppView } from '../../App';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
+import FileBase from '../../models/FileBase';
+import { useEntityEditor } from '../../hooks/useEntityEditor';
+
+enum BoxFilterNames {
+	ALL = 'all',
+	BOX = 'box',
+	DICTIONARY = 'dictionary',
+	OTHERS = 'others',
+}
+
+const boxFilterConfig: SwitcherCase<BoxFilterNames>[] = Object.values(BoxFilterNames).map(name => ({
+	id: name,
+	name: 'filter',
+	label: name === BoxFilterNames.ALL || name === BoxFilterNames.OTHERS ? name : <Icon id={name} stroke='black'/> 
+}))
 
 const useStyles = createUseStyles(
 	{
@@ -52,19 +69,23 @@ interface Props {
 
 function Boxes(props: Props) {
 	const boxesStore = useBoxesStore();
+	const entityEditor = useEntityEditor();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
 
 	const [searchValue, setSearchValue] = useState('');
-	const [filter, setFilter] = useState<BoxFilters>('all');
+	const [filter, setFilter] = useState<BoxFilterNames>(BoxFilterNames.ALL);
 
 	const boxes = useMemo(() => {
 		let allEntities;
 		switch (filter) {
-			case 'box':
+			case BoxFilterNames.BOX:
 				allEntities = boxesStore.boxes;
 				break;
-			case 'dictionary':
+			case BoxFilterNames.DICTIONARY:
 				allEntities = boxesStore.dictionaries;
+				break;
+			case BoxFilterNames.OTHERS:
+				allEntities = boxesStore.others;
 				break;
 			default:
 				allEntities = boxesStore.allEntities;
@@ -73,9 +94,16 @@ function Boxes(props: Props) {
 		return searchValue
 			? allEntities.filter(box => toLower(box.name).includes(toLower(searchValue)))
 			: allEntities;
-	}, [boxesStore.boxes, boxesStore.dictionaries, boxesStore.allEntities, searchValue, filter]);
+	}, [
+		boxesStore.others,
+		boxesStore.boxes,
+		boxesStore.dictionaries,
+		boxesStore.allEntities,
+		searchValue,
+		filter
+	]);
 
-	const renderBox = useCallback((index: number, box: BoxEntity | DictionaryEntity) => {
+	const renderBox = useCallback((index: number, box: FileBase) => {
 		if (isBoxEntity(box)) {
 			const group = boxesStore.groupsConfig.find(group => group.types.includes(box.spec.type));
 			return (
@@ -94,26 +122,32 @@ function Boxes(props: Props) {
 				</Observer>
 			);
 		}
-		return (
-			<Observer>
-				{() => (
-					<Dictionary
-						dictionary={box}
-						onClick={() => {
-							props.setViewType('dictionary');
-							selectedDictionaryStore.selectDictionary(box);
-						}}
-					/>
-				)}
-			</Observer>
-		);
+		if (isDictionaryEntity(box)) {
+			return (
+				<Observer>
+					{() => (
+						<Dictionary
+							dictionary={box}
+							onClick={() => {
+								props.setViewType('dictionary');
+								selectedDictionaryStore.selectDictionary(box);
+							}}
+						/>
+					)}
+				</Observer>
+			);
+		}
+		return <OtherBox file={box} onClick={() => {
+			props.setViewType('unknown');
+			entityEditor.setEntity(box);
+		}}/>
 	}, []);
 
 	const classes = useStyles();
 
 	return (
 		<div className={classes.container}>
-			<BoxFilter filter={filter} setFilter={setFilter}/>
+			<Switcher cases={boxFilterConfig} currentCase={filter} setCurrentCase={setFilter}/>
 			<BoxSearch setValue={setSearchValue} />
 			<Virtuoso
 				data={boxes}
@@ -174,85 +208,4 @@ function BoxSearch(props: BoxSearchProps) {
 			/>
 		</div>
 	);
-}
-
-type BoxFilters = 'all' | 'box' | 'dictionary';
-
-interface BoxFiltersProps {
-	filter: BoxFilters;
-	setFilter: (filter: BoxFilters) => void;
-}
-
-const useBoxFiltersStyles = createUseStyles(
-	{
-		filters: {
-			display: 'flex'
-		},
-		filtersInput: {
-			...visuallyHidden(),
-			'&:checked': {
-				'&+label': {
-					backgroundColor: '#fff'
-				}
-			}
-		},
-		filtersLabel: {
-			display: 'inline-flex',
-			verticalAlign: 'middle',
-			padding: 6,
-			cursor: 'pointer',
-		}
-	},
-);
-
-function BoxFilter({filter, setFilter}: BoxFiltersProps) {
-	const classes = useBoxFiltersStyles();
-	return (
-		<div className={classes.filters}>
-			<input
-				className={classes.filtersInput}
-				type='radio' 
-				name='filter' 
-				onClick={() => {setFilter('all')}} 
-				id='all' 
-				checked={filter === 'all'}
-			/>
-			<label 
-				htmlFor='all' 
-				className={classes.filtersLabel}
-			>
-				all
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio' 
-				name='filter' 
-				id='box' 
-				onClick={() => {setFilter('box')}}
-				checked={filter === 'box'}
-			/>
-			<label
-				title="Box"
-				htmlFor='box'
-				className={classes.filtersLabel}
-			>
-				<Icon id='box' stroke='black' />
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio' 
-				name='filter' 
-				id='dictionary' 
-				onClick={() => {setFilter('dictionary')}}
-				checked={filter === 'dictionary'}
-			/>
-			<label
-				title="Dictionary"
-				htmlFor='dictionary'
-				className={classes.filtersLabel}
-			>
-				<Icon id='book' stroke='black' />
-			</label>
-		</div>
-	)
 }

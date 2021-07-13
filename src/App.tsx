@@ -25,6 +25,8 @@ import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
 import { useSelectedDictionaryStore } from './hooks/useSelectedDictionaryStore';
+import NewEntityLayout from './components/layouts/NewEntityLayout';
+import UnknownLayout from './components/layouts/UnknownLayout';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -78,7 +80,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 }));
 
-export type AppView = 'dictionary' | 'box';
+export type AppView = 'dictionary' | 'box' | 'new' | 'unknown';
 
 function App() {
 	const rootStore = useRootStore();
@@ -104,6 +106,8 @@ function App() {
 						<DictionaryLayout setViewType={setViewType}/>
 					)}
 					{viewType === 'box' && <BoxLayout />}
+					{viewType === 'new' && <NewEntityLayout />}
+					{viewType === 'unknown' && <UnknownLayout />}
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>

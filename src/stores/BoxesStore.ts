@@ -14,9 +14,10 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, computed, makeObservable, observable, toJS } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { BoxEntity, isBoxEntity } from "../models/Box";
-import { DictionaryEntity, isDictionaryEntity } from "../models/Dictionary";
+import { isBoxLinksDefinition } from '../models/LinksDefinition';
+import { DictionaryEntity, isDictionaryEntity, isDictionaryLinksEntity } from "../models/Dictionary";
 import FileBase from "../models/FileBase";
 
 export class BoxesStore {
@@ -28,8 +29,8 @@ export class BoxesStore {
 			boxes: observable,
 			dictionaries: observable,
 			allEntities: computed,
-			setBoxes: action,
-			setDictionaries: action
+			resetEntities: action,
+			setEntities: action
 		});
 	}
 
@@ -76,16 +77,31 @@ export class BoxesStore {
 
 	dictionaries: DictionaryEntity[] = [];
 
+	others: FileBase[] = [];
+
 	public get allEntities() {
-		return [...this.boxes, ...this.dictionaries];
+		return [...this.boxes, ...this.dictionaries, ...this.others];
 	}
 
-	setBoxes = (allEntites: FileBase[]) => {
-		this.boxes = allEntites.filter(isBoxEntity);
+	resetEntities = () => {
+		this.boxes = [];
+		this.dictionaries = [];
+		this.others = [];
 	}
-
-	setDictionaries = (allEntites: FileBase[]) => {
-		this.dictionaries = allEntites.filter(isDictionaryEntity);
+	
+	setEntities = (allEntities: FileBase[]) => {
+		for (const entity of allEntities) {
+			if (isBoxEntity(entity)) {
+				this.boxes.push(entity);
+				continue;
+			}
+			if (isDictionaryEntity(entity)) {
+				this.dictionaries.push(entity);
+				continue;
+			}
+			if (!isDictionaryLinksEntity(entity) && !isBoxLinksDefinition(entity)) {
+				this.others.push(entity);
+			}
+		}
 	}
-
 }
