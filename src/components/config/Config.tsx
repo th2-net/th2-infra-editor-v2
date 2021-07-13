@@ -21,13 +21,14 @@ import { createUseStyles } from 'react-jss';
 import classnames from 'classnames';
 import { isValidJSONArray, isValidJSONObject } from '../../helpers/files';
 import { useInput } from '../../hooks/useInput';
-import { useSchemaStore } from '../../hooks/useSchemaStore';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { scrollBar } from '../../styles/mixins';
 import { Theme } from '../../styles/theme';
 import ConfigEditor from './ConfigEditor';
 import Input from '../util/Input';
 import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
+import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
@@ -58,7 +59,8 @@ const useStyles = createUseStyles((t: Theme) => ({
 function Config() {
 	const classes = useStyles();
 
-	const schemaStore = useSchemaStore();
+	const boxesStore = useBoxesStore();
+	const boxUpdater = useBoxUpdater();
 
 	const customConfig = useInput({
 		initialValue: '',
@@ -106,7 +108,7 @@ function Config() {
 
 	useEffect(() => {
 		const boxSubscription = reaction(
-			() => schemaStore.selectedBox,
+			() => boxesStore.selectedBox,
 			box => {
 				customConfig.setValue(
 					box && box?.spec['custom-config']
@@ -137,7 +139,7 @@ function Config() {
 			isValidJSONArray(pinsConfig.value) &&
 			isValidJSONObject(customConfig.value);
 
-		const originalBox = toJS(schemaStore.selectedBox);
+		const originalBox = toJS(boxesStore.selectedBox);
 		if (isConfigValid && originalBox) {
 			const updatedBox = applyBoxChanges(originalBox, {
 				kind: type.value,
@@ -151,11 +153,11 @@ function Config() {
 					pins: JSON.parse(pinsConfig.value),
 				},
 			});
-			schemaStore.saveBoxChanges(originalBox, updatedBox);
+			boxUpdater.saveBoxChanges(originalBox, updatedBox);
 		}
 	}
 
-	return schemaStore.selectedBox ? (
+	return boxesStore.selectedBox ? (
 		<div className={classes.container}>
 			<div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />

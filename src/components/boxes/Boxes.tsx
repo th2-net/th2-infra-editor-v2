@@ -23,10 +23,11 @@ import { BoxEntity, isBoxEntity } from '../../models/Box';
 import { scrollBar, visuallyHidden } from '../../styles/mixins';
 import Box from './Box';
 import Dictionary from './Dictionary';
-import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity } from '../../models/Dictionary';
 import { AppView } from '../../App';
+import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
 
 const useStyles = createUseStyles(
@@ -50,7 +51,8 @@ interface Props {
 }
 
 function Boxes(props: Props) {
-	const schemaStore = useSchemaStore();
+	const boxesStore = useBoxesStore();
+	const selectedDictionaryStore = useSelectedDictionaryStore();
 
 	const [searchValue, setSearchValue] = useState('');
 	const [filter, setFilter] = useState<BoxFilters>('all');
@@ -59,23 +61,23 @@ function Boxes(props: Props) {
 		let allEntities;
 		switch (filter) {
 			case 'box':
-				allEntities = schemaStore.boxes;
+				allEntities = boxesStore.boxes;
 				break;
 			case 'dictionary':
-				allEntities = schemaStore.dictionaries;
+				allEntities = boxesStore.dictionaries;
 				break;
 			default:
-				allEntities = [...schemaStore.boxes, ...schemaStore.dictionaries]
+				allEntities = boxesStore.allEntities;
 				break;
 		}
 		return searchValue
 			? allEntities.filter(box => toLower(box.name).includes(toLower(searchValue)))
 			: allEntities;
-	}, [schemaStore.boxes, schemaStore.dictionaries, searchValue, filter]);
+	}, [boxesStore.boxes, boxesStore.dictionaries, boxesStore.allEntities, searchValue, filter]);
 
 	const renderBox = useCallback((index: number, box: BoxEntity | DictionaryEntity) => {
 		if (isBoxEntity(box)) {
-			const group = schemaStore.groupsConfig.find(group => group.types.includes(box.spec.type));
+			const group = boxesStore.groupsConfig.find(group => group.types.includes(box.spec.type));
 			return (
 				<Observer>
 					{() => (
@@ -84,9 +86,9 @@ function Boxes(props: Props) {
 							color={group?.color}
 							onSelect={box => {
 								props.setViewType('box');
-								schemaStore.selectBox(box);
+								boxesStore.selectBox(box);
 							}}
-							isSelected={schemaStore.selectedBox?.name === box.name}
+							isSelected={boxesStore.selectedBox?.name === box.name}
 						/>
 					)}
 				</Observer>
@@ -99,7 +101,7 @@ function Boxes(props: Props) {
 						dictionary={box}
 						onClick={() => {
 							props.setViewType('dictionary');
-							schemaStore.selectDictionary(box);
+							selectedDictionaryStore.selectDictionary(box);
 						}}
 					/>
 				)}

@@ -19,6 +19,7 @@ import { createUseStyles } from 'react-jss';
 import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
 import { Theme } from '../../styles/theme';
+import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 
 export function getBoxType(box: BoxEntity) {
 	return box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name
@@ -50,11 +51,13 @@ const useStyles = createUseStyles(
 			fontSize: 12,
 		},
 		body: {
+			height: '100%',
+			padding: '20px',
+		},
+		row: {
+			width: '100%',
 			display: 'flex',
 			justifyContent: 'space-between',
-			alignItems: 'center',
-			height: '100%',
-			padding: '0 20px',
 		},
 		bodyValue: {
 			fontSize: '12px',
@@ -83,13 +86,14 @@ const useStyles = createUseStyles(
 
 interface Props {
 	box: BoxEntity;
+	editableDictionaryRelations?: boolean
 	color?: string;
 	onSelect?: (box: BoxEntity) => void;
 	isSelected?: boolean;
 }
 
 function Box(props: Props) {
-	const { box, color, onSelect, isSelected = false } = props;
+	const { box, color, onSelect, editableDictionaryRelations, isSelected = false } = props;
 	const classes = useStyles();
 
 	// TODO: fix status
@@ -111,12 +115,15 @@ function Box(props: Props) {
 				<h5 className={classes.name}>{box.name}</h5>
 			</div>
 			<div className={classes.body}>
-				<span
-					style={{ backgroundColor: color }}
-					className={classNames(classes.bodyValue, classes.type)}>
-					{getBoxType(box)}
-				</span>
-				<span className={classes.bodyValue}>{slicedImageName}</span>
+				<div className={classes.row}>
+					<span
+						style={{ backgroundColor: color }}
+						className={classNames(classes.bodyValue, classes.type)}>
+						{getBoxType(box)}
+					</span>
+					<span className={classes.bodyValue}>{slicedImageName}</span>
+				</div>
+				{editableDictionaryRelations && <DictionaryLinksEditor />}
 			</div>
 		</div>
 	);

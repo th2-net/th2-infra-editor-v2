@@ -45,7 +45,7 @@ export interface LinkArrow {
 	isHidden: boolean;
 }
 
-export function isLinksDefinition(file: FileBase): file is LinksDefinition {
+export function isBoxLinksDefinition(file: FileBase): file is LinksDefinition {
 	return file.kind === 'Th2Link' && (file as LinksDefinition).spec['boxes-relation'] !== undefined;
 }
 
