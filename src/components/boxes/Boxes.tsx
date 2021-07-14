@@ -70,7 +70,6 @@ interface Props {
 function Boxes(props: Props) {
 	const boxesStore = useBoxesStore();
 	const entityEditor = useEntityEditor();
-	const selectedDictionaryStore = useSelectedDictionaryStore();
 
 	const [searchValue, setSearchValue] = useState('');
 	const [filter, setFilter] = useState<BoxFilterNames>(BoxFilterNames.ALL);
@@ -114,6 +113,7 @@ function Boxes(props: Props) {
 							color={group?.color}
 							onSelect={box => {
 								props.setViewType('box');
+								entityEditor.setEntity(box);
 								boxesStore.selectBox(box);
 							}}
 							isSelected={boxesStore.selectedBox?.name === box.name}
@@ -130,7 +130,7 @@ function Boxes(props: Props) {
 							dictionary={box}
 							onClick={() => {
 								props.setViewType('dictionary');
-								selectedDictionaryStore.selectDictionary(box);
+								entityEditor.setEntity(box);
 							}}
 						/>
 					)}

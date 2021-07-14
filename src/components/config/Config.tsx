@@ -29,6 +29,8 @@ import Input from '../util/Input';
 import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { useEntityEditor } from '../../hooks/useEntityEditor';
+import UnionEditor from '../editors/UnionEditor'
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
@@ -61,6 +63,7 @@ function Config() {
 
 	const boxesStore = useBoxesStore();
 	const boxUpdater = useBoxUpdater();
+	const entityEditor = useEntityEditor();
 
 	const customConfig = useInput({
 		initialValue: '',
@@ -159,7 +162,8 @@ function Config() {
 
 	return boxesStore.selectedBox ? (
 		<div className={classes.container}>
-			<div className={classes.inputGroup}>
+			<UnionEditor />
+			{/* <div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
 				<Input inputConfig={imageVersion} />
 				<Input inputConfig={name} />
@@ -170,7 +174,7 @@ function Config() {
 			<h5 className={classes.codeEditorLabel}>Pins</h5>
 			<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} />
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
-			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
+			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} /> */}
 			<button onClick={saveChanges}>Save</button>
 		</div>
 	) : (

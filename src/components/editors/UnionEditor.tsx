@@ -14,6 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 import { observer } from 'mobx-react-lite';
+import { defineFileFormat } from '../../helpers/files'
+import Editor, { EditorProps } from '@monaco-editor/react';
 import { useEntityEditor } from '../../hooks/useEntityEditor';
 import { OtherSpecs } from '../../models/FileBase';
 import { BoxSpecs } from '../../models/Box';
@@ -37,7 +39,7 @@ const UnionEditor = () => {
 					id='name'
 					type='text'
 					autoComplete='off'
-					defaultValue={entity.name}
+					value={entity.name}
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 						setEntityName(event.target.value)
 					}}
@@ -45,26 +47,69 @@ const UnionEditor = () => {
 			</div>
 			{
 				entity.spec && Object.entries(entity.spec as (OtherSpecs | BoxSpecs | DictionarySpecs))
-					.map(([prop, value]) => (
-						<div>
-							<label htmlFor={prop}>
-								{prop}
-							</label>
-							<input
-								id={prop}
-								type='text'
-								autoComplete='off'
-								defaultValue={value}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-									setEntitySpecProperty((prop as keyof (OtherSpecs | BoxSpecs | DictionarySpecs)), event.target.value)
-								}}
+					.map(([key, value]) => {
+						const prop = key as keyof (OtherSpecs | BoxSpecs | DictionarySpecs);
+						const commonEditorProps: EditorProps = {
+							height: 300,
+							width: 'auto',
+							language: defineFileFormat(value),
+							onChange: (v) => setEntitySpecProperty(prop, v),
+							options: {
+								fontSize: 12,
+								codeLens: false,
+								lineNumbers: 'off',
+								minimap: {
+									enabled: false,
+								},
+								padding: {
+									bottom: 0,
+									top: 0,
+								},
+								autoClosingBrackets: 'always',
+								autoClosingQuotes: 'always',
+								contextmenu: false,
+							}
+						}
+						if (key === 'data') {	
+							return (
+								<Editor 
+								value={value}
+								{...commonEditorProps}
 							/>
-						</div>
-					))
+							)
+						}
+						if (
+							key === 'custom-config' ||
+							key === 'extended-settings' ||
+						  key === 'pins'
+						) {
+							return (
+								<Editor 
+									value={JSON.stringify(value, null, 4)}
+									{...commonEditorProps}
+								/>
+							)
+						}
+						return (
+							<div>
+								<label htmlFor={key}>
+									{key}
+								</label>
+								<input
+									id={key}
+									type='text'
+									autoComplete='off'
+									defaultValue={value}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+										setEntitySpecProperty(prop, event.target.value)
+									}}
+								/>
+							</div>
+						)
+					})
 			}
 		</div>
 	);
 };
 
 export default observer(UnionEditor);
-	

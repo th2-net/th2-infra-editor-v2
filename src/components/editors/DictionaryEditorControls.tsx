@@ -14,16 +14,13 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useInput } from '../../hooks/useInput';
-import ConfigEditor from './ConfigEditor';
 import { downloadFile, isXMLValid } from '../../helpers/files';
-import { usePrevious } from '../../hooks/usePrevious';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import { DictionaryEntity } from '../../models/Dictionary';
 import Icon from '../Icon';
+import { DictionarySpecs } from '../../models/Dictionary'
 import { buttonReset, visuallyHidden } from '../../styles/mixins';
-import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
+import { useEntityEditor } from '../../hooks/useEntityEditor';
 
 const useStyle = createUseStyles({
 	controls: {
@@ -50,49 +47,30 @@ const useStyle = createUseStyles({
 	}
 })
 
-interface DictionaryEditorProps {
-	dictionary: DictionaryEntity | null;
-	editDictionary: (v: string) => void;
-}
-
-const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps) => {
+const DictionaryEditorControls = () => {
 	const classes = useStyle();
-
-	const dictionaryInputConfig = useInput({
-		initialValue: dictionary?.spec.data,
-		id: 'dictionary-editor',
-		label: dictionary?.name,
-		validate: value => isXMLValid(value)
-	});
-
-	const prevValue = usePrevious(dictionaryInputConfig.value);
+	const { entity, setEntitySpecProperty } = useEntityEditor();
 
 	const uploadDictionary = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) {
 			const file = e.target.files[0];
 			const data = await file.text();
-			dictionaryInputConfig.setValue(data);
+			setEntitySpecProperty('data', data);
 		}
 	}
 
 	const downloadDictionary = () => {
-		if (dictionary) {
-			downloadFile(dictionaryInputConfig.value, dictionary.name, 'text/xml');
+		if (entity) {
+			downloadFile((entity.spec as DictionarySpecs).data, entity.name, 'text/xml');
 		}
 	}
 
 	return (
 		<>
-			<ConfigEditor configInput={dictionaryInputConfig} />
 			<div className={classes.controls}>
 				<button
 					className={classes.applyChanges}
-					disabled={prevValue === dictionaryInputConfig.value}
-					onClick={() => {
-						if (dictionaryInputConfig.isValid) {
-							editDictionary(dictionaryInputConfig.value);
-						}
-					}}
+					onClick={() => {}}
 				>
 					Apply changes
 				</button>
@@ -122,5 +100,5 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 	)
 };
 
-export default DictionaryEditor;
+export default observer(DictionaryEditorControls);
  
