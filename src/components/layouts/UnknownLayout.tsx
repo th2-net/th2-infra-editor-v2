@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import UnionEditor from '../editors/UnionEditor';
+import CommonEditor from '../editors/CommonEditor';
 
 const useStyles = createUseStyles({
 	container: {
@@ -28,7 +28,7 @@ function UnknownLayout() {
 
 	return (
 		<div className={classes.container}>
-			<UnionEditor />
+			<CommonEditor />
 		</div>
 	);
 }

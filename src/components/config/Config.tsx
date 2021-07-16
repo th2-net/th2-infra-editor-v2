@@ -24,13 +24,11 @@ import { useInput } from '../../hooks/useInput';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { scrollBar } from '../../styles/mixins';
 import { Theme } from '../../styles/theme';
-import ConfigEditor from './ConfigEditor';
-import Input from '../util/Input';
 import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useEntityEditor } from '../../hooks/useEntityEditor';
-import UnionEditor from '../editors/UnionEditor'
+import CommonEditor from '../editors/CommonEditor'
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
@@ -162,7 +160,7 @@ function Config() {
 
 	return boxesStore.selectedBox ? (
 		<div className={classes.container}>
-			<UnionEditor />
+			<CommonEditor />
 			{/* <div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
 				<Input inputConfig={imageVersion} />

@@ -42,13 +42,18 @@ export class EntityEditor {
 		}
 	}
 
-	setEntitySpecProperty = <T extends keyof (BoxSpecs | DictionarySpecs | OtherSpecs), V>(prop: T, value: V) => {
+	setEntitySpecProperty = <T extends keyof BoxSpecs | DictionarySpecs | OtherSpecs, V extends string>(prop: T, value: V) => {
+		const newValue =
+			prop !== 'extended-settings' && prop !== 'pins' && prop !== 'custom-config'
+				? value
+				: JSON.parse(value)
+		
 		if (this.entity && this.entity.spec) {
 			this.entity = {
 				...this.entity,
 				spec: {
 					...(this.entity.spec as BoxSpecs | DictionarySpecs | OtherSpecs),
-					[prop]: value
+					[prop as any]: newValue
 				}
 			};
 		}

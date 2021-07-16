@@ -16,10 +16,9 @@
 
 import { createUseStyles } from 'react-jss';
 import { AppView } from '../../App';
-import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import BoxLinksEditor from '../editors/BoxLinksEditor';
 import DictionaryEditorControls from '../editors/DictionaryEditorControls';
-import UnionEditor from '../editors/UnionEditor';
+import CommonEditor from '../editors/CommonEditor';
 
 interface Props {
 	setViewType: (viewType: AppView) => void;
@@ -35,7 +34,7 @@ function DictionaryLayout({ setViewType }: Props) {
 	return (
 		<div className={classes.dictionaryLayout}>
 			<button onClick={() => setViewType('box')}>back</button>
-			<UnionEditor />
+			<CommonEditor />
 			<DictionaryEditorControls />
 			<BoxLinksEditor />
 		</div>
