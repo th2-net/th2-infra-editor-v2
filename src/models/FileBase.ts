@@ -21,8 +21,10 @@ export default interface FileBase {
 	spec: unknown;
 }
 
+export type ActionType = 'add' | 'remove' | 'update'
+
 export interface RequestModel {
-	operation: 'add' | 'remove' | 'update';
+	operation: ActionType;
 	payload: FileBase;
 }
 

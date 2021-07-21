@@ -23,7 +23,11 @@ import { DictionarySpecs } from '../../models/Dictionary';
 import { createUseStyles } from 'react-jss';
 import { scrollBar } from '../../styles/mixins';
 
-const CommonEditor = () => {
+interface CommonEditorProps {
+	isNewEntity?: boolean
+}
+
+const CommonEditor = ({isNewEntity = false}: CommonEditorProps) => {
 
 	const { entity, setEntityName, setEntitySpecProperty } = useEntityEditor();
 	
@@ -33,14 +37,14 @@ const CommonEditor = () => {
 	
 	return (
 		<div>
-			<Input
+			{isNewEntity ? <Input
 				id='name'
 				label='Name'
-				defaultValue={entity.name}
+				value={entity.name}
 				onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 					setEntityName(event.target.value)
 				}}
-			/>
+			/> : <h4>{entity.name}</h4>}
 			{
 				entity.spec && Object.entries(entity.spec as (OtherSpecs | BoxSpecs | DictionarySpecs))
 					.map(([key, value]) => {
@@ -78,7 +82,7 @@ const CommonEditor = () => {
 								key={key}
 								id={key}
 								label={`${key.charAt(0).toUpperCase()}${key.slice(1)}`}
-								defaultValue={value}
+								value={value}
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
 									setEntitySpecProperty(prop, event.target.value)
 								}}
@@ -100,7 +104,7 @@ const useInputStyles = createUseStyles(
 		},
 		input: {
 			width: '100%',
-      height: 21,
+      		height: 21,
 			backgroundColor: '#fff',
 			border: '1px solid #7a99b8',
 			borderRadius: 4,
@@ -126,7 +130,7 @@ interface InputProps {
 	id: string;
 	label: string;
 	onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-	defaultValue: string;
+	value: string;
 	autocomplete?: {
 		datalistKey: string;
 		variants: string[];
@@ -148,7 +152,7 @@ function Input({ label, autocomplete, ...rest }: InputProps) {
 				list={autocomplete?.datalistKey}
 				autoComplete='off'
 			/>
-			{autocomplete && rest.defaultValue.length > 0 && (
+			{autocomplete && rest.value.length > 0 && (
 				<datalist id={autocomplete.datalistKey}>
 					{autocomplete.variants.map((variant, index) => (
 						<option key={index} value={variant} />

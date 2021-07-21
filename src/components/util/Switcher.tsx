@@ -25,7 +25,8 @@
  }
  
  export interface SwitcherCase<T extends string> {
-	 id: T;
+	 value: T,
+	 id: string;
 	 name: string;
 	 label: ReactNode;
  }
@@ -64,8 +65,8 @@
 							 type='radio' 
 							 name={item.name}
 							 id={item.id} 
-							 onClick={() => {setCurrentCase(item.id)}}
-							 defaultChecked={currentCase === item.id}
+							 onClick={() => {setCurrentCase(item.value)}}
+							 defaultChecked={currentCase === item.value}
 						 />
 						 <label
 							 title={`${item.id.charAt(0).toUpperCase()}${item.id.slice(1)}`}

@@ -21,14 +21,13 @@ import { Virtuoso } from 'react-virtuoso';
 import { toLower } from 'lodash';
 import Switcher, { SwitcherCase } from '../util/Switcher';
 import { isBoxEntity } from '../../models/Box';
-import { scrollBar, visuallyHidden } from '../../styles/mixins';
+import { buttonReset, scrollBar } from '../../styles/mixins';
 import Box from './Box';
 import Dictionary from './Dictionary';
 import OtherBox from './OtherBox';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { isDictionaryEntity } from '../../models/Dictionary';
 import { AppView } from '../../App';
-import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
 import FileBase from '../../models/FileBase';
@@ -43,6 +42,7 @@ enum BoxFilterNames {
 
 const boxFilterConfig: SwitcherCase<BoxFilterNames>[] = Object.values(BoxFilterNames).map(name => ({
 	id: name,
+	value: name,
 	name: 'filter',
 	label: name === BoxFilterNames.ALL || name === BoxFilterNames.OTHERS ? name : <Icon id={name} stroke='black'/> 
 }))
@@ -148,7 +148,7 @@ function Boxes(props: Props) {
 	return (
 		<div className={classes.container}>
 			<Switcher cases={boxFilterConfig} currentCase={filter} setCurrentCase={setFilter}/>
-			<BoxSearch setValue={setSearchValue} />
+			<BoxSearch setValue={setSearchValue} setViewType={() => props.setViewType('new')}/>
 			<Virtuoso
 				data={boxes}
 				itemContent={renderBox}
@@ -164,6 +164,7 @@ export default observer(Boxes);
 const useBoxSearchStyles = createUseStyles(
 	{
 		search: {
+			display: 'flex',
 			flexShrink: 0,
 			height: 50,
 			borderBottom: '1px solid',
@@ -175,11 +176,17 @@ const useBoxSearchStyles = createUseStyles(
 			outline: 'none',
 			padding: '0 15px',
 		},
+		add: {
+			...buttonReset(),
+			backgroundColor: 'white',
+			padding: 4
+		}
 	},
 	{ name: 'BoxSearch' },
 );
 interface BoxSearchProps {
 	setValue: (debouncedSearchValue: string) => void;
+	setViewType: () => void;
 }
 
 function BoxSearch(props: BoxSearchProps) {
@@ -206,6 +213,12 @@ function BoxSearch(props: BoxSearchProps) {
 				className={classes.searchInput}
 				onChange={onSearchValueChange}
 			/>
+			<button 
+				className={classes.add}
+				onClick={props.setViewType}
+			>
+				+
+			</button>
 		</div>
 	);
 }

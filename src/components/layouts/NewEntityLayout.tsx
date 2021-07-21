@@ -14,22 +14,89 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { useState, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { buttonReset } from '../../styles/mixins';
 import { createUseStyles } from 'react-jss';
+import { useEntityEditor } from '../../hooks/useEntityEditor';
+import { BoxEntity } from '../../models/Box';
+import { DictionaryEntity } from '../../models/Dictionary';
+import Switcher, { SwitcherCase } from '../util/Switcher';
+import CommonEditor from '../editors/CommonEditor';
+import Icon from '../Icon';
+
+enum NewEntityType {
+	BOX = 'box',
+	DICTIONARY = 'dictionary',
+}
+
+const switcherConfig: SwitcherCase<NewEntityType>[] = Object.values(NewEntityType).map((name, i) => ({
+	value: name,
+	id: `${i}-${name}`,
+	name: 'entity-type',
+	label: <Icon id={name} stroke='black'/> 
+}))
+
+const defaultBox: BoxEntity = {
+	name: '',
+	kind: 'Th2Box',
+	spec: {
+		type: '',
+		"image-name": '',
+		"image-version": '',
+		"node-port": undefined,
+		"extended-settings": {
+			service: {
+				enabled: true
+			}
+		}
+	}
+}
+
+const defaultDictionary: DictionaryEntity = {
+	name: '',
+	kind: 'Th2Dictionary',
+	spec: {
+		data: ''
+	}
+}
 
 const useStyles = createUseStyles({
 	container: {
 
+	},
+	add: {
+		...buttonReset()
 	}
 });
 
 function NewEntityLayout() {
 	const classes = useStyles();
+	const [type, setType] = useState<NewEntityType>(NewEntityType.BOX);
+	const { setActionType, setEntity, apply } = useEntityEditor();
+
+	useEffect(() => {
+		setActionType('add');
+		return () => {
+			setActionType('update');
+		}
+	}, [])
+
+	useEffect(() => {
+		if (type === NewEntityType.BOX) {
+			setEntity(defaultBox);
+		} else {
+			setEntity(defaultDictionary);
+		}
+	})
 
 	return (
 		<div className={classes.container}>
-			new entity
+			<Switcher cases={switcherConfig} currentCase={type} setCurrentCase={setType}/>
+			<CommonEditor isNewEntity/>
+			<button className={classes.add} onClick={apply}>Add</button>
 		</div>
 	);
 }
 
-export default NewEntityLayout;
+export default observer(NewEntityLayout);

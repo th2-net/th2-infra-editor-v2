@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { downloadFile, isXMLValid } from '../../helpers/files';
+import { downloadFile } from '../../helpers/files';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import Icon from '../Icon';
@@ -49,7 +49,7 @@ const useStyle = createUseStyles({
 
 const DictionaryEditorControls = () => {
 	const classes = useStyle();
-	const { entity, setEntitySpecProperty } = useEntityEditor();
+	const { entity, setEntitySpecProperty, apply } = useEntityEditor();
 
 	const uploadDictionary = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) {
@@ -70,7 +70,7 @@ const DictionaryEditorControls = () => {
 			<div className={classes.controls}>
 				<button
 					className={classes.applyChanges}
-					onClick={() => {}}
+					onClick={apply}
 				>
 					Apply changes
 				</button>

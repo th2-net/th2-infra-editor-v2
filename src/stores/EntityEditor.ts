@@ -17,18 +17,23 @@
 import { observable, makeObservable, action } from 'mobx'
 import { BoxSpecs } from '../models/Box';
 import { DictionarySpecs } from '../models/Dictionary';
-import FileBase, { OtherSpecs } from '../models/FileBase';
+import FileBase, { ActionType, OtherSpecs } from '../models/FileBase';
+import { EditableEntity, RequestsStore } from './RequestsStore';
 
 export class EntityEditor {
 
-	constructor() {
+	constructor(private requestsStore: RequestsStore) {
 		makeObservable(this, {
+			actionType: observable,
 			entity: observable,
+			setActionType: action,
 			setEntity: action,
 			setEntityName: action,
 			setEntitySpecProperty: action,
 		})
 	}
+
+	actionType: ActionType = 'update';
 
 	entity: FileBase | null = null;
 
@@ -56,6 +61,17 @@ export class EntityEditor {
 					[prop as any]: newValue
 				}
 			};
+		}
+	}
+
+	setActionType = (actionType: ActionType) => {
+		this.actionType = actionType;
+	}
+
+	apply = () => {
+		if (this.entity) {
+			this.requestsStore.saveEntityChanges(this.entity as EditableEntity, this.actionType)
+			this.requestsStore.saveChanges();
 		}
 	}
 }

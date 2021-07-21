@@ -30,9 +30,9 @@ export class SchemaStore {
 
 	boxesStore = new BoxesStore();
 
-	entityEditor = new EntityEditor();
-
 	history = new HistoryStore(this);
+
+	entityEditor: EntityEditor;
 
 	requestsStore: RequestsStore;
 	
@@ -51,6 +51,8 @@ export class SchemaStore {
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
+
+		this.entityEditor = new EntityEditor(this.requestsStore);
 		
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
 		

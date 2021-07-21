@@ -19,9 +19,11 @@ import { action, computed, makeObservable, observable } from "mobx";
 import Api from "../api/api";
 import { BoxEntity } from "../models/Box";
 import { DictionaryEntity, DictionaryLinksEntity } from "../models/Dictionary";
-import { RequestModel } from "../models/FileBase";
+import { ActionType, RequestModel } from "../models/FileBase";
 import { LinksDefinition } from "../models/LinksDefinition";
 import { SchemaStore } from "./SchemaStore";
+
+export type EditableEntity = BoxEntity | LinksDefinition | DictionaryLinksEntity | DictionaryEntity;
 
 export class RequestsStore {
 
@@ -44,8 +46,8 @@ export class RequestsStore {
 	}
 
 	saveEntityChanges = (
-		entity: BoxEntity | LinksDefinition | DictionaryLinksEntity | DictionaryEntity,
-		operation: 'add' | 'update' | 'remove',
+		entity: EditableEntity,
+		operation: ActionType,
 	) => {
 		if (
 			!this.preparedRequests.some(
