@@ -21,7 +21,35 @@ export default interface FileBase {
 	spec: unknown;
 }
 
+export type ActionType = 'add' | 'remove' | 'update'
+
 export interface RequestModel {
-	operation: 'add' | 'remove' | 'update';
+	operation: ActionType;
 	payload: FileBase;
+}
+
+export interface OtherSpecs {
+	[k: string]: string | number | ExtendedSettings
+}
+
+
+export interface ExtendedSettings {
+	['chart-cfg']?: {
+		path: string;
+		ref: string;
+	};
+	resources?: {
+		limits: {
+			cpu: string;
+			memory: string;
+		};
+		requests: {
+			cpu: string;
+			memory: string;
+		};
+	};
+	service: {
+		enabled: boolean;
+		targetPort?: string;
+	};
 }

@@ -19,16 +19,16 @@ import { isObservable, reaction, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import classnames from 'classnames';
-import { isValidJSONArray, isValidJSONObject } from '../../helpers/files';
+// import { isValidJSONArray, isValidJSONObject } from '../../helpers/files';
 import { useInput } from '../../hooks/useInput';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { scrollBar } from '../../styles/mixins';
 import { Theme } from '../../styles/theme';
-import ConfigEditor from './ConfigEditor';
-import Input from '../util/Input';
 import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { useEntityEditor } from '../../hooks/useEntityEditor';
+import CommonEditor from '../editors/CommonEditor'
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
@@ -60,7 +60,8 @@ function Config() {
 	const classes = useStyles();
 
 	const boxesStore = useBoxesStore();
-	const boxUpdater = useBoxUpdater();
+	// const boxUpdater = useBoxUpdater();
+	const entityEditor = useEntityEditor();
 
 	const customConfig = useInput({
 		initialValue: '',
@@ -131,35 +132,36 @@ function Config() {
 		return boxSubscription;
 	}, []);
 
-	function saveChanges() {
-		const isConfigValid =
-			[customConfig, pinsConfig, imageName, imageVersion, name, type].every(
-				input => input.isValid,
-			) &&
-			isValidJSONArray(pinsConfig.value) &&
-			isValidJSONObject(customConfig.value);
+	// function saveChanges() {
+	// 	const isConfigValid =
+	// 		[customConfig, pinsConfig, imageName, imageVersion, name, type].every(
+	// 			input => input.isValid,
+	// 		) &&
+	// 		isValidJSONArray(pinsConfig.value) &&
+	// 		isValidJSONObject(customConfig.value);
 
-		const originalBox = toJS(boxesStore.selectedBox);
-		if (isConfigValid && originalBox) {
-			const updatedBox = applyBoxChanges(originalBox, {
-				kind: type.value,
-				name: name.value,
-				spec: {
-					...originalBox.spec,
-					'custom-config': customConfig.value ? JSON.parse(customConfig.value) : '',
-					'image-name': imageName.value,
-					'image-version': imageVersion.value,
-					'extended-settings': extendedSettings.value ? JSON.parse(extendedSettings.value) : '',
-					pins: JSON.parse(pinsConfig.value),
-				},
-			});
-			boxUpdater.saveBoxChanges(originalBox, updatedBox);
-		}
-	}
+	// 	const originalBox = toJS(boxesStore.selectedBox);
+	// 	if (isConfigValid && originalBox) {
+	// 		const updatedBox = applyBoxChanges(originalBox, {
+	// 			kind: type.value,
+	// 			name: name.value,
+	// 			spec: {
+	// 				...originalBox.spec,
+	// 				'custom-config': customConfig.value ? JSON.parse(customConfig.value) : '',
+	// 				'image-name': imageName.value,
+	// 				'image-version': imageVersion.value,
+	// 				'extended-settings': extendedSettings.value ? JSON.parse(extendedSettings.value) : '',
+	// 				pins: JSON.parse(pinsConfig.value),
+	// 			},
+	// 		});
+	// 		boxUpdater.saveBoxChanges(originalBox, updatedBox);
+	// 	}
+	// }
 
 	return boxesStore.selectedBox ? (
 		<div className={classes.container}>
-			<div className={classes.inputGroup}>
+			<CommonEditor />
+			{/* <div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
 				<Input inputConfig={imageVersion} />
 				<Input inputConfig={name} />
@@ -170,8 +172,8 @@ function Config() {
 			<h5 className={classes.codeEditorLabel}>Pins</h5>
 			<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} />
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
-			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
-			<button onClick={saveChanges}>Save</button>
+			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} /> */}
+			<button onClick={entityEditor.apply}>Save</button>
 		</div>
 	) : (
 		<div className={classnames(classes.container, classes.noBoxSelected)}>

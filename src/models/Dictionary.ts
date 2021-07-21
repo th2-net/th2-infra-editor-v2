@@ -28,9 +28,11 @@ export interface DictionaryRelation {
 export interface DictionaryEntity extends FileBase {
 	name: string;
 	kind: string;
-	spec: {
-		data: string;
-	};
+	spec: DictionarySpecs;
+}
+
+export interface DictionarySpecs {
+	data: string;
 }
 
 export interface DictionaryLinksEntity extends FileBase {

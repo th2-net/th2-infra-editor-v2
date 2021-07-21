@@ -14,42 +14,25 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import FileBase from './FileBase';
+import FileBase, { ExtendedSettings } from './FileBase';
 import { DictionaryRelation } from './Dictionary';
 
 export interface BoxEntity extends FileBase {
-	spec: {
-		['custom-config']?: {
-			[prop: string]: string;
-		};
-		['extended-settings']: {
-			['chart-cfg']?: {
-				path: string;
-				ref: string;
-			};
-			resources?: {
-				limits: {
-					cpu: string;
-					memory: string;
-				};
-				requests: {
-					cpu: string;
-					memory: string;
-				};
-			};
-			service: {
-				enabled: boolean;
-				targetPort?: string;
-			};
-		};
-		['image-name']: string;
-		['image-version']: string;
-		['node-port']?: number;
-		['dictionaries-relation']?: Array<DictionaryRelation>;
-		data?: string;
-		pins?: Array<Pin>;
-		type: string;
+	spec: BoxSpecs	
+}
+
+export interface BoxSpecs {
+	['custom-config']?: {
+		[prop: string]: string;
 	};
+	['extended-settings']: ExtendedSettings;
+	['image-name']: string;
+	['image-version']: string;
+	['node-port']?: number;
+	['dictionaries-relation']?: Array<DictionaryRelation>;
+	data?: string;
+	pins?: Array<Pin>;
+	type: string;
 }
 
 export interface Pin {

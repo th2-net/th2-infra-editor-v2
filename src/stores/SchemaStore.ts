@@ -20,6 +20,7 @@ import Api from '../api/api';
 import { Schema } from '../models/Schema';
 import { BoxesStore } from './BoxesStore';
 import { BoxUpdater } from './BoxUpdater';
+import { EntityEditor } from './EntityEditor';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
 import { RequestsStore } from './RequestsStore';
 import { SelectedDictionaryStore } from './SelectedDictionaryStore';
@@ -30,6 +31,8 @@ export class SchemaStore {
 	boxesStore = new BoxesStore();
 
 	history = new HistoryStore(this);
+
+	entityEditor: EntityEditor;
 
 	requestsStore: RequestsStore;
 	
@@ -48,6 +51,8 @@ export class SchemaStore {
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
+
+		this.entityEditor = new EntityEditor(this.requestsStore);
 		
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
 		
@@ -93,8 +98,7 @@ export class SchemaStore {
 
 		try {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
-			this.boxesStore.setBoxes(schema.resources);
-			this.boxesStore.setDictionaries(schema.resources);
+			this.boxesStore.setEntities(schema.resources);
 			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 		} catch (error) {
@@ -115,9 +119,8 @@ export class SchemaStore {
 	private onSchemaChange = (selectedSchema: string | null) => {
 		this.currentSchemaRequest?.cancel();
 		this.currentSchemaRequest = selectedSchema ? this.fetchSchemaState(selectedSchema) : null;
-		this.boxesStore.setBoxes([]);
+		this.boxesStore.resetEntities();
 		this.boxesStore.selectBox(null);
-		this.boxesStore.setDictionaries([]);
 		this.selectedDictionaryStore.selectDictionary(null);
 		this.boxUpdater.setLinkDefinitions([]);
 	};
