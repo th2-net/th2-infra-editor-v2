@@ -8,5 +8,12 @@ module.exports = function (app) {
 			changeOrigin: true,
 			secure: false,
 		}),
+	).use(
+		'/grafana',
+		createProxyMiddleware({
+			target: 'http://th2-qa:30000/',
+			changeOrigin: true,
+			secure: false,
+		}),
 	);
 };
