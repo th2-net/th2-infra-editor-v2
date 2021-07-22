@@ -18,6 +18,7 @@ import { computed, reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
+import { useDebouncedCallback } from 'use-debounce/lib';
 import { useBoxesStore } from '../hooks/useBoxesStore';
 import { useInput } from '../hooks/useInput';
 import { useSchemaStore } from '../hooks/useSchemaStore';
@@ -60,16 +61,21 @@ function Metrics() {
 	});
 
 	const [component, setComponent] = useState<string>('');
+	const [searchDebouncedValue, setSearchDebouncedValue] = useState<string>('');
 
-	const options = computed(() => `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`).get()
+	const options = computed(() => schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`).get()
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {
 			return null;
 		}
 
-		return `orgId=1&refresh=10s&${options}&var-component=${component}&var-search=${search.value}&panelId=8`;
-	}, [options, component, search.value]);
+		return `orgId=1&refresh=10s&${options}&var-component=${component}&var-search=${searchDebouncedValue}&panelId=8`;
+	}, [options, component, searchDebouncedValue]);
+
+	const setDebouncedValue = useDebouncedCallback((value: string) => {
+		setSearchDebouncedValue(value);
+	}, 600);
 
 	const metricsOptions = useMemo(() => {
 		if (component === '') {
@@ -80,6 +86,10 @@ function Metrics() {
 	}, [options, component]);
 
 	useEffect(() => {
+		setDebouncedValue(search.value);
+	}, [search.value, setDebouncedValue]);
+
+	useEffect(() => {
 		const boxSubscription = reaction(
 			() => boxesStore.selectedBox,
 			box => {
@@ -88,7 +98,7 @@ function Metrics() {
 		);
 
 		return boxSubscription;
-	}, [boxesStore.selectedBox]);
+	}, [boxesStore]);
 
 	if (!options || !logsOptions || !metricsOptions) return null;
 
