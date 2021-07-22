@@ -15,24 +15,24 @@
  ***************************************************************************** */
 
 import { reaction } from 'mobx';
+import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { useBoxesStore } from '../hooks/useBoxesStore';
 import { useSchemaStore } from '../hooks/useSchemaStore';
-import { BoxEntity } from "../models/Box";
 
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
 		gridArea: 'metrics',
 		borderRadius: 6,
-		overflow: 'hidden'
+		overflow: 'hidden',
 	},
-	metriks: {
+	metrics: {
 		height: '100%',
 		width: '100%',
 		border: 'none',
-	}
+	},
 });
 
 function Metrics() {
@@ -40,32 +40,37 @@ function Metrics() {
 	const schemaStore = useSchemaStore();
 	const boxesStore = useBoxesStore();
 
-	const [componet, setComponet] = useState<string>('');
+	const [component, setComponent] = useState<string>('');
 
 	const source = useMemo(() => {
 		const namespace = schemaStore.selectedSchema;
 
-		return `http://th2-qa:30000/grafana/d-solo/logs/logs?orgId=1&refresh=10s&var-namespace=th2-${namespace}&var-component=${componet}&theme=light&panelId=8`;
-	}, [schemaStore.selectedSchema, componet]);
+		if (component === '') {
+			return null;
+		}
 
+		return `grafana/d-solo/logs/logs?orgId=1&refresh=10s&var-namespace=th2-${namespace}&var-component=${component}&theme=light&panelId=8`;
+	}, [schemaStore.selectedSchema, component]);
 
 	useEffect(() => {
 		const boxSubscription = reaction(
 			() => boxesStore.selectedBox,
 			box => {
-				setComponet(box?.name || '')
+				setComponent(box?.name || '');
 			},
 		);
 
 		return boxSubscription;
 	}, [boxesStore.selectedBox]);
 
-	return boxesStore.selectedBox && (
+
+	if (!source) return null;
+
+	return (
 		<div className={classes.container}>
-			<iframe className={classes.metriks} src={source}></iframe>
+			<iframe className={classes.metrics} src={source}></iframe>
 		</div>
 	);
 }
 
-export default Metrics;
-
+export default observer(Metrics);
