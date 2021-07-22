@@ -1,6 +1,6 @@
 {
 	"name": "th2-infra-editor",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"private": true,
 	"dependencies": {
 		"@monaco-editor/react": "^4.2.1",
