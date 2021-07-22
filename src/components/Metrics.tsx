@@ -65,7 +65,7 @@ function Metrics() {
 		const namespace = schemaStore.selectedSchema;
 
 		return `var-namespace=th2-${namespace}&theme=light`;
-	}, [schemaStore.selectedSchema]);
+	}, [schemaStore]);
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {
