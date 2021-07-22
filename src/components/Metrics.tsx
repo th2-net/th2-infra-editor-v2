@@ -29,8 +29,19 @@ const useStyles = createUseStyles({
 		gridArea: 'metrics',
 		borderRadius: 6,
 		overflow: 'hidden',
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'space-between',
+	},
+	metricsSection: {
+		height: '33%',
 	},
 	metrics: {
+		height: '100%',
+		width: '100%',
+		border: 'none',
+	},
+	logs: {
 		height: 'calc(100% - 40px)',
 		width: '100%',
 		border: 'none',
@@ -50,15 +61,27 @@ function Metrics() {
 
 	const [component, setComponent] = useState<string>('');
 
-	const source = useMemo(() => {
+	const options = useMemo(() => {
 		const namespace = schemaStore.selectedSchema;
 
+		return `var-namespace=th2-${namespace}&theme=light`;
+	}, [schemaStore.selectedSchema]);
+
+	const logsOptions = useMemo(() => {
 		if (component === '') {
 			return null;
 		}
 
-		return `grafana/d-solo/logs/logs?orgId=1&refresh=10s&var-namespace=th2-${namespace}&var-component=${component}&var-search=${search.value}&theme=light&panelId=8`;
-	}, [schemaStore.selectedSchema, component, search.value]);
+		return `orgId=1&refresh=10s&${options}&var-component=${component}&var-search=${search.value}&panelId=8`;
+	}, [options, component, search.value]);
+
+	const metricsOptions = useMemo(() => {
+		if (component === '') {
+			return null;
+		}
+
+		return `orgId=1&refresh=5s&var-datasource=Prometheus&${options}&var-workload=${component}&var-type=deployment`;
+	}, [options, component]);
 
 	useEffect(() => {
 		const boxSubscription = reaction(
@@ -71,13 +94,32 @@ function Metrics() {
 		return boxSubscription;
 	}, [boxesStore.selectedBox]);
 
-
-	if (!source) return null;
+	if (!options || !logsOptions || !metricsOptions) return null;
 
 	return (
 		<div className={classes.container}>
-			<Input inputConfig={search} />
-			<iframe title={component} className={classes.metrics} src={source}></iframe>
+			<section className={classes.metricsSection}>
+				<iframe
+					title={component}
+					className={classes.metrics}
+					src={`/grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=1`}
+				/>
+			</section>
+			<section className={classes.metricsSection}>
+				<iframe
+					title={component}
+					className={classes.metrics}
+					src={`grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=3`}
+				/>
+			</section>
+			<section className={classes.metricsSection}>
+				<Input inputConfig={search} />
+				<iframe
+					title={component}
+					className={classes.logs}
+					src={`grafana/d-solo/logs/logs?${logsOptions}`}
+				/>
+			</section>
 		</div>
 	);
 }
