@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { reaction } from 'mobx';
+import { computed, reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -61,11 +61,7 @@ function Metrics() {
 
 	const [component, setComponent] = useState<string>('');
 
-	const options = useMemo(() => {
-		const namespace = schemaStore.selectedSchema;
-
-		return `var-namespace=th2-${namespace}&theme=light`;
-	}, [schemaStore]);
+	const options = computed(() => `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`).get()
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {
