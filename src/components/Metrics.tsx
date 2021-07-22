@@ -19,7 +19,9 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { useBoxesStore } from '../hooks/useBoxesStore';
+import { useInput } from '../hooks/useInput';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+import Input from './util/Input';
 
 const useStyles = createUseStyles({
 	container: {
@@ -29,7 +31,7 @@ const useStyles = createUseStyles({
 		overflow: 'hidden',
 	},
 	metrics: {
-		height: '100%',
+		height: 'calc(100% - 40px)',
 		width: '100%',
 		border: 'none',
 	},
@@ -40,6 +42,12 @@ function Metrics() {
 	const schemaStore = useSchemaStore();
 	const boxesStore = useBoxesStore();
 
+	const search = useInput({
+		initialValue: '',
+		id: 'search',
+		label: 'Search',
+	});
+
 	const [component, setComponent] = useState<string>('');
 
 	const source = useMemo(() => {
@@ -49,8 +57,8 @@ function Metrics() {
 			return null;
 		}
 
-		return `grafana/d-solo/logs/logs?orgId=1&refresh=10s&var-namespace=th2-${namespace}&var-component=${component}&theme=light&panelId=8`;
-	}, [schemaStore.selectedSchema, component]);
+		return `grafana/d-solo/logs/logs?orgId=1&refresh=10s&var-namespace=th2-${namespace}&var-component=${component}&var-search=${search.value}&theme=light&panelId=8`;
+	}, [schemaStore.selectedSchema, component, search.value]);
 
 	useEffect(() => {
 		const boxSubscription = reaction(
@@ -68,7 +76,8 @@ function Metrics() {
 
 	return (
 		<div className={classes.container}>
-			<iframe className={classes.metrics} src={source}></iframe>
+			<Input inputConfig={search} />
+			<iframe title={component} className={classes.metrics} src={source}></iframe>
 		</div>
 	);
 }
