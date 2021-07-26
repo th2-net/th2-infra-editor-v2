@@ -8,4 +8,4 @@ RUN npm install && npm run build
 
 FROM nginx:1.17.10-alpine
 ENV NGINX_PORT=8080
-COPY --from=build /home/node/build/out /usr/share/nginx/html
+COPY --from=build /home/node/build /usr/share/nginx/html
