@@ -20,6 +20,7 @@ import { getBoxType, Status } from '../boxes/Box';
 import { BoxEntity, BoxStatus, Pin } from '../../models/Box';
 import { getHashCode } from '../../helpers/string';
 import { ellipsis } from '../../styles/mixins';
+import directionIcon from "../../assets/icons/direction-icon.svg";
 
 const useConnectionBoxStyles = createUseStyles({
 	header: {
@@ -50,7 +51,7 @@ const useConnectionBoxStyles = createUseStyles({
 	},
 	arrowIcon: {
 		// TODO: embed icon as component
-		backgroundImage: 'url("/icons/direction-icon.svg")',
+		backgroundImage: `url(${directionIcon})`,
 		backgroundSize: '100%',
 		placeSelf: 'center',
 		width: 25,
