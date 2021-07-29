@@ -14,41 +14,4 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { createUseStyles } from 'react-jss';
-import Icons from '../assets/icons.svg';
-
-const useStyles = createUseStyles({
-	icon: {
-		width: (props: Partial<IconProps>) => props.width,
-		height: (props: Partial<IconProps>) => props.height,
-		fill: (props: Partial<IconProps>) => props.fill || 'none',
-		stroke: (props: Partial<IconProps>) => props.stroke || '#ffffff',
-	},
-});
-
-interface IconProps {
-	width: number;
-	height: number;
-	id: string;
-	fill?: string;
-	stroke?: string;
-	className?: string;
-}
-
-function Icon({id, className, ...props}: IconProps) {
-	const classes = useStyles(props);
-
-	return (
-		<svg className={classes.icon}>
-			<use href={`${Icons}#${id}`} />
-		</svg>
-	);
-}
-
-Icon.defaultProps = {
-	width: 16,
-	height: 16,
-}
-
-export default Icon;
-
+declare module '*.woff';

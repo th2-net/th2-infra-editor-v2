@@ -25,18 +25,20 @@ import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
 import { useSelectedDictionaryStore } from './hooks/useSelectedDictionaryStore';
+import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
+import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff'
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
 		{
 			fontFamily: 'Open sans',
 			fontWeight: 'normal',
-			src: 'url(fonts/open-sans-v15-latin-regular.woff)',
+			src: `url(${openSansRegular})`,
 		},
 		{
 			fontFamily: 'Open sans',
 			fontWeight: 'bold',
-			src: 'url(fonts/open-sans-v15-latin-600.woff)',
+			src: `url(${openSansBold})`,
 		},
 	] as any,
 	'@global': {
