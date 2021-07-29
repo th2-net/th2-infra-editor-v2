@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable, flow, reaction } from 'mobx';
+import { action, flow, makeObservable, observable, reaction } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { Schema } from '../models/Schema';
@@ -24,38 +24,38 @@ import { DictionaryLinksStore } from './DictionaryLinksStore';
 import { RequestsStore } from './RequestsStore';
 import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 import HistoryStore from './HistoryStore';
+import { isDictionaryEntity } from '../models/Dictionary';
+import { RootStore } from './RootStore';
+import AppViewType from '../models/AppViewType';
+import { isBoxEntity } from '../models/Box';
 
 export class SchemaStore {
-
 	boxesStore = new BoxesStore();
 
 	history = new HistoryStore(this);
 
 	requestsStore: RequestsStore;
-	
+
 	selectedDictionaryStore: SelectedDictionaryStore;
-	
+
 	boxUpdater: BoxUpdater;
 
 	dictionaryLinksStore: DictionaryLinksStore;
 
-	constructor(private api: Api) {
+	constructor(private api: Api, private readonly rootStore: RootStore) {
 		makeObservable(this, {
+			boxesStore: observable,
 			selectSchema: action,
 			schemas: observable,
 			selectedSchema: observable,
-			isLoading: observable
+			isLoading: observable,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
-		
+
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
-		
-		this.boxUpdater = new BoxUpdater(
-			this.requestsStore,
-			this.boxesStore,
-			this.history
-		);
+
+		this.boxUpdater = new BoxUpdater(this.requestsStore, this.boxesStore, this.history);
 
 		this.dictionaryLinksStore = new DictionaryLinksStore(
 			this.requestsStore,
@@ -77,14 +77,19 @@ export class SchemaStore {
 
 		try {
 			this.schemas = yield this.api.fetchSchemasList();
-			if (this.schemas.length > 0) {
-				this.selectSchema(this.schemas[0]);
-			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error('Error occured while loading schemas');
 				console.error(error);
 			}
+		}
+
+		const { schema } = this.rootStore.urlParamsStore;
+
+		if (schema && this.schemas.includes(schema)) {
+			this.selectSchema(schema);
+		} else if (this.schemas.length > 0) {
+			this.selectSchema(this.schemas[0]);
 		}
 	});
 
@@ -97,6 +102,21 @@ export class SchemaStore {
 			this.boxesStore.setDictionaries(schema.resources);
 			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
+
+			const { object } = this.rootStore.urlParamsStore;
+
+			if (object) {
+				const resource = schema.resources.find(resource => resource.name === object);
+				if (resource) {
+					if (isBoxEntity(resource)) {
+						this.boxesStore.selectBox(resource);
+						this.rootStore.appViewStore.setViewType(AppViewType.Box);
+					} else if (isDictionaryEntity(resource)) {
+						this.selectedDictionaryStore.selectDictionary(resource);
+						this.rootStore.appViewStore.setViewType(AppViewType.Dictionary);
+					}
+				}
+			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);

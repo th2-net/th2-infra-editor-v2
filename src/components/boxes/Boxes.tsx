@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
@@ -25,10 +25,11 @@ import Box from './Box';
 import Dictionary from './Dictionary';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity } from '../../models/Dictionary';
-import { AppView } from '../../App';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
+import { useAppViewStore } from '../../hooks/useAppViewStore';
+import AppViewType from '../../models/AppViewType';
 
 const useStyles = createUseStyles(
 	{
@@ -46,13 +47,10 @@ const useStyles = createUseStyles(
 	{ name: 'Boxes' },
 );
 
-interface Props {
-	setViewType: (viewType: AppView) => void;
-}
-
-function Boxes(props: Props) {
+function Boxes() {
 	const boxesStore = useBoxesStore();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
+	const appViewStore = useAppViewStore();
 
 	const [searchValue, setSearchValue] = useState('');
 	const [filter, setFilter] = useState<BoxFilters>('all');
@@ -85,7 +83,7 @@ function Boxes(props: Props) {
 							box={box}
 							color={group?.color}
 							onSelect={box => {
-								props.setViewType('box');
+								appViewStore.setViewType(AppViewType.Box);
 								boxesStore.selectBox(box);
 							}}
 							isSelected={boxesStore.selectedBox?.name === box.name}
@@ -100,7 +98,7 @@ function Boxes(props: Props) {
 					<Dictionary
 						dictionary={box}
 						onClick={() => {
-							props.setViewType('dictionary');
+							appViewStore.setViewType(AppViewType.Dictionary);
 							selectedDictionaryStore.selectDictionary(box);
 						}}
 					/>
@@ -113,7 +111,7 @@ function Boxes(props: Props) {
 
 	return (
 		<div className={classes.container}>
-			<BoxFilter filter={filter} setFilter={setFilter}/>
+			<BoxFilter filter={filter} setFilter={setFilter} />
 			<BoxSearch setValue={setSearchValue} />
 			<Virtuoso
 				data={boxes}
@@ -183,76 +181,69 @@ interface BoxFiltersProps {
 	setFilter: (filter: BoxFilters) => void;
 }
 
-const useBoxFiltersStyles = createUseStyles(
-	{
-		filters: {
-			display: 'flex'
-		},
-		filtersInput: {
-			...visuallyHidden(),
-			'&:checked': {
-				'&+label': {
-					backgroundColor: '#fff'
-				}
-			}
-		},
-		filtersLabel: {
-			display: 'inline-flex',
-			verticalAlign: 'middle',
-			padding: 6,
-			cursor: 'pointer',
-		}
+const useBoxFiltersStyles = createUseStyles({
+	filters: {
+		display: 'flex',
 	},
-);
+	filtersInput: {
+		...visuallyHidden(),
+		'&:checked': {
+			'&+label': {
+				backgroundColor: '#fff',
+			},
+		},
+	},
+	filtersLabel: {
+		display: 'inline-flex',
+		verticalAlign: 'middle',
+		padding: 6,
+		cursor: 'pointer',
+	},
+});
 
-function BoxFilter({filter, setFilter}: BoxFiltersProps) {
+function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 	const classes = useBoxFiltersStyles();
 	return (
 		<div className={classes.filters}>
 			<input
 				className={classes.filtersInput}
-				type='radio' 
-				name='filter' 
-				onClick={() => {setFilter('all')}} 
-				id='all' 
+				type='radio'
+				name='filter'
+				onClick={() => {
+					setFilter('all');
+				}}
+				id='all'
 				checked={filter === 'all'}
 			/>
-			<label 
-				htmlFor='all' 
-				className={classes.filtersLabel}
-			>
+			<label htmlFor='all' className={classes.filtersLabel}>
 				all
 			</label>
 			<input
 				className={classes.filtersInput}
-				type='radio' 
-				name='filter' 
-				id='box' 
-				onClick={() => {setFilter('box')}}
+				type='radio'
+				name='filter'
+				id='box'
+				onClick={() => {
+					setFilter('box');
+				}}
 				checked={filter === 'box'}
 			/>
-			<label
-				title="Box"
-				htmlFor='box'
-				className={classes.filtersLabel}
-			>
+			<label title='Box' htmlFor='box' className={classes.filtersLabel}>
 				<Icon id='box' stroke='black' />
 			</label>
 			<input
 				className={classes.filtersInput}
-				type='radio' 
-				name='filter' 
-				id='dictionary' 
-				onClick={() => {setFilter('dictionary')}}
+				type='radio'
+				name='filter'
+				id='dictionary'
+				onClick={() => {
+					setFilter('dictionary');
+				}}
 				checked={filter === 'dictionary'}
 			/>
-			<label
-				title="Dictionary"
-				htmlFor='dictionary'
-				className={classes.filtersLabel}
-			>
+			<label title='Dictionary' htmlFor='dictionary' className={classes.filtersLabel}>
 				<Icon id='book' stroke='black' />
 			</label>
 		</div>
-	)
+	);
 }

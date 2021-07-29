@@ -14,35 +14,10 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable } from 'mobx';
-import { DictionaryEntity } from '../models/Dictionary';
-import { RequestsStore } from './RequestsStore';
+import { useRootStore } from './useRootStore';
 
-export class SelectedDictionaryStore {
-	dictionary: DictionaryEntity | null = null;
+export const useAppViewStore = () => {
+	const rootStore = useRootStore();
 
-	constructor(private requestsStore: RequestsStore) {
-		makeObservable(this, {
-			dictionary: observable,
-			selectDictionary: action,
-			editDictionary: action,
-		});
-	}
-
-	selectDictionary = (dictionary: DictionaryEntity | null) => {
-		this.dictionary = dictionary;
-	};
-
-	editDictionary = (data: string) => {
-		if (this.dictionary) {
-			this.dictionary = {
-				...this.dictionary,
-				spec: {
-					data,
-				},
-			};
-			this.requestsStore.saveEntityChanges(this.dictionary, 'update');
-			this.requestsStore.saveChanges();
-		}
-	};
-}
+	return rootStore.appViewStore;
+};

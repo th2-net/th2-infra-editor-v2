@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { computed, reaction } from 'mobx';
+import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -63,7 +63,10 @@ function Metrics() {
 	const [component, setComponent] = useState<string>('');
 	const [searchDebouncedValue, setSearchDebouncedValue] = useState<string>('');
 
-	const options = computed(() => schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`).get()
+	const options = computed(
+		() =>
+			schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`,
+	).get();
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {
@@ -90,15 +93,8 @@ function Metrics() {
 	}, [search.value, setDebouncedValue]);
 
 	useEffect(() => {
-		const boxSubscription = reaction(
-			() => boxesStore.selectedBox,
-			box => {
-				setComponent(box?.name || '');
-			},
-		);
-
-		return boxSubscription;
-	}, [boxesStore]);
+		setComponent(boxesStore.selectedBox?.name || '');
+	}, [boxesStore.selectedBox]);
 
 	if (!options || !logsOptions || !metricsOptions) return null;
 

@@ -14,13 +14,12 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, computed, makeObservable, observable, toJS } from "mobx";
-import { BoxEntity, isBoxEntity } from "../models/Box";
-import { DictionaryEntity, isDictionaryEntity } from "../models/Dictionary";
-import FileBase from "../models/FileBase";
+import { action, computed, makeObservable, observable } from 'mobx';
+import { BoxEntity, isBoxEntity } from '../models/Box';
+import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
+import FileBase from '../models/FileBase';
 
 export class BoxesStore {
-	
 	constructor() {
 		makeObservable(this, {
 			selectedBox: observable,
@@ -29,7 +28,7 @@ export class BoxesStore {
 			dictionaries: observable,
 			allEntities: computed,
 			setBoxes: action,
-			setDictionaries: action
+			setDictionaries: action,
 		});
 	}
 
@@ -67,7 +66,7 @@ export class BoxesStore {
 	];
 
 	selectedBox: BoxEntity | null = null;
-	
+
 	selectBox = (box: BoxEntity | null) => {
 		this.selectedBox = box;
 	};
@@ -82,10 +81,9 @@ export class BoxesStore {
 
 	setBoxes = (allEntites: FileBase[]) => {
 		this.boxes = allEntites.filter(isBoxEntity);
-	}
+	};
 
 	setDictionaries = (allEntites: FileBase[]) => {
 		this.dictionaries = allEntites.filter(isDictionaryEntity);
-	}
-
+	};
 }

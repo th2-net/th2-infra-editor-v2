@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import Header from './components/Header';
@@ -24,9 +24,10 @@ import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
-import { useSelectedDictionaryStore } from './hooks/useSelectedDictionaryStore';
 import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
-import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff'
+import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff';
+import { useAppViewStore } from './hooks/useAppViewStore';
+import AppViewType from './models/AppViewType';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -80,17 +81,11 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 }));
 
-export type AppView = 'dictionary' | 'box';
-
 function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
-	const selectedDictionaryStore = useSelectedDictionaryStore();
 	const classes = useStyles();
-
-	const [viewType, setViewType] = useState<AppView>(
-		selectedDictionaryStore.dictionary ? 'dictionary' : 'box',
-	);
+	const { viewType, setViewType } = useAppViewStore();
 
 	useEffect(() => {
 		rootStore.init();
@@ -101,11 +96,9 @@ function App() {
 			<Header />
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
-					<Boxes setViewType={setViewType} />
-					{viewType === 'dictionary' && (
-						<DictionaryLayout setViewType={setViewType}/>
-					)}
-					{viewType === 'box' && <BoxLayout />}
+					<Boxes />
+					{viewType === AppViewType.Dictionary && <DictionaryLayout setViewType={setViewType} />}
+					{viewType === AppViewType.Box && <BoxLayout />}
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>
