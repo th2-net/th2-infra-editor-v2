@@ -28,6 +28,8 @@ import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
 import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff';
 import { useAppViewStore } from './hooks/useAppViewStore';
 import AppViewType from './models/AppViewType';
+import { useURLParamsStore } from './hooks/useURLParamsStore';
+import EmbeddedLayout from './components/embedded/EmbeddedLayout';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -86,10 +88,15 @@ function App() {
 	const schemaStore = useSchemaStore();
 	const classes = useStyles();
 	const { viewType, setViewType } = useAppViewStore();
+	const { embedded } = useURLParamsStore();
 
 	useEffect(() => {
 		rootStore.init();
 	}, []);
+
+	if (embedded) {
+		return <EmbeddedLayout />;
+	}
 
 	return (
 		<div className={classes.app}>
