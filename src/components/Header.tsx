@@ -14,9 +14,27 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { createUseStyles } from 'react-jss';
+import { createUseStyles, Styles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+
+const button: Styles = {
+	height: '30px',
+	width: 'auto',
+	borderRadius: '17px',
+	color: '#fff',
+	padding: '7px 12px',
+	textTransform: 'capitalize',
+	outline: 'none',
+	border: 'none',
+	margin: '0 25px',
+	boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
+	fontWeight: '600',
+	fontSize: '13px',
+	lineHeight: '16px',
+	position: 'relative',
+};
 
 const useStyles = createUseStyles({
 	container: {
@@ -28,12 +46,50 @@ const useStyles = createUseStyles({
 		display: 'flex',
 		alignItems: 'center',
 	},
+	submitButton: {
+		...button,
+		background: '#ffa666',
+		'&:hover': {
+			background: '#ffb37c',
+		},
+		'&:active': {
+			background: '#ffc093',
+		},
+	},
+	disableButton: {
+		...button,
+		background: '#979797',
+	},
+	badge: {
+		height: '15px',
+		width: '15px',
+		borderRadius: '50%',
+		color: '#fff',
+		border: 'none',
+		boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
+		fontWeight: '600',
+		fontSize: '12px',
+		lineHeight: '15px',
+		position: 'absolute',
+		top: '-5px',
+		right: '-5px',
+		background: '#ed4300',
+	},
+	disableBadge: {
+		display: 'none',
+	},
 });
 
 function Header() {
 	const schemaStore = useSchemaStore();
 
 	const classes = useStyles();
+
+	const requestsExist = computed(() => schemaStore.requestsStore.preparedRequests.length > 0).get();
+
+	const submitChanges = () => {
+		schemaStore.requestsStore.saveChanges()
+	};
 
 	return (
 		<div className={classes.container}>
@@ -48,6 +104,15 @@ function Header() {
 					))}
 				</select>
 			)}
+			<button
+				disabled={requestsExist}
+				className={requestsExist ? classes.submitButton : classes.disableButton}
+				onClick={submitChanges}>
+				<span className={requestsExist ? classes.badge : classes.disableBadge}>
+					{schemaStore.requestsStore.preparedRequests.length}
+				</span>
+				Submit changes
+			</button>
 		</div>
 	);
 }

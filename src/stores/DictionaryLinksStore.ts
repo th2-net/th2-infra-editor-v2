@@ -37,7 +37,6 @@ export class DictionaryLinksStore {
 			deleteLinkDictionary: action,
 			setLinkDictionaries: action
 		});
-		reaction(() => this.dictionaryLinksEntity, this.saveLinkDictionaries);
 	}
 
 	dictionaryLinksEntity: DictionaryLinksEntity | null = null;
@@ -82,10 +81,6 @@ export class DictionaryLinksStore {
 			}
 			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
 		}
-	}
-
-	saveLinkDictionaries = () => {
-		this.requestsStore.saveChanges()
 	}
 
 	setLinkDictionaries = (allEntities: FileBase[]) => {
