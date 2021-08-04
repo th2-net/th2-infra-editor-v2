@@ -18,19 +18,12 @@ import { createUseStyles } from 'react-jss';
 import Config from '../config';
 import Links from '../links';
 import Metrics from '../Metrics';
+import SplitPane from './SplitPane';
 
 const useStyles = createUseStyles({
 	container: {
-		display: 'grid',
-		gridTemplateAreas: `
-			"config metrics"
-			"links links"
-		`,
-		gridTemplateRows: '1fr 350px',
-		gridTemplateColumns: '1fr 1fr',
-		gap: 8,
 		height: '100%',
-    overflow: 'hidden',
+		overflow: 'hidden',
 	},
 });
 
@@ -39,9 +32,20 @@ function BoxLayout() {
 
 	return (
 		<div className={classes.container}>
-			<Config />
-			<Metrics />
-			<Links />
+			<SplitPane
+				isVertical={true}
+				firstMinSize={250}
+				first={
+					<SplitPane
+						firstMinSize={250}
+						first={<Config />}
+						secondMinSize={350}
+						second={<Metrics />}
+					/>
+				}
+				secondMinSize={250}
+				second={<Links />}
+			/>
 		</div>
 	);
 }

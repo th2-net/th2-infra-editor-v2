@@ -33,10 +33,11 @@ import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
 		border: '1px solid',
-		gridArea: 'config',
 		borderRadius: 6,
 		overflow: 'auto',
 		padding: '15px 10px',
+		height: '100%',
+		width: '100%',
 		...scrollBar(),
 	},
 	noBoxSelected: {

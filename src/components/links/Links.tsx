@@ -25,7 +25,6 @@ import { useBoxesStore } from '../../hooks/useBoxesStore';
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
-		gridArea: 'links',
 		borderRadius: 6,
 		overflow: 'hidden',
 		display: 'grid',
@@ -37,6 +36,8 @@ const useStyles = createUseStyles({
 			...scrollBar(),
 		},
 		position: 'relative',
+		height: '100%',
+		width: '100%',
 	},
 	selectedBox: {
 		display: 'grid',
