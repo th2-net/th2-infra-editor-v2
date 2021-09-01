@@ -22,7 +22,7 @@ import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 import { computed } from 'mobx';
 
 export function getBoxType(box: BoxEntity) {
-	return box.spec.type ?box.spec.type.replace('th2-', '') : box.name;
+	return box.spec.type ? box.spec.type.replace(/^(th2-)/, '') : box.name;
 }
 
 interface StylesProps {
