@@ -115,10 +115,9 @@ function Boxes(props: Props) {
 
 	const expandGroup = useCallback(
 		(name: string): void => {
-			if (expandedGroups.indexOf(name) > -1) {
+			if (expandedGroups.includes(name)) {
 				setExpandedGroups(expandedGroups.filter(group => group !== name));
 			} else {
-				console.log(expandedGroups, [name], [...expandedGroups, name]);
 				setExpandedGroups([...expandedGroups, name]);
 			}
 		},
