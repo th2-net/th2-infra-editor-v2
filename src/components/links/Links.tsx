@@ -16,11 +16,15 @@
 
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import Box from '../boxes/Box';
 import { scrollBar } from '../../styles/mixins';
 import BoxConnections from './BoxConnections';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useEffect, useState } from 'react';
+import ConnectionEditor from '../editors/ConnectionEditor';
+import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
+import SelectedBox from '../boxes/SelectedBox';
+import { Link } from '../../models/LinksDefinition';
 
 const useStyles = createUseStyles({
 	container: {
@@ -54,6 +58,59 @@ function Links() {
 	const boxUpdater = useBoxUpdater();
 
 	const [incoming, outgoing] = boxUpdater.selectedBoxConnections;
+	const [showEditor, setShowEditor] = useState(false);
+	const [editableLink, setEditableLink] = useState<Link<ExtendedConnectionOwner>>();
+
+	const createNewLink = () => {
+		setEditableLink(undefined);
+		setShowEditor(true);
+	};
+
+	const onSubmit = (value: Link<ExtendedConnectionOwner>) => {
+		console.log(value);
+		if (editableLink) {
+			console.log('+');
+			boxUpdater.changeLink(editableLink, value);
+		} else {
+			boxUpdater.addLink(value);
+		}
+	};
+
+	const onDelete = () => {
+		if (editableLink) {
+			boxUpdater.deleteLink(editableLink).then();
+		}
+	};
+
+	const onClose = () => setShowEditor(false);
+
+	const editLink = (direction: 'to' | 'from', box?: BoxEntity, pin?: Pin) => {
+		if (!box && !pin) {
+			setEditableLink({
+				name: boxesStore.selectedBox?.name || '',
+				[direction]: {
+					box: boxesStore.selectedBox?.name,
+					pin: ''
+				}
+			});
+			setShowEditor(true);
+			return;
+		}
+
+		const oppositeDirection = direction === 'to' ? 'from' : 'to';
+
+		const selectedLink = boxUpdater.links
+			.filter(link => link[direction]?.box === boxesStore.selectedBox?.name)
+			.filter(link => link[direction]?.connectionType === pin?.['connection-type'])[0];
+
+		console.log('selectedLink', selectedLink);
+		setEditableLink(selectedLink);
+		setShowEditor(true);
+	};
+
+	useEffect(() => {
+		setShowEditor(false);
+	}, [boxesStore.selectedBox])
 
 	if (!boxesStore.selectedBox) return null;
 
@@ -65,10 +122,14 @@ function Links() {
 					onBoxSelect={boxesStore.selectBox}
 					direction='to'
 					maxDepth={2}
+					editLink={editLink}
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				<Box box={boxesStore.selectedBox} editableDictionaryRelations={true}/>
+				{showEditor ?
+					<ConnectionEditor editableLink={editableLink} onSubmit={onSubmit} onDelete={onDelete} onClose={onClose} />
+					: <SelectedBox box={boxesStore.selectedBox} createNewLink={createNewLink} />
+				}
 			</div>
 			{outgoing && (
 				<BoxConnections
@@ -76,6 +137,7 @@ function Links() {
 					onBoxSelect={boxesStore.selectBox}
 					direction='from'
 					maxDepth={2}
+					editLink={editLink}
 				/>
 			)}
 		</div>

@@ -24,22 +24,22 @@ export function convertToExtendedLink(
 	let convertedLink = {
 		name: link.name,
 		from: {
-			box: link.from.box,
-			pin: link.from.pin,
+			box: link.from?.box,
+			pin: link.from?.pin,
 			connectionType,
 		},
 		to: {
-			box: link.to.box,
-			pin: link.to.pin,
+			box: link.to?.box,
+			pin: link.to?.pin,
 			connectionType,
 		},
 	} as Link<ExtendedConnectionOwner>;
 
 	convertedLink = addAdditionalDetailsToLink(convertedLink, {
-		fromStrategy: link.from.strategy,
-		toStrategy: link.to.strategy,
-		fromServiceClass: link.from['service-class'],
-		toServiceClass: link.to['service-class'],
+		fromStrategy: link.from?.strategy,
+		toStrategy: link.to?.strategy,
+		fromServiceClass: link.from?.['service-class'],
+		toServiceClass: link.to?.['service-class'],
 	}) as Link<ExtendedConnectionOwner>;
 
 	return convertedLink;
@@ -49,20 +49,20 @@ export function convertToOriginLink(link: Link<ExtendedConnectionOwner>): Link<C
 	let convertedLink = {
 		name: link.name,
 		from: {
-			box: link.from.box,
-			pin: link.from.pin,
+			box: link.from?.box,
+			pin: link.from?.pin,
 		},
 		to: {
-			box: link.to.box,
-			pin: link.to.pin,
+			box: link.to?.box,
+			pin: link.to?.pin,
 		},
 	} as Link<ExtendedConnectionOwner>;
 
 	convertedLink = addAdditionalDetailsToLink(convertedLink, {
-		fromStrategy: link.from.strategy,
-		toStrategy: link.to.strategy,
-		fromServiceClass: link.from['service-class'],
-		toServiceClass: link.to['service-class'],
+		fromStrategy: link.from?.strategy,
+		toStrategy: link.to?.strategy,
+		fromServiceClass: link.from?.['service-class'],
+		toServiceClass: link.to?.['service-class'],
 	}) as Link<ExtendedConnectionOwner>;
 
 	return convertedLink;
@@ -79,17 +79,22 @@ export function addAdditionalDetailsToLink(
 ) {
 	const tempLink = link;
 
-	if (details.fromStrategy) {
-		tempLink.from.strategy = details.fromStrategy;
+	if (tempLink.from) {
+		if (details.fromStrategy) {
+			tempLink.from.strategy = details.fromStrategy;
+		}
+		if (details.fromServiceClass) {
+			tempLink.from['service-class'] = details.fromServiceClass;
+		}
 	}
-	if (details.toStrategy) {
-		tempLink.to.strategy = details.toStrategy;
-	}
-	if (details.fromServiceClass) {
-		tempLink.from['service-class'] = details.fromServiceClass;
-	}
-	if (details.toServiceClass) {
-		tempLink.to['service-class'] = details.toServiceClass;
+
+	if (tempLink.to) {
+		if (details.toStrategy) {
+			tempLink.to.strategy = details.toStrategy;
+		}
+		if (details.toServiceClass) {
+			tempLink.to['service-class'] = details.toServiceClass;
+		}
 	}
 
 	return tempLink;

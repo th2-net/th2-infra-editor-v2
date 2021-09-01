@@ -14,26 +14,16 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import {
-	chain,
-	Dictionary,
-	keyBy,
-	mapValues,
-	sortBy,
-	uniqBy,
-	cloneDeep,
-	remove,
-	isEqual
-} from "lodash";
-import { action, computed, makeObservable, observable, toJS } from "mobx";
-import { IBoxConnections, IPinConnections } from "../components/links/BoxConnections";
-import { convertToExtendedLink } from "../helpers/link";
-import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from "../models/Box";
-import FileBase from "../models/FileBase";
-import { isBoxLinksDefinition, Link, LinksDefinition } from "../models/LinksDefinition";
-import { BoxesStore } from "./BoxesStore";
-import HistoryStore from "./HistoryStore";
-import { RequestsStore } from "./RequestsStore";
+import { chain, cloneDeep, Dictionary, isEqual, keyBy, mapValues, remove, sortBy, uniqBy } from 'lodash';
+import { action, computed, makeObservable, observable, toJS } from 'mobx';
+import { IBoxConnections, IPinConnections } from '../components/links/BoxConnections';
+import { convertToExtendedLink } from '../helpers/link';
+import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
+import FileBase from '../models/FileBase';
+import { isBoxLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
+import { BoxesStore } from './BoxesStore';
+import HistoryStore from './HistoryStore';
+import { RequestsStore } from './RequestsStore';
 
 const editorLink: Readonly<LinksDefinition> = {
 	kind: 'Th2Link',
@@ -48,20 +38,23 @@ const editorLink: Readonly<LinksDefinition> = {
 
 export class BoxUpdater {
 
+	linkDefinitions: LinksDefinition[] = [];
+
 	constructor(
 		private requestsStore: RequestsStore,
 		private boxesStore: BoxesStore,
-		private history: HistoryStore
+		private history: HistoryStore,
 	) {
 		makeObservable(this, {
 			linkDefinitions: observable,
 			links: computed,
 			selectedBoxConnections: computed,
-			setLinkDefinitions: action
+			setLinkDefinitions: action,
+			changeLink: action,
+			addLink: action,
+			deleteLink: action,
 		});
 	}
-
-	linkDefinitions: LinksDefinition[] = [];
 
 	public get links(): Link<ExtendedConnectionOwner>[] {
 		if (this.linkDefinitions === null) return [];
@@ -71,13 +64,13 @@ export class BoxUpdater {
 				return [
 					...(linkBox.spec['boxes-relation']['router-mq']
 						? linkBox.spec['boxes-relation']['router-mq'].map(link =>
-								convertToExtendedLink(link, 'mq'),
-						  )
+							convertToExtendedLink(link, 'mq'),
+						)
 						: []),
 					...(linkBox.spec['boxes-relation']['router-grpc']
 						? linkBox.spec['boxes-relation']['router-grpc'].map(link =>
-								convertToExtendedLink(link, 'grpc'),
-						  )
+							convertToExtendedLink(link, 'grpc'),
+						)
 						: []),
 				];
 			}
@@ -101,7 +94,7 @@ export class BoxUpdater {
 
 	setLinkDefinitions = (allEntities: FileBase[]) => {
 		this.linkDefinitions = allEntities.filter(isBoxLinksDefinition);
-	}
+	};
 
 	resolveBoxLinks(
 		box: BoxEntity,
@@ -113,26 +106,26 @@ export class BoxUpdater {
 	): IBoxConnections {
 		const oppositeDirection = direction === 'to' ? 'from' : 'to';
 		const connectedLinks = links.filter(
-			link => link[direction].box === box.name && boxesMap[link[oppositeDirection].box],
+			link => link[direction]?.box === box.name && boxesMap[link[oppositeDirection]?.box || ''],
 		);
-		const connectedPins = connectedLinks.map(link => link[direction].pin);
+		const connectedPins = connectedLinks.map(link => link[direction]?.pin);
 		const pins = (box.spec.pins || []).filter(pin => connectedPins.includes(pin.name));
-	
+
 		let boxes: IPinConnections[] =
 			currentDepth === depth
 				? []
 				: pins.map(pin => ({
-						pin,
-						boxes: chain(connectedLinks)
-							.filter(link => link[direction].pin === pin.name)
-							.map(link => boxesMap[link[oppositeDirection].box])
-							.uniqBy('name')
-							.filter(isBoxEntity)
-							.sortBy('name')
-							.map(box => this.resolveBoxLinks(box, boxesMap, links, direction, depth, currentDepth + 1))
-							.value(),
-					}));
-	
+					pin,
+					boxes: chain(connectedLinks)
+						.filter(link => link[direction]?.pin === pin.name)
+						.map(link => boxesMap[link[oppositeDirection]?.box || ''])
+						.uniqBy('name')
+						.filter(isBoxEntity)
+						.sortBy('name')
+						.map(box => this.resolveBoxLinks(box, boxesMap, links, direction, depth, currentDepth + 1))
+						.value(),
+				}));
+
 		boxes = boxes.reduce((acc, curr) => {
 			const pin = acc.find(b => b.pin.name === curr.pin.name);
 			if (pin) {
@@ -141,24 +134,28 @@ export class BoxUpdater {
 			}
 			return [...acc, curr];
 		}, [] as IPinConnections[]);
-	
+
 		const boxLinks: IBoxConnections = {
 			box,
 			direction,
 			pins: sortBy(boxes, 'pin.name').filter(pinConnections => pinConnections.boxes.length > 0),
 		};
-	
+
 		return boxLinks;
 	}
 
 	updateLinks = (boxName: string, updatedBoxName: string) => {
 		this.links
-			.filter(link => link.from.box === boxName || link.to.box === boxName)
+			.filter(link => link.from?.box === boxName || link.to?.box === boxName)
 			.map(link => {
 				const updatedLink = toJS(link);
-				updatedLink.from.box =
-					updatedLink.from.box === boxName ? updatedBoxName : updatedLink.from.box;
-				updatedLink.to.box = updatedLink.to.box === boxName ? updatedBoxName : updatedLink.to.box;
+				if (updatedLink.from) {
+					updatedLink.from.box =
+						updatedLink.from.box === boxName ? updatedBoxName : updatedLink.from.box;
+				}
+				if (updatedLink.to) {
+					updatedLink.to.box = updatedLink.to.box === boxName ? updatedBoxName : updatedLink.to.box;
+				}
 				return [link, updatedLink];
 			})
 			.forEach(([link, updatedLink]) => {
@@ -200,7 +197,7 @@ export class BoxUpdater {
 		const changedLink = this.findBoxRelationLink(linkToRemove);
 
 		if (changedLink) {
-			if (changedLink.spec['boxes-relation']) {
+			if (changedLink.spec['boxes-relation'] && linkToRemove.from) {
 				const connectionType = `router-${linkToRemove.from.connectionType}` as const;
 				remove(
 					changedLink.spec['boxes-relation'][connectionType],
@@ -227,6 +224,10 @@ export class BoxUpdater {
 	};
 
 	addLink(link: Link<ExtendedConnectionOwner>, createSnapshot = true) {
+		if (!link.from) {
+			throw new Error('\'from\' field shouldn\'t be undefined');
+		}
+
 		let editorGeneratedLink = this.linkDefinitions.find(
 			linkBox => linkBox.name === editorLink.name,
 		);
@@ -260,20 +261,6 @@ export class BoxUpdater {
 		}
 	}
 
-	private findBoxRelationLink = (
-		targetLink: Link<ExtendedConnectionOwner>,
-	): LinksDefinition | null => {
-		return (
-			this.linkDefinitions.find(linkBox => {
-				const links =
-					linkBox.spec['boxes-relation']?.[
-						`router-${targetLink.from.connectionType}` as 'router-mq' | 'router-grpc'
-					];
-				return links?.some(link => link.name === targetLink.name);
-			}) || null
-		);
-	};
-
 	saveBoxChanges = (box: BoxEntity, updatedBox: BoxEntity) => {
 		if (box.name !== updatedBox.name && this.boxesStore.boxes.find(box => box.name === updatedBox.name)) {
 			alert(`Box "${updatedBox.name}" already exists`);
@@ -295,5 +282,20 @@ export class BoxUpdater {
 		}
 
 		// TODO: add changes to change list
+	};
+
+	private findBoxRelationLink = (
+		targetLink: Link<ExtendedConnectionOwner>,
+	): LinksDefinition | null => {
+		return (
+			this.linkDefinitions.find(linkBox => {
+				const links =
+					targetLink.from ?
+						linkBox.spec['boxes-relation']?.[
+							`router-${targetLink.from.connectionType}` as 'router-mq' | 'router-grpc'
+							] : [];
+				return links?.some(link => link.name === targetLink.name);
+			}) || null
+		);
 	};
 }

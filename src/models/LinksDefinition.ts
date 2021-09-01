@@ -33,8 +33,8 @@ export interface LinksDefinition extends FileBase {
 
 export interface Link<T extends ConnectionOwner | ExtendedConnectionOwner> {
 	name: string;
-	from: T;
-	to: T;
+	from?: T;
+	to?: T;
 }
 
 export interface LinkArrow {

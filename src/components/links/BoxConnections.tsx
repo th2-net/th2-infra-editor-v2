@@ -51,25 +51,54 @@ const useStyles = createUseStyles((t: Theme) => ({
 		width: 250,
 		flexShrink: 0,
 	},
+	newLink: {
+		display: 'block',
+		width: '220px',
+		height: '35px',
+		lineHeight: '30px',
+		paddingBottom: '5px',
+		textAlign: 'center',
+		border: '3px dashed #556f7c',
+		background: 'transparent',
+		fontWeight: 'bolder',
+		color: 'rgb(85,111,124)',
+		cursor: 'pointer',
+		margin: '5px 27px',
+		userSelect: 'none',
+		direction: 'initial',
+		borderRadius: '7px',
+		opacity: '0.5',
+		transition: '250ms',
+		'&:hover': {
+			opacity: '1',
+			background: 'rgba(255, 255, 255, 0.4)'
+		},
+		'&:active': {
+			background: 'rgba(255, 255, 255, 0.7)'
+		}
+	}
 }));
 
 interface GroupProps {
 	onBoxSelect: (box: BoxEntity) => void;
+	editLink: (direction: 'to' | 'from', box?: BoxEntity, pin?: Pin, ) => void;
 	direction: 'to' | 'from';
 	pinConnections: IPinConnections[];
 	maxDepth?: number;
 }
 
 export default function BoxConnections(props: GroupProps) {
-	const { onBoxSelect, direction, pinConnections, maxDepth = 2 } = props;
+	const { onBoxSelect, editLink, direction, pinConnections, maxDepth = 2 } = props;
 
 	const classes = useStyles();
 
 	return (
 		<div style={{ direction: direction === 'to' ? 'rtl' : 'initial' }}>
+			<div className={classes.newLink} onClick={() => editLink(direction)}>New link +</div>
 			{pinConnections
 				.filter(g => g.boxes.length > 0)
 				.map(connection => (
+
 					<div className={classes.root}>
 						<PinConnections
 							connections={connection}
@@ -77,6 +106,9 @@ export default function BoxConnections(props: GroupProps) {
 							onBoxSelect={onBoxSelect}
 							isRoot={true}
 							maxDepth={maxDepth}
+							editLink={(box) => {
+								editLink(direction, box, connection.pin)
+							}}
 						/>
 					</div>
 				))}
@@ -93,6 +125,7 @@ interface PinGroupProps {
 	isRoot?: boolean;
 	maxDepth?: number;
 	currentDepth?: number;
+	editLink: (box: BoxEntity) => void;
 }
 
 const usePinConnectionsClasses = createUseStyles({
@@ -133,6 +166,7 @@ function PinConnections({
 	isRoot = false,
 	maxDepth = 2,
 	currentDepth = 0,
+													editLink
 }: PinGroupProps) {
 	const [isExpandedMap, setIsExpandedMap] = useState<Map<string, boolean>>(new Map());
 
@@ -170,6 +204,8 @@ function PinConnections({
 								pin={connections.pin}
 								direction={direction}
 								onBoxSelect={onBoxSelect}
+								isEditable={currentDepth === 0}
+								onClickLink={() => editLink(box.box)}
 							/>
 						</div>
 						{currentDepth + 1 < maxDepth && (
@@ -190,6 +226,7 @@ function PinConnections({
 											}}
 											maxDepth={maxDepth}
 											currentDepth={currentDepth + 1}
+											editLink={editLink}
 										/>
 									))}
 							</div>
