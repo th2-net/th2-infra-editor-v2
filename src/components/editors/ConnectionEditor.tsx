@@ -26,6 +26,7 @@ import { button } from '../../styles/mixins';
 import ConnectionConfig from './ConnectionConfig';
 import { computed } from 'mobx';
 import { chain } from 'lodash';
+import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	editor: {
@@ -166,6 +167,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 	const classes = useStyles();
 
 	const boxesStore = useBoxesStore();
+	const boxUpdater = useBoxUpdater();
 	const selectedBox = boxesStore.selectedBox;
 
 	const ref = useRef<HTMLDivElement>(null);
@@ -232,8 +234,20 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 
 	const linkName = computed(() => `${link?.from?.box || '...'}-to-${link?.to?.box || '...'} `).get();
 
-	const submit = () => {
+	const isSubmitDisabled = computed(() => {
 		if (!link.to || !link.from) {
+			return true;
+		}
+
+		return chain(boxUpdater.links)
+			.filter(item => item.to?.box === link.to?.box && item.from?.box === link.from?.box)
+			.filter(item => item.to?.pin === link.to?.pin && item.from?.pin === link.from?.pin)
+			.value()
+			.length > 0
+	}).get();
+
+	const submit = () => {
+		if (isSubmitDisabled) {
 			return;
 		}
 		onSubmit({
@@ -268,8 +282,8 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 				<button onClick={cancelOrDelete}
 								className={classNames(classes.button, classes.delete)}>{editableLink ? 'Delete' : 'Cancel'}</button>
 				<button onClick={submit} className={classNames(classes.button, {
-					[classes.submit]: link.to && link.from,
-					[classes.disabled]: !link.to || !link.from,
+					[classes.submit]: !isSubmitDisabled,
+					[classes.disabled]: isSubmitDisabled,
 				})}>Submit
 				</button>
 			</div>
