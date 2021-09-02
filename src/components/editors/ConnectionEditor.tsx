@@ -16,7 +16,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { ExtendedConnectionOwner } from '../../models/Box';
+import { ExtendedConnectionOwner, isBoxEntity, Pin } from '../../models/Box';
 import { Theme } from '../../styles/theme';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
@@ -25,6 +25,7 @@ import { Link } from '../../models/LinksDefinition';
 import { button } from '../../styles/mixins';
 import ConnectionConfig from './ConnectionConfig';
 import { computed } from 'mobx';
+import { chain } from 'lodash';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	editor: {
@@ -190,13 +191,25 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 			return [];
 		}
 
-		const pin = boxesStore.boxes.filter(item => item.name === owner.box)[0].spec.pins?.filter(pin => pin.name === owner.pin)?.[0];
+		const pin: Pin = chain(boxesStore.boxes)
+			.filter(box => box.name === owner.box)
+			.uniqBy('name')
+			.filter(isBoxEntity)
+			.map(box => box.spec?.pins || [])
+			.flatten()
+			.filter(pin => pin.name === owner.pin)
+			.head()
+			.value();
 
 		if (!pin) {
 			return [];
 		}
 
-		return boxesStore.boxes.filter(box => (box.spec.pins || []).filter(item => item['connection-type'] === pin['connection-type']).length > 0).map(box => box.name);
+		return chain(boxesStore.boxes)
+			.filter(box => (box.spec?.pins || [])
+				.filter(box => box['connection-type'] === pin['connection-type']).length > 0)
+			.map(box => box.name)
+			.value();
 	}, [boxesStore.boxes]);
 
 	const swap = () => {
@@ -217,7 +230,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 		);
 	};
 
-	const linkName = computed(() => `${link?.from?.box || '...'}-to-${link?.to?.box || '...'} `).get()
+	const linkName = computed(() => `${link?.from?.box || '...'}-to-${link?.to?.box || '...'} `).get();
 
 	const submit = () => {
 		if (!link.to || !link.from) {
@@ -253,11 +266,12 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 
 			<div className={classes.actions}>
 				<button onClick={cancelOrDelete}
-								className={classNames(classes.button, classes.delete)}>{editableLink ?  'Delete' : 'Cancel'}</button>
+								className={classNames(classes.button, classes.delete)}>{editableLink ? 'Delete' : 'Cancel'}</button>
 				<button onClick={submit} className={classNames(classes.button, {
 					[classes.submit]: link.to && link.from,
-					[classes.disabled]: !link.to || !link.from
-				})}>Submit</button>
+					[classes.disabled]: !link.to || !link.from,
+				})}>Submit
+				</button>
 			</div>
 		</div>
 	);

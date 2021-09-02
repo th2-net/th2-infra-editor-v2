@@ -25,6 +25,7 @@ import ConnectionEditor from '../editors/ConnectionEditor';
 import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
 import SelectedBox from '../boxes/SelectedBox';
 import { Link } from '../../models/LinksDefinition';
+import { chain } from 'lodash';
 
 const useStyles = createUseStyles({
 	container: {
@@ -67,9 +68,7 @@ function Links() {
 	};
 
 	const onSubmit = (value: Link<ExtendedConnectionOwner>) => {
-		console.log(value);
 		if (editableLink) {
-			console.log('+');
 			boxUpdater.changeLink(editableLink, value);
 		} else {
 			boxUpdater.addLink(value);
@@ -97,13 +96,13 @@ function Links() {
 			return;
 		}
 
-		const oppositeDirection = direction === 'to' ? 'from' : 'to';
-
-		const selectedLink = boxUpdater.links
+		const selectedLink = chain(boxUpdater.links)
 			.filter(link => link[direction]?.box === boxesStore.selectedBox?.name)
-			.filter(link => link[direction]?.connectionType === pin?.['connection-type'])[0];
+			.filter(link => link[direction]?.pin === pin?.name)
+			.filter(link => link[direction]?.connectionType === pin?.['connection-type'])
+			.head()
+			.value();
 
-		console.log('selectedLink', selectedLink);
 		setEditableLink(selectedLink);
 		setShowEditor(true);
 	};

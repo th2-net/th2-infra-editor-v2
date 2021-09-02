@@ -66,8 +66,7 @@ export class RequestsStore {
 		if (!this.selectedSchema || this.preparedRequests.length === 0) return;
 		try {
 			this.isSaving = true;
-			console.log('SEND REQUESTS', this.preparedRequests);
-			//await this.api.sendSchemaRequest(this.selectedSchema, this.preparedRequests);
+			await this.api.sendSchemaRequest(this.selectedSchema, this.preparedRequests);
 			this.preparedRequests = [];
 		} catch (error) {
 			alert("Couldn't save changes");
