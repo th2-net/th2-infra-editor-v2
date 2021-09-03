@@ -29,7 +29,7 @@ const useStyles = createUseStyles({
 		border: '1px solid',
 		gridArea: 'metrics',
 		borderRadius: 6,
-		overflow: 'hidden',
+		overflow: 'visible',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
@@ -63,7 +63,10 @@ function Metrics() {
 	const [component, setComponent] = useState<string>('');
 	const [searchDebouncedValue, setSearchDebouncedValue] = useState<string>('');
 
-	const options = computed(() => schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`).get()
+	const options = computed(
+		() =>
+			schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`,
+	).get();
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {

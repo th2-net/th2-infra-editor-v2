@@ -35,7 +35,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 		border: '1px solid',
 		gridArea: 'config',
 		borderRadius: 6,
-		overflow: 'auto',
+		overflow: 'visible',
 		padding: '15px 10px',
 		...scrollBar(),
 	},

@@ -15,22 +15,21 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import Config from '../config';
 import Links from '../links';
-import Metrics from '../Metrics';
+import ConfigAndMetricsLayout from './ConfigAndMetricsLayout';
 
 const useStyles = createUseStyles({
 	container: {
 		display: 'grid',
 		gridTemplateAreas: `
-			"config metrics"
-			"links links"
+		"links links"
+		"configAndMetrics configAndMetrics"
 		`,
-		gridTemplateRows: '1fr 350px',
+		gridTemplateRows: '1fr ',
 		gridTemplateColumns: '1fr 1fr',
 		gap: 8,
 		height: '100%',
-    overflow: 'hidden',
+		overflow: 'hidden',
 	},
 });
 
@@ -39,9 +38,8 @@ function BoxLayout() {
 
 	return (
 		<div className={classes.container}>
-			<Config />
-			<Metrics />
 			<Links />
+			<ConfigAndMetricsLayout />
 		</div>
 	);
 }

@@ -21,6 +21,8 @@ import { scrollBar } from '../../styles/mixins';
 import BoxConnections from './BoxConnections';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
+import Resizer from '../util/Resizer';
+import React from 'react';
 
 const useStyles = createUseStyles({
 	container: {
@@ -30,6 +32,7 @@ const useStyles = createUseStyles({
 		overflow: 'hidden',
 		display: 'grid',
 		gridTemplateColumns: '1.5fr 1fr 1.5fr',
+		height: 'fit-content',
 		padding: 5,
 		'&>div': {
 			flex: 1,
@@ -53,12 +56,21 @@ function Links() {
 	const boxesStore = useBoxesStore();
 	const boxUpdater = useBoxUpdater();
 
+	const linksRef = React.useRef<HTMLDivElement>(null);
 	const [incoming, outgoing] = boxUpdater.selectedBoxConnections;
+
+	const handleResize = (movementY: any) => {
+		const links = linksRef.current;
+		if (!links) return;
+		const { height } = links.getBoundingClientRect();
+		links.style.height = `${height + movementY}px`;
+	};
 
 	if (!boxesStore.selectedBox) return null;
 
 	return (
-		<div className={classes.container}>
+		<div className={classes.container} ref={linksRef}>
+			<Resizer onResize={handleResize} />
 			{incoming && (
 				<BoxConnections
 					pinConnections={incoming.pins}
@@ -68,7 +80,7 @@ function Links() {
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				<Box box={boxesStore.selectedBox} editableDictionaryRelations={true}/>
+				<Box box={boxesStore.selectedBox} editableDictionaryRelations={true} />
 			</div>
 			{outgoing && (
 				<BoxConnections
