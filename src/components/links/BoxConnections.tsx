@@ -98,6 +98,11 @@ interface PinGroupProps {
 const usePinConnectionsClasses = createUseStyles({
 	pin: {
 		margin: '3px 0',
+		width: '100%',
+		height: '1.2em',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
 	},
 	boxList: {
 		width: '100%',

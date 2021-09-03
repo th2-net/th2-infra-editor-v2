@@ -23,7 +23,7 @@ const useStyles = createUseStyles({
 	container: {
 		display: 'grid',
 		gridTemplateAreas: `
-			"config metrics"
+			"config config"
 			"links links"
 		`,
 		gridTemplateRows: '1fr 350px',
@@ -40,7 +40,6 @@ function BoxLayout() {
 	return (
 		<div className={classes.container}>
 			<Config />
-			<Metrics />
 			<Links />
 		</div>
 	);

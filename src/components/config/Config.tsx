@@ -36,7 +36,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 		gridArea: 'config',
 		borderRadius: 6,
 		overflow: 'auto',
-		padding: '15px 10px',
+		padding: '20px 40px',
 		...scrollBar(),
 	},
 	noBoxSelected: {

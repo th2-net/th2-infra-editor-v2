@@ -42,12 +42,13 @@ const useConnectionBoxStyles = createUseStyles({
 	name: {
 		margin: '0 0 0 5px',
 		fontSize: 12,
-		whiteSpace: 'nowrap',
 		flexGrow: 1,
-		flexShrink: 0,
+		flexShrink: 1,
 		marginRight: 8,
 		lineHeight: '16px',
-		...ellipsis(),
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+		overflow: 'hidden'
 	},
 	arrowIcon: {
 		// TODO: embed icon as component
@@ -78,7 +79,9 @@ const useConnectionBoxStyles = createUseStyles({
 		backgroundColor: 'rgb(102, 204, 145)',
 		minWidth: 30,
 		lineHeight: '16px',
-		...ellipsis(),
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+		overflow: 'hidden'
 	},
 	values: {
 		display: 'flex',
