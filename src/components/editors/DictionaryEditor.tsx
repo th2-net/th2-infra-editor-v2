@@ -18,12 +18,10 @@ import { useInput } from '../../hooks/useInput';
 import ConfigEditor from './ConfigEditor';
 import { downloadFile, isXMLValid } from '../../helpers/files';
 import { usePrevious } from '../../hooks/usePrevious';
-import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { DictionaryEntity } from '../../models/Dictionary';
 import Icon from '../Icon';
 import { buttonReset, visuallyHidden } from '../../styles/mixins';
-import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 
 const useStyle = createUseStyles({
 	controls: {

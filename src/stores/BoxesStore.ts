@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, computed, makeObservable, observable, toJS } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { BoxEntity, isBoxEntity } from "../models/Box";
 import { DictionaryEntity, isDictionaryEntity } from "../models/Dictionary";
 import FileBase from "../models/FileBase";

@@ -410,7 +410,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 					setFilter('all');
 				}}
 				id='all'
-				checked={filter === 'all'}
+				defaultChecked={filter === 'all'}
 			/>
 			<label htmlFor='all' className={classes.filtersLabel}>
 				all
@@ -423,7 +423,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				onClick={() => {
 					setFilter('box');
 				}}
-				checked={filter === 'box'}
+				defaultChecked={filter === 'box'}
 			/>
 			<label title='Box' htmlFor='box' className={classes.filtersLabel}>
 				<Icon id='box' stroke='black' />
@@ -436,7 +436,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				onClick={() => {
 					setFilter('dictionary');
 				}}
-				checked={filter === 'dictionary'}
+				defaultChecked={filter === 'dictionary'}
 			/>
 			<label title='Dictionary' htmlFor='dictionary' className={classes.filtersLabel}>
 				<Icon id='book' stroke='black' />
