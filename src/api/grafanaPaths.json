@@ -1,0 +1,7 @@
+{
+    "logsPanel": "http://th2-qa:30000/grafana/d-solo/logs/logs",
+    "cpuMemoryPanel": "http://th2-qa:30000/grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval",
+    "cpuUsagePanelId": 1,
+    "memoryUsagePanelId": 3,
+    "logsPanelId": 8
+}
