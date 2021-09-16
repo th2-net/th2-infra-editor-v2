@@ -14,7 +14,7 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { action, computed, makeObservable, observable, reaction } from "mobx";
+import { action, computed, makeObservable, observable, toJS } from 'mobx';
 import { DictionaryLinksEntity, DictionaryRelation, isDictionaryLinksEntity } from "../models/Dictionary";
 import FileBase from "../models/FileBase";
 import { BoxesStore } from "./BoxesStore";
@@ -54,6 +54,24 @@ export class DictionaryLinksStore {
 
 	public get linkedDictionaries(): DictionaryRelation[] {
 		return this.dictionaryRelations.filter(rel => rel.box === this.boxesStore.selectedBox?.name);
+	}
+
+	updateLinksDictionary = (boxName: string, updatedBoxName: string) => {
+		this.dictionaryRelations
+			.filter(link => link.box === boxName)
+			.map(link => {
+				const updatedLink = toJS(link);
+				updatedLink.box = updatedBoxName
+				return [link, updatedLink];
+			})
+			.forEach(([link, updatedLink]) => {
+				this.changeLinkDictionary(link, updatedLink);
+			});
+	};
+
+	changeLinkDictionary = (link: DictionaryRelation, newLink: DictionaryRelation) => {
+		this.deleteLinkDictionary(link);
+		this.addLinkDictionary(newLink);
 	}
 
 	addLinkDictionary = (link: DictionaryRelation) => {

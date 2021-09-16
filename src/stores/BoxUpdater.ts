@@ -16,29 +16,25 @@
 
 import {
 	chain,
-	cloneDeep,
 	Dictionary,
-	isEqual,
 	keyBy,
 	mapValues,
-	remove,
 	sortBy,
 	uniqBy,
-} from 'lodash';
-import { action, computed, makeObservable, observable, toJS } from 'mobx';
-import { IBoxConnections, IPinConnections } from '../components/links/BoxConnections';
-import { convertToExtendedLink } from '../helpers/link';
-import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
-import FileBase from '../models/FileBase';
-import {
-	ConnectionDirection,
-	isBoxLinksDefinition,
-	Link,
-	LinksDefinition,
-} from '../models/LinksDefinition';
-import { BoxesStore } from './BoxesStore';
-import HistoryStore from './HistoryStore';
-import { RequestsStore } from './RequestsStore';
+	cloneDeep,
+	remove,
+	isEqual
+} from "lodash";
+import { action, computed, makeObservable, observable, toJS } from "mobx";
+import { IBoxConnections, IPinConnections } from "../components/links/BoxConnections";
+import { convertToExtendedLink } from "../helpers/link";
+import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from "../models/Box";
+import FileBase from "../models/FileBase";
+import { ConnectionDirection, isBoxLinksDefinition, Link, LinksDefinition } from "../models/LinksDefinition";
+import { BoxesStore } from "./BoxesStore";
+import HistoryStore from "./HistoryStore";
+import { RequestsStore } from "./RequestsStore";
+import { DictionaryLinksStore } from './DictionaryLinksStore';
 
 const editorLink: Readonly<LinksDefinition> = {
 	kind: 'Th2Link',
@@ -58,6 +54,7 @@ export class BoxUpdater {
 		private requestsStore: RequestsStore,
 		private boxesStore: BoxesStore,
 		private history: HistoryStore,
+		private dictionaryLinksStore: DictionaryLinksStore
 	) {
 		makeObservable(this, {
 			linkDefinitions: observable,
@@ -296,7 +293,7 @@ export class BoxUpdater {
 					updatedBox,
 				];
 				this.updateLinks(box.name, updatedBox.name);
-				// TODO: update dictionaries
+				this.dictionaryLinksStore.updateLinksDictionary(box.name, updatedBox.name);
 			}
 
 			if (box.name === this.boxesStore.selectedBox?.name) {
@@ -304,7 +301,18 @@ export class BoxUpdater {
 			}
 		}
 
-		// TODO: add changes to change list
+		this.history.addSnapshot({
+			object: box.name,
+			type: 'link',
+			operation: 'change',
+			changeList: [
+				{
+					object: box.name,
+					from: box,
+					to: updatedBox,
+				},
+			],
+		});
 	};
 
 	private findBoxRelationLink = (

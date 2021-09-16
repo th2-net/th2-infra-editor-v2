@@ -82,14 +82,9 @@ const useStyles = createUseStyles({
 
 function Header() {
 	const schemaStore = useSchemaStore();
+	const requestsExist = schemaStore.requestsStore.requestsExist;
 
 	const classes = useStyles();
-
-	const requestsExist = computed(() => schemaStore.requestsStore.preparedRequests.length > 0).get();
-
-	const submitChanges = () => {
-		schemaStore.requestsStore.saveChanges()
-	};
 
 	return (
 		<div className={classes.container}>
@@ -105,9 +100,9 @@ function Header() {
 				</select>
 			)}
 			<button
-				disabled={requestsExist}
+				disabled={!requestsExist}
 				className={requestsExist ? classes.submitButton : classes.disableButton}
-				onClick={submitChanges}>
+				onClick={schemaStore.requestsStore.saveChanges}>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
 					{schemaStore.requestsStore.preparedRequests.length}
 				</span>
