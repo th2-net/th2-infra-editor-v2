@@ -71,7 +71,7 @@ function Metrics() {
 			return null;
 		}
 
-		return `orgId=1&refresh=10s&${options}&var-component=${component}&var-search=${searchDebouncedValue}&panelId=${grafanaPaths.logsPanelId}`;
+		return `orgId=1&refresh=10s&${options}&var-component=${component}&var-search=${searchDebouncedValue}`;
 	}, [options, component, searchDebouncedValue]);
 
 	const setDebouncedValue = useDebouncedCallback((value: string) => {
@@ -109,14 +109,14 @@ function Metrics() {
 				<iframe
 					title={component}
 					className={classes.metrics}
-					src={`${grafanaPaths.cpuMemoryPanel}?${metricsOptions}&panelId=${grafanaPaths.cpuUsagePanelId}`}
+					src={`${grafanaPaths.cpuPanel}&${metricsOptions}`}
 				/>
 			</section>
 			<section className={classes.metricsSection}>
 				<iframe
 					title={component}
 					className={classes.metrics}
-					src={`${grafanaPaths.cpuMemoryPanel}?${metricsOptions}&panelId=${grafanaPaths.memoryUsagePanelId}`}
+					src={`${grafanaPaths.memoryPanel}&${metricsOptions}`}
 				/>
 			</section>
 			<section className={classes.metricsSection}>
@@ -124,7 +124,7 @@ function Metrics() {
 				<iframe
 					title={component}
 					className={classes.logs}
-					src={`${grafanaPaths.logsPanel}?${logsOptions}`}
+					src={`${grafanaPaths.logsPanel}&${logsOptions}`}
 				/>
 			</section>
 		</div>
