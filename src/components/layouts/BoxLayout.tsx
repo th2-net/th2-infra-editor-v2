@@ -17,29 +17,110 @@
 import { createUseStyles } from 'react-jss';
 import Links from '../links';
 import ConfigAndMetricsLayout from './ConfigAndMetricsLayout';
+import SplitView from '../splitView/SplitView';
+import Splitter from '../util/Splitter';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import classnames from 'classnames';
+import { reaction } from 'mobx';
+import { useEffect } from 'react';
+import { useInput } from '../../hooks/useInput';
 
 const useStyles = createUseStyles({
 	container: {
 		display: 'grid',
-		gridTemplateAreas: `
-		"links links"
-		"configAndMetrics configAndMetrics"
-		`,
-		gridTemplateRows: '1fr ',
-		gridTemplateColumns: '1fr 1fr',
 		gap: 8,
 		height: '100%',
-		overflow: 'hidden',
+		overflow: 'visible',
+	},
+	noBoxSelected: {
+		display: 'grid',
+		placeItems: 'center',
 	},
 });
 
 function BoxLayout() {
 	const classes = useStyles();
+	const boxesStore = useBoxesStore();
 
-	return (
+	const customConfig = useInput({
+		initialValue: '',
+		id: 'custom-config',
+	});
+
+	const pinsConfig = useInput({
+		initialValue: '',
+		id: 'custom-config',
+	});
+
+	const extendedSettings = useInput({
+		initialValue: '',
+		id: 'extended-settings',
+	});
+
+	const imageName = useInput({
+		initialValue: '',
+		validate: name => name.length > 0,
+		id: 'imageName',
+		label: 'Image name',
+	});
+
+	const imageVersion = useInput({
+		initialValue: '',
+		validate: version => version.length > 0,
+		id: 'imageVersion',
+		label: 'Image version',
+	});
+
+	const name = useInput({
+		initialValue: '',
+		validate: name =>
+			name.trim().length > 0 &&
+			/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/gm.test(name),
+		id: 'name',
+		label: 'Name',
+	});
+
+	const type = useInput({
+		initialValue: '',
+		id: 'type',
+		label: 'Type',
+	});
+
+	useEffect(() => {
+		const boxSubscription = reaction(
+			() => boxesStore.selectedBox,
+			box => {
+				customConfig.setValue(
+					box && box?.spec['custom-config']
+						? JSON.stringify(box?.spec['custom-config'], null, 4)
+						: '',
+				);
+				pinsConfig.setValue(box && box.spec.pins ? JSON.stringify(box.spec.pins, null, 4) : '');
+				imageName.setValue(box?.spec['image-name'] || '');
+				imageVersion.setValue(box?.spec['image-version'] || '');
+				extendedSettings.setValue(
+					box?.spec['extended-settings']
+						? JSON.stringify(box?.spec['extended-settings'], null, 4)
+						: '',
+				);
+				name.setValue(box?.name || '');
+				type.setValue(box?.kind || '');
+			},
+		);
+		return boxSubscription;
+	}, []);
+
+	return boxesStore.selectedBox ? (
 		<div className={classes.container}>
-			<Links />
-			<ConfigAndMetricsLayout />
+			<SplitView
+				topComponent={<Links />}
+				bottomComponent={<ConfigAndMetricsLayout />}
+				splitter={<Splitter />}
+			/>
+		</div>
+	) : (
+		<div className={classnames(classes.container, classes.noBoxSelected)}>
+			<p>Select a box to edit</p>
 		</div>
 	);
 }

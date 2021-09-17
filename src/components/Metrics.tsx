@@ -28,7 +28,8 @@ const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
 		gridArea: 'metrics',
-		borderRadius: 6,
+		borderRadius: '6px',
+
 		overflow: 'visible',
 		display: 'flex',
 		flexDirection: 'column',

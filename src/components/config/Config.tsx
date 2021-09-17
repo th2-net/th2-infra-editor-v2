@@ -39,10 +39,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 		padding: '15px 10px',
 		...scrollBar(),
 	},
-	noBoxSelected: {
-		display: 'grid',
-		placeItems: 'center',
-	},
+
 	inputGroup: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(2, 1fr)',
@@ -157,7 +154,7 @@ function Config() {
 		}
 	}
 
-	return boxesStore.selectedBox ? (
+	return (
 		<div className={classes.container}>
 			<div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
@@ -172,10 +169,6 @@ function Config() {
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
 			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
 			<button onClick={saveChanges}>Save</button>
-		</div>
-	) : (
-		<div className={classnames(classes.container, classes.noBoxSelected)}>
-			<p>Select a box to edit</p>
 		</div>
 	);
 }
