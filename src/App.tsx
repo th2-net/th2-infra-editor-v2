@@ -92,6 +92,7 @@ function App() {
 
 	useEffect(() => {
 		rootStore.init();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	if (embedded) {

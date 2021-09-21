@@ -42,6 +42,8 @@ export class SchemaStore {
 
 	dictionaryLinksStore: DictionaryLinksStore;
 
+	isDictionary: boolean = true;
+
 	constructor(private api: Api, private readonly rootStore: RootStore) {
 		makeObservable(this, {
 			boxesStore: observable,
@@ -49,6 +51,7 @@ export class SchemaStore {
 			schemas: observable,
 			selectedSchema: observable,
 			isLoading: observable,
+			isDictionary: observable,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -86,7 +89,7 @@ export class SchemaStore {
 
 		const { schema } = this.rootStore.urlParamsStore;
 
-		if (schema && this.schemas.includes(schema)) {
+		if (schema && this.schemas.includes(schema) && schema !== this.selectedSchema) {
 			this.selectSchema(schema);
 		} else if (this.schemas.length > 0) {
 			this.selectSchema(this.schemas[0]);
@@ -112,10 +115,15 @@ export class SchemaStore {
 						this.boxesStore.selectBox(resource);
 						this.rootStore.appViewStore.setViewType(AppViewType.Box);
 					} else if (isDictionaryEntity(resource)) {
+						this.isDictionary = true;
 						this.selectedDictionaryStore.selectDictionary(resource);
 						this.rootStore.appViewStore.setViewType(AppViewType.Dictionary);
 					}
+				} else {
+					this.isDictionary = false;
 				}
+			} else {
+				this.isDictionary = false;
 			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {

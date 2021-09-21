@@ -25,6 +25,7 @@ const EmbeddedLayout = () => {
 		return <EmbeddedDictionaryEditor />;
 	}
 
+
 	return null;
 };
 

@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,27 +11,24 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- *  limitations under the License.
+ * limitations under the License.
  ***************************************************************************** */
 
-import { useEffect } from "react";
+.spinner {
+    height: 16px;
+    width: 16px;
+    border: 3px solid #1111;
+    border-top: 3px solid #4D4D4D;;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
 
-export default function useOutsideClickListener(
-	ref: React.MutableRefObject<HTMLElement | SVGElement | null>,
-	handler: (e: MouseEvent) => void,
-) {
-	const onOutsideClick = (e: MouseEvent) => {
-		if (!ref.current?.contains(e.target as Element)) {
-			handler(e);
-		}
-	};
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
 
-	useEffect(() => {
-		document.addEventListener('mousedown', onOutsideClick);
-
-		return () => {
-			document.removeEventListener('mousedown', onOutsideClick);
-		};
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+    100% {
+        transform: rotate(360deg);
+    }
 }
