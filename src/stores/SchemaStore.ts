@@ -14,16 +14,18 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable, flow, reaction } from 'mobx';
+import { action, flow, makeObservable, observable, reaction } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
-import { Schema } from '../models/Schema';
+import { isSettingsEntity, Schema, SchemaSettings } from '../models/Schema';
 import { BoxesStore } from './BoxesStore';
 import { BoxUpdater } from './BoxUpdater';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
 import { RequestsStore } from './RequestsStore';
 import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 import HistoryStore from './HistoryStore';
+import { chain } from 'lodash';
+import SubscriptionStore from './SubscriptionStore';
 
 export class SchemaStore {
 
@@ -32,29 +34,60 @@ export class SchemaStore {
 	history = new HistoryStore(this);
 
 	requestsStore: RequestsStore;
-	
+
 	selectedDictionaryStore: SelectedDictionaryStore;
-	
+
 	boxUpdater: BoxUpdater;
 
 	dictionaryLinksStore: DictionaryLinksStore;
+
+	subscriptionStore: SubscriptionStore;
+
+	schemaSettings: SchemaSettings | null;
+
+	schemas: string[] = [];
+
+	selectedSchema: string | null = null;
+
+	isLoading = false;
+
+	public fetchSchemaState = flow(function* (this: SchemaStore, schemaName: string) {
+		this.isLoading = true;
+
+		try {
+			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
+			this.boxesStore.setBoxes(schema.resources);
+			this.boxesStore.setDictionaries(schema.resources);
+			this.boxUpdater.setLinkDefinitions(schema.resources);
+			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
+			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
+		} catch (error) {
+			if (error.name !== 'AbortError') {
+				console.error(`Error occured while fetching schema ${schemaName}`, error);
+			}
+		} finally {
+			this.isLoading = false;
+		}
+	});
+	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
 	constructor(private api: Api) {
 		makeObservable(this, {
 			selectSchema: action,
 			schemas: observable,
 			selectedSchema: observable,
-			isLoading: observable
+			isLoading: observable,
+			fetchSchemaState: action,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
-		
+
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
-		
+
 		this.boxUpdater = new BoxUpdater(
 			this.requestsStore,
 			this.boxesStore,
-			this.history
+			this.history,
 		);
 
 		this.dictionaryLinksStore = new DictionaryLinksStore(
@@ -63,14 +96,19 @@ export class SchemaStore {
 			this.boxesStore,
 		);
 
+		this.subscriptionStore = new SubscriptionStore(
+			this.api,
+			this,
+		);
+
+		this.schemaSettings = null;
+
 		reaction(() => this.selectedSchema, this.onSchemaChange);
 	}
 
-	schemas: string[] = [];
-
-	selectedSchema: string | null = null;
-
-	isLoading = false;
+	selectSchema = (schema: string) => {
+		this.selectedSchema = schema;
+	};
 
 	fetchSchemas = flow(function* (this: SchemaStore) {
 		this.isLoading = true;
@@ -87,30 +125,6 @@ export class SchemaStore {
 			}
 		}
 	});
-
-	fetchSchemaState = flow(function* (this: SchemaStore, schemaName: string) {
-		this.isLoading = true;
-
-		try {
-			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
-			this.boxesStore.setBoxes(schema.resources);
-			this.boxesStore.setDictionaries(schema.resources);
-			this.boxUpdater.setLinkDefinitions(schema.resources);
-			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
-		} catch (error) {
-			if (error.name !== 'AbortError') {
-				console.error(`Error occured while fetching schema ${schemaName}`, error);
-			}
-		} finally {
-			this.isLoading = false;
-		}
-	});
-
-	selectSchema = (schema: string) => {
-		this.selectedSchema = schema;
-	};
-
-	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
 	private onSchemaChange = (selectedSchema: string | null) => {
 		this.currentSchemaRequest?.cancel();

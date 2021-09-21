@@ -20,6 +20,7 @@ import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 import { computed } from 'mobx';
+import useSubscriptionStore from '../../hooks/useSubscriptionStore';
 
 export function getBoxType(box: BoxEntity) {
 	return box.spec.type ? box.spec.type.replace(/^(th2-)/, '') : box.name;
@@ -134,8 +135,8 @@ function Box(props: Props) {
 
 	const classes = useStyles(stylesProps);
 
-	// TODO: fix status
-	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
+	const subscriptionStore = useSubscriptionStore();
+	const status = useRef(subscriptionStore.boxStates.get(box.name) || BoxStatus.PENDING);
 
 	const imageName = box.spec['image-name'];
 	const splitedImageName = imageName.split('/');

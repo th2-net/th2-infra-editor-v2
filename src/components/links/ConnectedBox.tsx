@@ -21,6 +21,7 @@ import { BoxEntity, BoxStatus, Pin } from '../../models/Box';
 import { getHashCode } from '../../helpers/string';
 import { ellipsis } from '../../styles/mixins';
 import directionIcon from "../../assets/icons/direction-icon.svg";
+import useSubscriptionStore from '../../hooks/useSubscriptionStore';
 
 const useConnectionBoxStyles = createUseStyles({
 	header: {
@@ -98,8 +99,8 @@ interface ConnectionBoxProps {
 export default function ConnectedBox({ box, direction, pin, onBoxSelect }: ConnectionBoxProps) {
 	const classes = useConnectionBoxStyles();
 
-	// TODO: fix status
-	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
+	const subscriptionStore = useSubscriptionStore();
+	const status = useRef(subscriptionStore.boxStates.get(box.name) || BoxStatus.PENDING);
 
 	const hueValue = useMemo(() => {
 		const hashCode = getHashCode(pin.name);
