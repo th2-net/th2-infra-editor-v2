@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
+import { Theme } from './theme';
+import { createUseStyles } from 'react-jss';
 
-.spinner {
-    height: 16px;
-    width: 16px;
-    border: 3px solid #1111;
-    border-top: 3px solid #4D4D4D;;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
+export const spinner = createUseStyles((theme: Theme) => ({
+    '@keyframes spin': {
+        from: {transform: 'rotate(0deg)'},
+        to: {transform: 'rotate(360deg)'}
+    },
+	spinner: {
+		height: '16px',
+		width: '16px',
+		border: '3px solid #1111',
+		borderTop: '3px solid #4D4D4D',
+		borderRadius: '50%',
+		animationName: '$spin',
+		animationDuration: '1s',
+		animationTimingFunction: 'linear',
+		animationIterationCount: 'infinite'
+	},
+}));

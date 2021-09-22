@@ -18,12 +18,13 @@ import React from 'react';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import DictionaryEditor from '../editors/DictionaryEditor';
 import { observer } from 'mobx-react-lite';
-import '/home/exp.exactpro.com/maria.yakovleva/provider&viewer/th2-infra-editor-v2/src/components/editors/spinner.css';
+import {spinner} from '../../styles/spinner'
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 
 const EmbeddedDictionaryEditor = () => {
 	const { dictionary, editDictionary } = useSelectedDictionaryStore();
 	const schemaStore = useSchemaStore();
+	const classes = spinner();
 
 	if (dictionary != null && dictionary !== undefined) {
 
@@ -37,7 +38,7 @@ const EmbeddedDictionaryEditor = () => {
 	return<div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
 		<p>Loading...</p>
 		<div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', marginLeft: '5px'}}>
-			<div className='spinner'></div>
+			<div className={classes.spinner} ></div>
 		</div>
 		
 	</div>;
