@@ -1,7 +1,7 @@
 {
 	"homepage": ".",
 	"name": "th2-infra-editor",
-	"version": "2.0.5",
+	"version": "2.0.6",
 	"private": true,
 	"dependencies": {
 		"@monaco-editor/react": "^4.2.1",
@@ -33,7 +33,9 @@
 	},
 	"scripts": {
 		"start": "react-scripts start",
-		"build": "npm run validate && react-scripts build",
+		"build": "npm run validate && react-scripts build && npm run initEditor",
+		"postinstall": "npm run initEditor",
+		"initEditor": "node initEditor.js",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
 		"validate": "tsc && eslint . --ext .js,.js,.ts,.tsx",
@@ -42,7 +44,9 @@
 		"test:ci": "jest --no-cache"
 	},
 	"eslintConfig": {
-		"ignorePatterns": ["**/public/**"],
+		"ignorePatterns": [
+			"**/public/**"
+		],
 		"extends": [
 			"react-app",
 			"react-app/jest"
@@ -62,6 +66,7 @@
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.170",
+		"fs-extra": "^10.0.0",
 		"prettier": "^2.3.1"
 	}
 }
