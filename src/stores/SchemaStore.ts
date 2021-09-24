@@ -80,7 +80,7 @@ export class SchemaStore {
 			if (this.schemas.length > 0) {
 				this.selectSchema(this.schemas[0]);
 			}
-		} catch (error) {
+		} catch (error: any) {
 			if (error.name !== 'AbortError') {
 				console.error('Error occured while loading schemas');
 				console.error(error);
@@ -97,7 +97,7 @@ export class SchemaStore {
 			this.boxesStore.setDictionaries(schema.resources);
 			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
-		} catch (error) {
+		} catch (error: any) {
 			if (error.name !== 'AbortError') {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
 			}
