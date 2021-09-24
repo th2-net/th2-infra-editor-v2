@@ -30,7 +30,7 @@ const useStyles = createUseStyles({
 		display: 'grid',
 		gap: 8,
 		height: '100%',
-		overflow: 'visible',
+		overflow: 'hidden',
 	},
 	noBoxSelected: {
 		display: 'grid',
