@@ -18,75 +18,108 @@ import { useRef } from 'react';
 import { createUseStyles } from 'react-jss';
 import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
-import { Theme } from '../../styles/theme';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
+import { computed } from 'mobx';
 
 export function getBoxType(box: BoxEntity) {
-	return box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name
+	return box.spec.type ? box.spec.type.replace(/^(th2-)/, '') : box.name;
 }
 
-const useStyles = createUseStyles(
-	(theme: Theme) => ({
+interface StylesProps {
+	boxBodySpacing: number;
+}
+
+const useStyles = createUseStyles<string, StylesProps>(
+	{
 		container: {
 			width: '100%',
 			backgroundColor: '#fff',
-			minHeight: 70,
+			minHeight: 25,
 			borderRadius: 6,
 			overflow: 'hidden',
 			display: 'grid',
-			gridTemplateRows: '25px 1fr',
-			cursor: 'pointer'
+			gridTemplateRows: '23px auto',
+			cursor: 'pointer',
+			boxSizing: 'border-box',
+			padding: '1px',
 		},
 		header: {
-			height: 25,
+			height: 23,
 			width: '100%',
-			display: 'flex',
+			maxHeight: 23,
+			display: 'grid',
 			alignItems: 'center',
+			gridTemplateAreas: `
+				"status type name spacer imageName"
+			`,
+			gridTemplateRows: '1fr',
+			gridTemplateColumns:
+				'11px minmax(30px, auto) minmax(100px, max-content) minmax(auto, 1fr) minmax(50px, max-content)',
+			justifyContent: 'start',
 			padding: '0 10px',
-			backgroundColor: 'rgb(102, 204, 145)',
-			color: '#fff',
+			backgroundColor: '#fff',
+			color: '#000',
+			gap: 5,
 		},
 		name: {
 			margin: '0 0 0 5px',
 			fontSize: 12,
+			textAlign: 'left',
+			whiteSpace: 'nowrap',
+			overflow: 'hidden',
+			minWidth: '100%	',
+			lineHeight: '23px',
+			height: '100%',
+			textOverflow: 'ellipsis',
+			gridArea: 'name',
 		},
 		body: {
 			height: '100%',
-			padding: '20px',
-		},
-		row: {
-			width: '100%',
-			display: 'flex',
-			justifyContent: 'space-between',
+			padding: props => `${props.boxBodySpacing}px`,
 		},
 		bodyValue: {
 			fontSize: '12px',
-			lineHeight: '15px',
+			lineHeight: '23px',
 			fontWeight: 'bold',
 			borderRadius: 9,
-			padding: '0 4px 2px',
+			whiteSpace: 'nowrap',
+			overflow: 'hidden',
+			minWidth: '20px',
+			height: '100%',
+			textOverflow: 'ellipsis',
 		},
 		type: {
-			color: '#fff',
-			flexShrink: 0,
+			color: '#fff ',
 			backgroundColor: 'rgb(102, 204, 145)',
+			borderRadius: '10px',
+			padding: '0 6px',
+			height: '20px',
+			maxWidth: '80px',
+			lineHeight: '20px',
+			gridArea: 'type',
+		},
+		imageName: {
+			color: 'rgba(0, 0, 0, 0.5)',
+			gridArea: 'imageName',
 		},
 		selectable: {
 			cursor: 'pointer',
 			'&:hover': {
-				border: '2px solid',
+				border: '1px solid',
+				padding: '0',
 			},
 		},
 		selected: {
-			border: '2px solid',
+			border: '1px solid',
+			padding: '0',
 		},
-	}),
+	},
 	{ name: 'Box' },
 );
 
 interface Props {
 	box: BoxEntity;
-	editableDictionaryRelations?: boolean
+	editableDictionaryRelations?: boolean;
 	color?: string;
 	onSelect?: (box: BoxEntity) => void;
 	isSelected?: boolean;
@@ -94,7 +127,12 @@ interface Props {
 
 function Box(props: Props) {
 	const { box, color, onSelect, editableDictionaryRelations, isSelected = false } = props;
-	const classes = useStyles();
+
+	const stylesProps = computed(() => {
+		return { boxBodySpacing: editableDictionaryRelations ? 20 : 0 };
+	}).get();
+
+	const classes = useStyles(stylesProps);
 
 	// TODO: fix status
 	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
@@ -110,21 +148,22 @@ function Box(props: Props) {
 				[classes.selected]: isSelected,
 			})}
 			onClick={() => onSelect && onSelect(box)}>
-			<div className={classes.header} style={{ backgroundColor: color }}>
+			<div className={classes.header}>
 				<Status status={status.current} />
-				<h5 className={classes.name}>{box.name}</h5>
+				<span
+					style={{ backgroundColor: color }}
+					className={classNames(classes.bodyValue, classes.type)}
+					title={getBoxType(box)}>
+					{getBoxType(box)}
+				</span>
+				<h5 className={classes.name} title={box.name}>
+					{box.name}
+				</h5>
+				<span className={classNames(classes.bodyValue, classes.imageName)} title={slicedImageName}>
+					{slicedImageName}
+				</span>
 			</div>
-			<div className={classes.body}>
-				<div className={classes.row}>
-					<span
-						style={{ backgroundColor: color }}
-						className={classNames(classes.bodyValue, classes.type)}>
-						{getBoxType(box)}
-					</span>
-					<span className={classes.bodyValue}>{slicedImageName}</span>
-				</div>
-				{editableDictionaryRelations && <DictionaryLinksEditor />}
-			</div>
+			<div className={classes.body}>{editableDictionaryRelations && <DictionaryLinksEditor />}</div>
 		</div>
 	);
 }
@@ -137,7 +176,7 @@ const useStatusStyles = createUseStyles(
 			height: 11,
 			width: 11,
 			borderRadius: '50%',
-			border: '1px solid #fff',
+			border: '1px solid #777',
 			backgroundColor: '#8b8b8b',
 		},
 		Running: {

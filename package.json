@@ -2,6 +2,7 @@
 	"homepage": ".",
 	"name": "th2-infra-editor",
 	"version": "2.0.6",
+
 	"private": true,
 	"dependencies": {
 		"@monaco-editor/react": "^4.2.1",
@@ -42,6 +43,7 @@
 		"test:ci": "jest --no-cache"
 	},
 	"eslintConfig": {
+		"ignorePatterns": ["**/public/**"],
 		"extends": [
 			"react-app",
 			"react-app/jest"
