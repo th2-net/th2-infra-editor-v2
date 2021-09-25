@@ -30,7 +30,7 @@ const useStyles = createUseStyles({
 		gridArea: 'metrics',
 		borderRadius: '6px',
 
-		overflow: 'visible',
+		overflow: 'hidden',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
