@@ -30,23 +30,27 @@ const useStyles = createUseStyles({
 		gridArea: 'metrics',
 		borderRadius: '6px',
 
-		overflow: 'hidden',
+		overflow: 'visible',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
 	},
 	metricsSection: {
+		margin: '0 0 0.5px 0',
 		height: '33%',
+		borderRadius: '6px',
 	},
 	metrics: {
 		height: '100%',
 		width: '100%',
 		border: 'none',
+		borderRadius: '6px',
 	},
 	logs: {
 		height: 'calc(100% - 40px)',
 		width: '100%',
 		border: 'none',
+		borderRadius: '6px',
 	},
 });
 
