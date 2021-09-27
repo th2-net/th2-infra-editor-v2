@@ -16,11 +16,11 @@
 
 import React from 'react';
 import { createUseStyles } from 'react-jss';
+import Splitter from './Splitter';
 
 type SplitViewProps = {
 	topComponent: React.ReactNode;
 	bottomComponent: React.ReactNode;
-	splitter: React.ReactNode;
 };
 
 type StylesProps = {
@@ -65,7 +65,7 @@ type MouseEvents = {
 	onMouseMove: (e: MouseEvent) => void;
 };
 
-function SplitView({ topComponent, bottomComponent, splitter }: SplitViewProps) {
+function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 	const rootRef = React.useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = React.useState(false);
 	const [topComponentHeight, setTopComponentHeight] = React.useState(200);
@@ -131,7 +131,7 @@ function SplitView({ topComponent, bottomComponent, splitter }: SplitViewProps) 
 		<div className={classes.container} ref={rootRef}>
 			<div className={classes.panel}>{topComponent}</div>
 			<div className={classes.splitter} onMouseDown={splitterMouseDown}>
-				{splitter}
+				<Splitter />
 			</div>
 			<div className={classes.panel}>{bottomComponent}</div>
 		</div>

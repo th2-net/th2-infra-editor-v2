@@ -14,9 +14,7 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import { useBoxesStore } from '../../hooks/useBoxesStore';
 
 const useStyles = createUseStyles({
 	container: {
@@ -25,7 +23,6 @@ const useStyles = createUseStyles({
 		alignContent: 'center',
 		gridAutoFlow: 'column',
 		justifyItems: 'center',
-		overflow: 'visible',
 	},
 	item: {
 		display: 'flex',
@@ -57,9 +54,6 @@ const useStyles = createUseStyles({
 
 function Splitter() {
 	const classes = useStyles();
-	const boxesStore = useBoxesStore();
-
-	if (!boxesStore.selectedBox) return null;
 
 	return (
 		<div className={classes.container}>
@@ -77,4 +71,4 @@ function Splitter() {
 	);
 }
 
-export default observer(Splitter);
+export default Splitter;

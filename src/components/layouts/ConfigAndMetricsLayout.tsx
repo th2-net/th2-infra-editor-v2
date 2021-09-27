@@ -21,10 +21,6 @@ import Metrics from '../Metrics';
 const useStyles = createUseStyles({
 	container: {
 		display: 'grid',
-		gridTemplateAreas: `
-		"config metrics"
-		`,
-		gridTemplateRows: '1fr ',
 		gridTemplateColumns: '1fr 1fr',
 		gap: 8,
 		height: '100%',

@@ -27,16 +27,13 @@ import Input from './util/Input';
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
-		gridArea: 'metrics',
 		borderRadius: '6px',
-
-		overflow: 'visible',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
 	},
 	metricsSection: {
-		margin: '0 0 0.5px 0',
+		margin: '0 0 1px 0',
 		height: '33%',
 		borderRadius: '6px',
 	},

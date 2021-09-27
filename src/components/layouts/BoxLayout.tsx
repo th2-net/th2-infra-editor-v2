@@ -18,29 +18,36 @@ import { createUseStyles } from 'react-jss';
 import Links from '../links';
 import ConfigAndMetricsLayout from './ConfigAndMetricsLayout';
 import SplitView from '../splitView/SplitView';
-import Splitter from '../util/Splitter';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { observer } from 'mobx-react-lite';
 
 const useStyles = createUseStyles({
 	container: {
-		display: 'grid',
-		gap: 8,
 		height: '100%',
 		overflow: 'hidden',
+	},
+	noBoxSelected: {
+		width: '100%',
+		height: '100%',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 });
 
 function BoxLayout() {
 	const classes = useStyles();
+	const boxesStore = useBoxesStore();
 
-	return (
+	return boxesStore.selectedBox ? (
 		<div className={classes.container}>
-			<SplitView
-				topComponent={<Links />}
-				bottomComponent={<ConfigAndMetricsLayout />}
-				splitter={<Splitter />}
-			/>
+			<SplitView topComponent={<Links />} bottomComponent={<ConfigAndMetricsLayout />} />
+		</div>
+	) : (
+		<div className={classes.noBoxSelected}>
+			<p>Select a box to edit</p>
 		</div>
 	);
 }
 
-export default BoxLayout;
+export default observer(BoxLayout);

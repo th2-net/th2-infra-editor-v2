@@ -32,9 +32,7 @@ import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
 		border: '1px solid',
-		gridArea: 'config',
 		borderRadius: 6,
-		overflow: 'visible',
 		padding: '15px 10px',
 		...scrollBar(),
 	},
@@ -49,14 +47,6 @@ const useStyles = createUseStyles((t: Theme) => ({
 		fontSize: 12,
 		margin: '6px 0',
 		fontWeight: 'normal',
-	},
-	noBoxSelected: {
-		position: 'fixed',
-		zIndex: 15,
-		top: '50%',
-		left: '55.8%',
-		display: 'grid',
-		placeItems: 'center',
 	},
 }));
 
@@ -161,7 +151,7 @@ function Config() {
 		}
 	}
 
-	return boxesStore.selectedBox ? (
+	return (
 		<div className={classes.container}>
 			<div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
@@ -176,10 +166,6 @@ function Config() {
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
 			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
 			<button onClick={saveChanges}>Save</button>
-		</div>
-	) : (
-		<div className={classes.noBoxSelected}>
-			<p>Select a box to edit</p>
 		</div>
 	);
 }
