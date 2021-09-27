@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 import ConnectionEditor from '../editors/ConnectionEditor';
 import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
 import SelectedBox from '../boxes/SelectedBox';
-import { Link } from '../../models/LinksDefinition';
+import { ConnectionDirection, Link } from '../../models/LinksDefinition';
 import { chain } from 'lodash';
 
 const useStyles = createUseStyles({
@@ -60,37 +60,43 @@ function Links() {
 
 	const [incoming, outgoing] = boxUpdater.selectedBoxConnections;
 	const [showEditor, setShowEditor] = useState(false);
-	const [editableLink, setEditableLink] = useState<Link<ExtendedConnectionOwner>>();
-
-	const createNewLink = () => {
-		setEditableLink(undefined);
-		setShowEditor(true);
-	};
+	const [linkToEdit, setLinkToEdit] = useState<Link<ExtendedConnectionOwner>>();
 
 	const onSubmit = (value: Link<ExtendedConnectionOwner>) => {
-		if (editableLink) {
-			boxUpdater.changeLink(editableLink, value);
+		if (linkToEdit) {
+			boxUpdater.changeLink(linkToEdit, value);
 		} else {
 			boxUpdater.addLink(value);
 		}
 	};
 
 	const onDelete = () => {
-		if (editableLink) {
-			boxUpdater.deleteLink(editableLink).then();
+		if (linkToEdit) {
+			boxUpdater.deleteLink(linkToEdit).then();
 		}
 	};
 
 	const onClose = () => setShowEditor(false);
 
-	const editLink = (direction: 'to' | 'from', box?: BoxEntity, pin?: Pin) => {
+	const openLinkEditor = (
+		create: boolean,
+		direction: ConnectionDirection,
+		box?: BoxEntity,
+		pin?: Pin,
+	) => {
+		if (create) {
+			setLinkToEdit(undefined);
+			setShowEditor(true);
+			return;
+		}
+
 		if (!box && !pin) {
-			setEditableLink({
+			setLinkToEdit({
 				name: boxesStore.selectedBox?.name || '',
 				[direction]: {
 					box: boxesStore.selectedBox?.name,
-					pin: ''
-				}
+					pin: '',
+				},
 			});
 			setShowEditor(true);
 			return;
@@ -103,13 +109,13 @@ function Links() {
 			.head()
 			.value();
 
-		setEditableLink(selectedLink);
+		setLinkToEdit(selectedLink);
 		setShowEditor(true);
 	};
 
 	useEffect(() => {
 		setShowEditor(false);
-	}, [boxesStore.selectedBox])
+	}, [boxesStore.selectedBox]);
 
 	if (!boxesStore.selectedBox) return null;
 
@@ -121,14 +127,23 @@ function Links() {
 					onBoxSelect={boxesStore.selectBox}
 					direction='to'
 					maxDepth={2}
-					editLink={editLink}
+					editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				{showEditor ?
-					<ConnectionEditor editableLink={editableLink} onSubmit={onSubmit} onDelete={onDelete} onClose={onClose} />
-					: <SelectedBox box={boxesStore.selectedBox} createNewLink={createNewLink} />
-				}
+				{showEditor ? (
+					<ConnectionEditor
+						editableLink={linkToEdit}
+						onSubmit={onSubmit}
+						onDelete={onDelete}
+						onClose={onClose}
+					/>
+				) : (
+					<SelectedBox
+						box={boxesStore.selectedBox}
+						createNewLink={() => openLinkEditor(true, 'from')}
+					/>
+				)}
 			</div>
 			{outgoing && (
 				<BoxConnections
@@ -136,7 +151,7 @@ function Links() {
 					onBoxSelect={boxesStore.selectBox}
 					direction='from'
 					maxDepth={2}
-					editLink={editLink}
+					editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
 				/>
 			)}
 		</div>

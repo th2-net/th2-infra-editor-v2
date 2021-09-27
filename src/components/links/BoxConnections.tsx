@@ -19,11 +19,12 @@ import { createUseStyles } from 'react-jss';
 import ConnectedBox from './ConnectedBox';
 import { BoxEntity, Pin } from '../../models/Box';
 import { Theme } from '../../styles/theme';
+import { ConnectionDirection } from '../../models/LinksDefinition';
 
 export interface IBoxConnections {
 	box: BoxEntity;
 	pins: IPinConnections[];
-	direction: 'to' | 'from';
+	direction: ConnectionDirection;
 }
 
 export interface IPinConnections {
@@ -71,18 +72,18 @@ const useStyles = createUseStyles((t: Theme) => ({
 		transition: '250ms',
 		'&:hover': {
 			opacity: '1',
-			background: 'rgba(255, 255, 255, 0.4)'
+			background: 'rgba(255, 255, 255, 0.4)',
 		},
 		'&:active': {
-			background: 'rgba(255, 255, 255, 0.7)'
-		}
-	}
+			background: 'rgba(255, 255, 255, 0.7)',
+		},
+	},
 }));
 
 interface GroupProps {
 	onBoxSelect: (box: BoxEntity) => void;
-	editLink: (direction: 'to' | 'from', box?: BoxEntity, pin?: Pin, ) => void;
-	direction: 'to' | 'from';
+	editLink: (direction: ConnectionDirection, box?: BoxEntity, pin?: Pin) => void;
+	direction: ConnectionDirection;
 	pinConnections: IPinConnections[];
 	maxDepth?: number;
 }
@@ -94,11 +95,12 @@ export default function BoxConnections(props: GroupProps) {
 
 	return (
 		<div style={{ direction: direction === 'to' ? 'rtl' : 'initial' }}>
-			<div className={classes.newLink} onClick={() => editLink(direction)}>New link +</div>
+			<div className={classes.newLink} onClick={() => editLink(direction)}>
+				New link +
+			</div>
 			{pinConnections
 				.filter(g => g.boxes.length > 0)
 				.map(connection => (
-
 					<div className={classes.root}>
 						<PinConnections
 							connections={connection}
@@ -106,8 +108,8 @@ export default function BoxConnections(props: GroupProps) {
 							onBoxSelect={onBoxSelect}
 							isRoot={true}
 							maxDepth={maxDepth}
-							editLink={(box) => {
-								editLink(direction, box, connection.pin)
+							editLink={box => {
+								editLink(direction, box, connection.pin);
 							}}
 						/>
 					</div>
@@ -119,7 +121,7 @@ export default function BoxConnections(props: GroupProps) {
 interface PinGroupProps {
 	onBoxSelect: (box: BoxEntity) => void;
 	connections: IPinConnections;
-	direction: 'to' | 'from';
+	direction: ConnectionDirection;
 	isExpanded?: boolean;
 	setIsExpanded?: (isExpanded: boolean) => void;
 	isRoot?: boolean;
@@ -166,7 +168,7 @@ function PinConnections({
 	isRoot = false,
 	maxDepth = 2,
 	currentDepth = 0,
-													editLink
+	editLink,
 }: PinGroupProps) {
 	const [isExpandedMap, setIsExpandedMap] = useState<Map<string, boolean>>(new Map());
 

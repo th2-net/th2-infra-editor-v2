@@ -20,8 +20,9 @@ import { getBoxType, Status } from '../boxes/Box';
 import { BoxEntity, BoxStatus, Pin } from '../../models/Box';
 import { getHashCode } from '../../helpers/string';
 import { ellipsis } from '../../styles/mixins';
-import directionIcon from "../../assets/icons/direction-icon.svg";
+import directionIcon from '../../assets/icons/direction-icon.svg';
 import classNames from 'classnames';
+import { ConnectionDirection } from '../../models/LinksDefinition';
 
 const useConnectionBoxStyles = createUseStyles({
 	header: {
@@ -64,7 +65,7 @@ const useConnectionBoxStyles = createUseStyles({
 		gridColumn: 1,
 	},
 	editable: {
-		cursor: 'pointer'
+		cursor: 'pointer',
 	},
 	box: {
 		display: 'grid',
@@ -94,14 +95,21 @@ const useConnectionBoxStyles = createUseStyles({
 
 interface ConnectionBoxProps {
 	box: BoxEntity;
-	direction: 'to' | 'from';
+	direction: ConnectionDirection;
 	pin: Pin;
 	onBoxSelect: (box: BoxEntity) => void;
 	isEditable: boolean;
 	onClickLink: () => void;
 }
 
-export default function ConnectedBox({ box, direction, pin, onBoxSelect, onClickLink, isEditable }: ConnectionBoxProps) {
+export default function ConnectedBox({
+	box,
+	direction,
+	pin,
+	onBoxSelect,
+	onClickLink,
+	isEditable,
+}: ConnectionBoxProps) {
 	const classes = useConnectionBoxStyles();
 
 	// TODO: fix status
@@ -136,7 +144,7 @@ export default function ConnectedBox({ box, direction, pin, onBoxSelect, onClick
 			<span
 				onClick={() => isEditable && onClickLink()}
 				className={classNames(classes.arrowIcon, {
-					[classes.editable]: isEditable
+					[classes.editable]: isEditable,
 				})}
 				style={{
 					filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)`,

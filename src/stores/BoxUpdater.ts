@@ -14,13 +14,28 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { chain, cloneDeep, Dictionary, isEqual, keyBy, mapValues, remove, sortBy, uniqBy } from 'lodash';
+import {
+	chain,
+	cloneDeep,
+	Dictionary,
+	isEqual,
+	keyBy,
+	mapValues,
+	remove,
+	sortBy,
+	uniqBy,
+} from 'lodash';
 import { action, computed, makeObservable, observable, toJS } from 'mobx';
 import { IBoxConnections, IPinConnections } from '../components/links/BoxConnections';
 import { convertToExtendedLink } from '../helpers/link';
 import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
 import FileBase from '../models/FileBase';
-import { isBoxLinksDefinition, Link, LinksDefinition } from '../models/LinksDefinition';
+import {
+	ConnectionDirection,
+	isBoxLinksDefinition,
+	Link,
+	LinksDefinition,
+} from '../models/LinksDefinition';
 import { BoxesStore } from './BoxesStore';
 import HistoryStore from './HistoryStore';
 import { RequestsStore } from './RequestsStore';
@@ -37,7 +52,6 @@ const editorLink: Readonly<LinksDefinition> = {
 };
 
 export class BoxUpdater {
-
 	linkDefinitions: LinksDefinition[] = [];
 
 	constructor(
@@ -64,13 +78,13 @@ export class BoxUpdater {
 				return [
 					...(linkBox.spec['boxes-relation']['router-mq']
 						? linkBox.spec['boxes-relation']['router-mq'].map(link =>
-							convertToExtendedLink(link, 'mq'),
-						)
+								convertToExtendedLink(link, 'mq'),
+						  )
 						: []),
 					...(linkBox.spec['boxes-relation']['router-grpc']
 						? linkBox.spec['boxes-relation']['router-grpc'].map(link =>
-							convertToExtendedLink(link, 'grpc'),
-						)
+								convertToExtendedLink(link, 'grpc'),
+						  )
 						: []),
 				];
 			}
@@ -100,7 +114,7 @@ export class BoxUpdater {
 		box: BoxEntity,
 		boxesMap: Dictionary<BoxEntity>,
 		links: Link<ExtendedConnectionOwner>[],
-		direction: 'to' | 'from',
+		direction: ConnectionDirection,
 		depth = 2,
 		currentDepth = 0,
 	): IBoxConnections {
@@ -115,16 +129,18 @@ export class BoxUpdater {
 			currentDepth === depth
 				? []
 				: pins.map(pin => ({
-					pin,
-					boxes: chain(connectedLinks)
-						.filter(link => link[direction]?.pin === pin.name)
-						.map(link => boxesMap[link[oppositeDirection]?.box || ''])
-						.uniqBy('name')
-						.filter(isBoxEntity)
-						.sortBy('name')
-						.map(box => this.resolveBoxLinks(box, boxesMap, links, direction, depth, currentDepth + 1))
-						.value(),
-				}));
+						pin,
+						boxes: chain(connectedLinks)
+							.filter(link => link[direction]?.pin === pin.name)
+							.map(link => boxesMap[link[oppositeDirection]?.box || ''])
+							.uniqBy('name')
+							.filter(isBoxEntity)
+							.sortBy('name')
+							.map(box =>
+								this.resolveBoxLinks(box, boxesMap, links, direction, depth, currentDepth + 1),
+							)
+							.value(),
+				  }));
 
 		boxes = boxes.reduce((acc, curr) => {
 			const pin = acc.find(b => b.pin.name === curr.pin.name);
@@ -225,7 +241,7 @@ export class BoxUpdater {
 
 	addLink(link: Link<ExtendedConnectionOwner>, createSnapshot = true) {
 		if (!link.from) {
-			throw new Error('\'from\' field shouldn\'t be undefined');
+			throw new Error("'from' field shouldn't be undefined");
 		}
 
 		let editorGeneratedLink = this.linkDefinitions.find(
@@ -262,7 +278,10 @@ export class BoxUpdater {
 	}
 
 	saveBoxChanges = (box: BoxEntity, updatedBox: BoxEntity) => {
-		if (box.name !== updatedBox.name && this.boxesStore.boxes.find(box => box.name === updatedBox.name)) {
+		if (
+			box.name !== updatedBox.name &&
+			this.boxesStore.boxes.find(box => box.name === updatedBox.name)
+		) {
 			alert(`Box "${updatedBox.name}" already exists`);
 			return;
 		}
@@ -271,7 +290,10 @@ export class BoxUpdater {
 
 		if (hasChanges) {
 			if (box.name !== updatedBox.name) {
-				this.boxesStore.boxes = [...this.boxesStore.boxes.filter(b => b.name !== box.name), updatedBox];
+				this.boxesStore.boxes = [
+					...this.boxesStore.boxes.filter(b => b.name !== box.name),
+					updatedBox,
+				];
 				this.updateLinks(box.name, updatedBox.name);
 				// TODO: update dictionaries
 			}
@@ -289,11 +311,11 @@ export class BoxUpdater {
 	): LinksDefinition | null => {
 		return (
 			this.linkDefinitions.find(linkBox => {
-				const links =
-					targetLink.from ?
-						linkBox.spec['boxes-relation']?.[
+				const links = targetLink.from
+					? linkBox.spec['boxes-relation']?.[
 							`router-${targetLink.from.connectionType}` as 'router-mq' | 'router-grpc'
-							] : [];
+					  ]
+					: [];
 				return links?.some(link => link.name === targetLink.name);
 			}) || null
 		);

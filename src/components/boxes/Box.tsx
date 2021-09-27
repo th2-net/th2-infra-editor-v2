@@ -22,10 +22,15 @@ import { Theme } from '../../styles/theme';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 
 export function getBoxType(box: BoxEntity) {
-	return box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name
+	return box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name;
 }
 
-const useStyles = createUseStyles(
+export function getImageNameWithoutDomain(imageName: string): string {
+	const splitedImageName = imageName.split('/');
+	return splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
+}
+
+export const useStyles = createUseStyles(
 	(theme: Theme) => ({
 		container: {
 			width: '100%',
@@ -35,7 +40,7 @@ const useStyles = createUseStyles(
 			overflow: 'hidden',
 			display: 'grid',
 			gridTemplateRows: '25px 1fr',
-			cursor: 'pointer'
+			cursor: 'pointer',
 		},
 		header: {
 			height: 25,
@@ -86,7 +91,7 @@ const useStyles = createUseStyles(
 
 interface Props {
 	box: BoxEntity;
-	editableDictionaryRelations?: boolean
+	editableDictionaryRelations?: boolean;
 	color?: string;
 	onSelect?: (box: BoxEntity) => void;
 	isSelected?: boolean;
@@ -99,9 +104,7 @@ function Box(props: Props) {
 	// TODO: fix status
 	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
 
-	const imageName = box.spec['image-name'];
-	const splitedImageName = imageName.split('/');
-	const slicedImageName = splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
+	const slicedImageName = getImageNameWithoutDomain(box.spec['image-name']);
 
 	return (
 		<div

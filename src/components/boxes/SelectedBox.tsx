@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
 import { Theme } from '../../styles/theme';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
-import { Status } from './Box';
+import { getBoxType, getImageNameWithoutDomain, Status } from './Box';
 import { button } from '../../styles/mixins';
 
-export function getBoxType(box: BoxEntity) {
-	return box.spec.type ? box.spec.type.split('-').slice(1).join('-') : box.name;
+interface StylesProps {
+	headerBgColor?: string;
 }
 
 const useStyles = createUseStyles(
@@ -37,7 +37,6 @@ const useStyles = createUseStyles(
 			overflow: 'hidden',
 			display: 'grid',
 			gridTemplateRows: '25px 1fr',
-			cursor: 'pointer',
 		},
 		header: {
 			height: 25,
@@ -45,7 +44,8 @@ const useStyles = createUseStyles(
 			display: 'flex',
 			alignItems: 'center',
 			padding: '0 10px',
-			backgroundColor: 'rgb(102, 204, 145)',
+			backgroundColor: (props: StylesProps) =>
+				props.headerBgColor ? props.headerBgColor : 'rgb(102, 204, 145)',
 			color: '#fff',
 		},
 		name: {
@@ -107,18 +107,16 @@ interface Props {
 
 function SelectedBox(props: Props) {
 	const { box, createNewLink, color } = props;
-	const classes = useStyles();
+	const classes = useStyles({ headerBgColor: color });
 
 	// TODO: fix status
 	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
 
-	const imageName = box.spec['image-name'];
-	const splitedImageName = imageName.split('/');
-	const slicedImageName = splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
+	const slicedImageName = getImageNameWithoutDomain(box.spec['image-name']);
 
 	return (
-		<div className={classNames(classes.container)}>
-			<div className={classes.header} style={{ backgroundColor: color }}>
+		<div className={classes.container}>
+			<div className={classes.header}>
 				<Status status={status.current} />
 				<h5 className={classes.name}>{box.name}</h5>
 			</div>
@@ -133,7 +131,9 @@ function SelectedBox(props: Props) {
 				</div>
 				<DictionaryLinksEditor />
 				<div className={classes.row}>
-					<button className={classes.addButton} onClick={createNewLink}>Add link</button>
+					<button className={classes.addButton} onClick={createNewLink}>
+						Add link
+					</button>
 				</div>
 			</div>
 		</div>

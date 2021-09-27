@@ -57,3 +57,5 @@ export function isLink(object: unknown): object is Link<ConnectionOwner | Extend
 		(object as Link<ConnectionOwner | ExtendedConnectionOwner>).from !== undefined
 	);
 }
+
+export type ConnectionDirection = 'to' | 'from';

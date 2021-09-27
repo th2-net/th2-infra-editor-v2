@@ -14,14 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { ExtendedConnectionOwner, isBoxEntity, Pin } from '../../models/Box';
 import { Theme } from '../../styles/theme';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
-import { Link } from '../../models/LinksDefinition';
+import { ConnectionDirection, Link } from '../../models/LinksDefinition';
 import { button } from '../../styles/mixins';
 import ConnectionConfig from './ConnectionConfig';
 import { computed } from 'mobx';
@@ -41,13 +41,11 @@ const useStyles = createUseStyles((t: Theme) => ({
 		overflow: 'hidden',
 		display: 'grid',
 		gridTemplateRows: '36px 1fr 36px',
-		gridTemplateColumns: '1fr',
 	},
 	header: {
 		display: 'grid',
 		gridTemplateAreas: '"title linkName close"',
-		gridTemplateColumn: 'minmax(30px, max-content) minmax(30px, 100px) 25px',
-		gridTemplateRows: '1fr',
+		gridTemplateColumns: 'minmax(30px, max-content) 1fr 25px',
 		gap: '10px',
 		padding: '7px 15px',
 		borderRadius: '10px 10px 0 0',
@@ -63,8 +61,9 @@ const useStyles = createUseStyles((t: Theme) => ({
 		overflow: 'hidden',
 		whiteSpace: 'nowrap',
 		textOverflow: 'ellipsis',
+		justifySelf: 'center',
 	},
-	close: {
+	closeButton: {
 		gridArea: 'close',
 		borderRadius: '50%',
 		cursor: 'pointer',
@@ -84,7 +83,6 @@ const useStyles = createUseStyles((t: Theme) => ({
 	content: {
 		padding: '7px',
 		display: 'grid',
-		gridTemplateColumns: '1fr',
 		gridTemplateRows: 'repeat(auto-fit, minmax(30px, max-content))',
 		height: 'auto',
 		width: '100%',
@@ -111,7 +109,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 			background: '#ffc093',
 		},
 	},
-	delete: {
+	deleteButton: {
 		background: '#ff6666',
 		'&:hover': {
 			background: '#ff7c7c',
@@ -124,7 +122,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 		background: '#7c7c7c',
 		cursor: 'not-allowed',
 	},
-	swap: {
+	swapButton: {
 		display: 'block',
 		height: '25px',
 		lineHeight: '20px',
@@ -153,7 +151,6 @@ const useStyles = createUseStyles((t: Theme) => ({
 	},
 }));
 
-
 interface ConnectionsEditorProps {
 	editableLink?: Link<ExtendedConnectionOwner>;
 	onSubmit: (value: Link<ExtendedConnectionOwner>) => void;
@@ -170,14 +167,18 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 	const boxUpdater = useBoxUpdater();
 	const selectedBox = boxesStore.selectedBox;
 
-	const ref = useRef<HTMLDivElement>(null);
-	const [link, setLink] = useState<Link<ExtendedConnectionOwner>>(editableLink ? editableLink : {
-		name: selectedBox?.name ?? '', from: {
-			box: selectedBox?.name || '',
-			pin: '',
-			connectionType: 'grpc',
-		},
-	});
+	const [link, setLink] = useState<Link<ExtendedConnectionOwner>>(
+		editableLink
+			? editableLink
+			: {
+					name: selectedBox?.name ?? '',
+					from: {
+						box: selectedBox?.name || '',
+						pin: '',
+						connectionType: 'grpc',
+					},
+			  },
+	);
 
 	const cancelOrDelete = () => {
 		if (editableLink) {
@@ -186,33 +187,49 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 		onClose();
 	};
 
-	const direction: 'to' | 'from' = computed(() => selectedBox?.name === link?.to?.box ? 'to' : 'from').get();
+	const direction: ConnectionDirection = useMemo(
+		() => (selectedBox?.name === link?.to?.box ? 'to' : 'from'),
+		[link?.to?.box, selectedBox?.name],
+	);
 
-	const getAutocompleteByOwner = useCallback((owner?: ExtendedConnectionOwner): string[] => {
-		if (!owner || boxesStore.boxes.filter(item => item.name === owner.box).length === 0) {
-			return [];
-		}
+	const isExistBox = useCallback(
+		(box: string) => {
+			return boxesStore.boxes.filter(item => item.name === box).length !== 0;
+		},
+		[boxesStore.boxes],
+	);
 
-		const pin: Pin = chain(boxesStore.boxes)
-			.filter(box => box.name === owner.box)
-			.uniqBy('name')
-			.filter(isBoxEntity)
-			.map(box => box.spec?.pins || [])
-			.flatten()
-			.filter(pin => pin.name === owner.pin)
-			.head()
-			.value();
+	const getAutocompleteByOwner = useCallback(
+		(owner?: ExtendedConnectionOwner): string[] => {
+			if (!owner || !isExistBox(owner.box)) {
+				return [];
+			}
 
-		if (!pin) {
-			return [];
-		}
+			const pin: Pin = chain(boxesStore.boxes)
+				.filter(box => box.name === owner.box)
+				.uniqBy('name')
+				.filter(isBoxEntity)
+				.map(box => box.spec?.pins || [])
+				.flatten()
+				.filter(pin => pin.name === owner.pin)
+				.head()
+				.value();
 
-		return chain(boxesStore.boxes)
-			.filter(box => (box.spec?.pins || [])
-				.filter(box => box['connection-type'] === pin['connection-type']).length > 0)
-			.map(box => box.name)
-			.value();
-	}, [boxesStore.boxes]);
+			if (!pin) {
+				return [];
+			}
+
+			return chain(boxesStore.boxes)
+				.filter(
+					box =>
+						(box.spec?.pins || []).filter(box => box['connection-type'] === pin['connection-type'])
+							.length > 0,
+				)
+				.map(box => box.name)
+				.value();
+		},
+		[boxesStore.boxes, isExistBox],
+	);
 
 	const swap = () => {
 		setLink({
@@ -222,29 +239,31 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 		});
 	};
 
-	const setOwner = (owner: ExtendedConnectionOwner, direction: 'to' | 'from') => {
-		setLink(
-			{
-				name: link.name,
-				from: direction === 'from' ? owner : link.from,
-				to: direction === 'to' ? owner : link.to,
-			},
-		);
+	const setOwner = (owner: ExtendedConnectionOwner, direction: ConnectionDirection) => {
+		setLink({
+			name: link.name,
+			from: direction === 'from' ? owner : link.from,
+			to: direction === 'to' ? owner : link.to,
+		});
 	};
 
-	const linkName = computed(() => `${link?.from?.box || '...'}-to-${link?.to?.box || '...'} `).get();
+	const linkName = useMemo(
+		() => `${link?.from?.box || '...'}-to-${link?.to?.box || '...'} `,
+		[link?.from?.box, link?.to?.box],
+	);
 
-	const isSubmitDisabled = computed(() => {
+	const isSubmitDisabled = useMemo(() => {
 		if (!link.to || !link.from) {
 			return true;
 		}
 
-		return chain(boxUpdater.links)
-			.filter(item => item.to?.box === link.to?.box && item.from?.box === link.from?.box)
-			.filter(item => item.to?.pin === link.to?.pin && item.from?.pin === link.from?.pin)
-			.value()
-			.length > 0
-	}).get();
+		return (
+			chain(boxUpdater.links)
+				.filter(item => item.to?.box === link.to?.box && item.from?.box === link.from?.box)
+				.filter(item => item.to?.pin === link.to?.pin && item.from?.pin === link.from?.pin)
+				.value().length > 0
+		);
+	}, [boxUpdater.links, link.from, link.to]);
 
 	const submit = () => {
 		if (isSubmitDisabled) {
@@ -258,33 +277,55 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 		onClose();
 	};
 
+	const submitButtonClassName = classNames(
+		classes.button,
+		isSubmitDisabled ? classes.disabled : classes.submit,
+	);
+
 	return (
-		<div ref={ref} className={classes.editor}>
+		<div className={classes.editor}>
 			<div className={classes.header}>
 				<span className={classes.title}>{editableLink ? 'Edit' : 'New link'}</span>
 				<span title={link?.name} className={classes.linkName}>{`(${linkName})`}</span>
-				<span className={classes.close} onClick={() => onClose()}>&#10006;</span>
+				<span className={classes.closeButton} onClick={() => onClose()}>
+					&#10006;
+				</span>
 			</div>
 
 			<div className={classes.content}>
-				<ConnectionConfig label='from' id='boxFrom' owner={link.from} setOwner={(owner) => setOwner(owner, 'from')}
-													autocomplete={boxesStore.boxes.map(box => box.name)}
-													disabled={direction === 'from' ? (editableLink ? 'all' : 'box') : 'none'}
-													isSelected={direction === 'from'} />
-				<span className={classes.swap} onClick={swap}>&#8645;</span>
-				<ConnectionConfig label='to' id='boxTo' owner={link.to} setOwner={(owner) => setOwner(owner, 'to')}
-													autocomplete={getAutocompleteByOwner(link.from)}
-													disabled={direction === 'to' ? (editableLink ? 'all' : 'box') : 'none'}
-													isSelected={direction === 'to'} />
+				<ConnectionConfig
+					label='from'
+					id='boxFrom'
+					owner={link.from}
+					setOwner={owner => setOwner(owner, 'from')}
+					autocomplete={boxesStore.boxes.map(box => box.name)}
+					disabled={direction === 'from' && editableLink !== undefined}
+					isBoxFieldDisabled={direction === 'from' && editableLink === undefined}
+					isSelected={direction === 'from'}
+				/>
+				<span className={classes.swapButton} onClick={swap}>
+					&#8645;
+				</span>
+				<ConnectionConfig
+					label='to'
+					id='boxTo'
+					owner={link.to}
+					setOwner={owner => setOwner(owner, 'to')}
+					autocomplete={getAutocompleteByOwner(link.from)}
+					disabled={direction === 'to' && editableLink !== undefined}
+					isBoxFieldDisabled={direction === 'to' && editableLink === undefined}
+					isSelected={direction === 'to'}
+				/>
 			</div>
 
 			<div className={classes.actions}>
-				<button onClick={cancelOrDelete}
-								className={classNames(classes.button, classes.delete)}>{editableLink ? 'Delete' : 'Cancel'}</button>
-				<button onClick={submit} className={classNames(classes.button, {
-					[classes.submit]: !isSubmitDisabled,
-					[classes.disabled]: isSubmitDisabled,
-				})}>Submit
+				<button
+					onClick={cancelOrDelete}
+					className={classNames(classes.button, classes.deleteButton)}>
+					{editableLink ? 'Delete' : 'Cancel'}
+				</button>
+				<button onClick={submit} className={submitButtonClassName}>
+					Submit
 				</button>
 			</div>
 		</div>
