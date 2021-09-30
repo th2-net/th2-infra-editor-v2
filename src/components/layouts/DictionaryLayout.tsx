@@ -25,7 +25,13 @@ interface Props {
 }
 
 const useStyles = createUseStyles({
-	dictionaryLayout: {},
+	dictionaryLayout: {
+		width: '100%',
+		height: 700,
+		display: 'grid',
+		gridTemplateRows: 'auto 1fr auto',
+		placeItems: 'start',
+	},
 });
 
 function DictionaryLayout({ setViewType }: Props) {

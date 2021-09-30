@@ -14,6 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import React from 'react';
 import { useInput } from '../../hooks/useInput';
 import ConfigEditor from './ConfigEditor';
 import { downloadFile, isXMLValid } from '../../helpers/files';
@@ -24,10 +25,17 @@ import Icon from '../Icon';
 import { buttonReset, visuallyHidden } from '../../styles/mixins';
 
 const useStyle = createUseStyles({
+	container: {
+		width: '100%',
+		height: '100%',
+		display: 'grid',
+		gridTemplateRows: '1fr auto',
+		gap: 8,
+	},
 	controls: {
 		display: 'flex',
 		justifyContent: 'flex-end',
-		alignItems: 'center'
+		alignItems: 'center',
 	},
 	applyChanges: {
 		...buttonReset(),
@@ -41,12 +49,12 @@ const useStyle = createUseStyles({
 		display: 'inline-flex',
 		marginLeft: 10,
 		cursor: 'pointer',
-		transform: 'rotate(180deg)'
+		transform: 'rotate(180deg)',
 	},
 	input: {
-		...visuallyHidden()
-	}
-})
+		...visuallyHidden(),
+	},
+});
 
 interface DictionaryEditorProps {
 	dictionary: DictionaryEntity | null;
@@ -60,7 +68,7 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 		initialValue: dictionary?.spec.data,
 		id: 'dictionary-editor',
 		label: dictionary?.name,
-		validate: value => isXMLValid(value)
+		validate: value => isXMLValid(value),
 	});
 
 	const prevValue = usePrevious(dictionaryInputConfig.value);
@@ -71,16 +79,16 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 			const data = await file.text();
 			dictionaryInputConfig.setValue(data);
 		}
-	}
+	};
 
 	const downloadDictionary = () => {
 		if (dictionary) {
 			downloadFile(dictionaryInputConfig.value, dictionary.name, 'text/xml');
 		}
-	}
+	};
 
 	return (
-		<>
+		<div className={classes.container}>
 			<ConfigEditor configInput={dictionaryInputConfig} />
 			<div className={classes.controls}>
 				<button
@@ -90,16 +98,11 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 						if (dictionaryInputConfig.isValid) {
 							editDictionary(dictionaryInputConfig.value);
 						}
-					}}
-				>
+					}}>
 					Apply changes
 				</button>
-				<label 
-					className={classes.upload} 
-					htmlFor='dictionary-file-input'
-					title='Upload'
-				>
-					<Icon id='download' fill='black'/>
+				<label className={classes.upload} htmlFor='dictionary-file-input' title='Upload'>
+					<Icon id='download' fill='black' />
 				</label>
 				<input
 					onChange={uploadDictionary}
@@ -108,17 +111,12 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 					className={classes.input}
 					id='dictionary-file-input'
 				/>
-				<button 
-					onClick={downloadDictionary}
-					className={classes.download}
-					title='Download'
-				>
-					<Icon id='download' fill='black'/>
+				<button onClick={downloadDictionary} className={classes.download} title='Download'>
+					<Icon id='download' fill='black' />
 				</button>
 			</div>
-		</>
-	)
+		</div>
+	);
 };
 
 export default DictionaryEditor;
- 
