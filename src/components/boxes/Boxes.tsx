@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
@@ -30,6 +30,7 @@ import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionarySto
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
 import classNames from 'classnames';
+import { useAppViewStore } from '../../hooks/useAppViewStore';
 
 const useStyles = createUseStyles(
 	{
@@ -168,7 +169,7 @@ function Boxes() {
 								index + 1 < groupedBoxes.length &&
 								getType(groupedBoxes[index + 1]) === getType(box),
 							[classes.prevGroupItem]:
-								index - 1 >= 0 && (getType(groupedBoxes[index - 1]) === getType(box)),
+								index - 1 >= 0 && getType(groupedBoxes[index - 1]) === getType(box),
 						})}>
 						<Observer>
 							{() => (
@@ -176,7 +177,7 @@ function Boxes() {
 									box={box}
 									color={group?.color}
 									onSelect={box => {
-										props.setViewType('box');
+										appViewStore.setViewType(AppViewType.Box);
 										boxesStore.selectBox(box);
 									}}
 									isSelected={boxesStore.selectedBox?.name === (box as BoxEntity).name}
@@ -194,7 +195,7 @@ function Boxes() {
 								<Dictionary
 									dictionary={box}
 									onClick={() => {
-										props.setViewType('dictionary');
+										appViewStore.setViewType(AppViewType.Dictionary);
 										selectedDictionaryStore.selectDictionary(box);
 									}}
 								/>
@@ -216,7 +217,7 @@ function Boxes() {
 				</Observer>
 			);
 		},
-		[boxesStore, expandGroup, expandedMap, props, selectedDictionaryStore],
+		[boxesStore, expandGroup, expandedMap, selectedDictionaryStore],
 	);
 
 	const classes = useStyles();
@@ -280,7 +281,7 @@ const useExpandGroupStyles = createUseStyles(
 			height: '100%',
 			lineHeight: '25px',
 			gridArea: 'name',
-			background: 'transperent',
+			background: 'transparent',
 			borderRadius: '7px',
 			padding: '0 15px',
 			'&:hover': {
