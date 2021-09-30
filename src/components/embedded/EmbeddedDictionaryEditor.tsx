@@ -18,30 +18,15 @@ import React from 'react';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import DictionaryEditor from '../editors/DictionaryEditor';
 import { observer } from 'mobx-react-lite';
-import {spinner} from '../../styles/spinner'
-import { useSchemaStore } from '../../hooks/useSchemaStore';
 
 const EmbeddedDictionaryEditor = () => {
 	const { dictionary, editDictionary } = useSelectedDictionaryStore();
-	const schemaStore = useSchemaStore();
-	const classes = spinner();
 
-	if (dictionary != null && dictionary !== undefined) {
-
-		return <DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />;
+	if (!dictionary) {
+		return <div>Dictionary not found</div>;
 	}
 
-	if(!schemaStore.isDictionary){
-		return <div>Dictionary not found</div>
-	}
-
-	return<div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
-		<p>Loading...</p>
-		<div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', marginLeft: '5px'}}>
-			<div className={classes.spinner} ></div>
-		</div>
-		
-	</div>;
+	return <DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />;
 };
 
 export default observer(EmbeddedDictionaryEditor);

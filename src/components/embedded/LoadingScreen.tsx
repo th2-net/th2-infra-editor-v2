@@ -13,15 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
-import { Theme } from './theme';
+
+import React from 'react';
 import { createUseStyles } from 'react-jss';
 
-export const spinner = createUseStyles((theme: Theme) => ({
-    '@keyframes spin': {
-        from: {transform: 'rotate(0deg)'},
-        to: {transform: 'rotate(360deg)'}
-    },
+const useStyles = createUseStyles({
+	container: {
+		width: '100%',
+		height: '100%',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	'@keyframes spin': {
+		from: { transform: 'rotate(0deg)' },
+		to: { transform: 'rotate(360deg)' },
+	},
 	spinner: {
+		marginRight: 8,
 		height: '16px',
 		width: '16px',
 		border: '3px solid #1111',
@@ -30,6 +39,19 @@ export const spinner = createUseStyles((theme: Theme) => ({
 		animationName: '$spin',
 		animationDuration: '1s',
 		animationTimingFunction: 'linear',
-		animationIterationCount: 'infinite'
+		animationIterationCount: 'infinite',
 	},
-}));
+});
+
+const LoadingScreen = () => {
+	const classes = useStyles();
+
+	return (
+		<div className={classes.container}>
+			<div className={classes.spinner} />
+			<p>Loading</p>
+		</div>
+	);
+};
+
+export default LoadingScreen;

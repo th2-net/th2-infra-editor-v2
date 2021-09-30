@@ -17,16 +17,31 @@
 import React from 'react';
 import { useURLParamsStore } from '../../hooks/useURLParamsStore';
 import EmbeddedDictionaryEditor from './EmbeddedDictionaryEditor';
+import { useSchemaStore } from '../../hooks/useSchemaStore';
+import LoadingScreen from './LoadingScreen';
+import { observer } from 'mobx-react-lite';
+
+interface EmbeddedViews {
+	[editorMode: string]: React.ReactNode;
+}
+
+const embeddedViews: EmbeddedViews = {
+	dictionaryEditor: <EmbeddedDictionaryEditor />,
+};
 
 const EmbeddedLayout = () => {
 	const { editorMode } = useURLParamsStore();
+	const { isLoading } = useSchemaStore();
 
-	if (editorMode === 'dictionaryEditor') {
-		return <EmbeddedDictionaryEditor />;
+	if (!editorMode || !embeddedViews[editorMode]) {
+		return <div>Please provide a valid editorMode</div>;
 	}
 
+	if (isLoading) {
+		return <LoadingScreen />;
+	}
 
-	return null;
+	return <>{embeddedViews[editorMode]}</>;
 };
 
-export default EmbeddedLayout;
+export default observer(EmbeddedLayout);
