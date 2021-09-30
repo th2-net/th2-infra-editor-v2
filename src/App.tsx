@@ -30,6 +30,7 @@ import { useAppViewStore } from './hooks/useAppViewStore';
 import AppViewType from './models/AppViewType';
 import { useURLParamsStore } from './hooks/useURLParamsStore';
 import EmbeddedLayout from './components/embedded/EmbeddedLayout';
+import loader from "@monaco-editor/loader";
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -92,7 +93,7 @@ function App() {
 
 	useEffect(() => {
 		rootStore.init();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		loader.config({ paths: { vs: "vs" } });
 	}, []);
 
 	if (embedded) {

@@ -14,22 +14,22 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
 import { toLower } from 'lodash';
 import { BoxEntity, isBoxEntity } from '../../models/Box';
 import { scrollBar, visuallyHidden } from '../../styles/mixins';
-import Box from './Box';
+import Box, { getBoxType } from './Box';
 import Dictionary from './Dictionary';
 import { useDebouncedCallback } from 'use-debounce/lib';
-import { DictionaryEntity } from '../../models/Dictionary';
+import { DictionaryEntity, isDictionaryEntity } from '../../models/Dictionary';
+import AppViewType from '../../models/AppViewType';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
-import { useAppViewStore } from '../../hooks/useAppViewStore';
-import AppViewType from '../../models/AppViewType';
+import classNames from 'classnames';
 
 const useStyles = createUseStyles(
 	{
@@ -41,11 +41,37 @@ const useStyles = createUseStyles(
 			borderRadius: 6,
 		},
 		boxList: {
+			marginTop: '10px',
 			...scrollBar(),
+		},
+		item: {
+			paddingBottom: '6px',
+		},
+		groupItem: {
+			background: '#fff',
+			padding: '3px',
+			marginBottom: '6px',
+			borderRadius: '6px',
+		},
+		nextGroupItem: {
+			paddingBottom: '6px',
+			marginBottom: '0',
+			WebkitBorderBottomLeftRadius: '0',
+			WebkitBorderBottomRightRadius: '0',
+		},
+		prevGroupItem: {
+			WebkitBorderTopLeftRadius: '0',
+			WebkitBorderTopRightRadius: '0',
 		},
 	},
 	{ name: 'Boxes' },
 );
+
+interface GroupEntity {
+	name: string;
+}
+
+type Entity = GroupEntity | BoxEntity | DictionaryEntity;
 
 function Boxes() {
 	const boxesStore = useBoxesStore();
@@ -54,6 +80,7 @@ function Boxes() {
 
 	const [searchValue, setSearchValue] = useState('');
 	const [filter, setFilter] = useState<BoxFilters>('all');
+	const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
 	const boxes = useMemo(() => {
 		let allEntities;
@@ -73,40 +100,124 @@ function Boxes() {
 			: allEntities;
 	}, [boxesStore.boxes, boxesStore.dictionaries, boxesStore.allEntities, searchValue, filter]);
 
-	const renderBox = useCallback((index: number, box: BoxEntity | DictionaryEntity) => {
+	const getType = (box: any): string => {
 		if (isBoxEntity(box)) {
-			const group = boxesStore.groupsConfig.find(group => group.types.includes(box.spec.type));
+			return getBoxType(box);
+		} else if (isDictionaryEntity(box)) {
+			return 'dictionaries';
+		} else {
+			return box.name;
+		}
+	};
+
+	const expandGroup = useCallback(
+		(name: string): void => {
+			if (expandedGroups.includes(name)) {
+				setExpandedGroups(expandedGroups.filter(group => group !== name));
+			} else {
+				setExpandedGroups([...expandedGroups, name]);
+			}
+		},
+		[expandedGroups, setExpandedGroups],
+	);
+
+	const expandedMap = useMemo(() => {
+		const map = new Map<string, boolean>();
+
+		boxes.forEach(box => {
+			const type = getType(box);
+			map.set(type, expandedGroups.includes(type));
+		});
+
+		return map;
+	}, [boxes, expandedGroups]);
+
+	const groupedBoxes = useMemo(() => {
+		let result: Entity[] = [];
+		let singleEntities: Entity[] = [];
+
+		for (let group of expandedMap.keys()) {
+			const filteredBoxes = boxes.filter(box => getType(box) === group);
+			if (filteredBoxes.length === 1) {
+				singleEntities = [...singleEntities, ...filteredBoxes];
+				continue;
+			}
+
+			if (expandedMap.get(group)) {
+				result = [...result, { name: group }, ...filteredBoxes];
+			} else {
+				result = [...result, { name: group }];
+			}
+		}
+
+		result = [...result, ...singleEntities];
+
+		return result;
+	}, [boxes, expandedMap]);
+
+	const renderBox = useCallback(
+		(index: number, box: Entity) => {
+			if (isBoxEntity(box)) {
+				const group = boxesStore.groupsConfig.find(group =>
+					group.types.includes((box as BoxEntity).spec.type),
+				);
+				return (
+					<div
+						className={classNames(classes.groupItem, {
+							[classes.nextGroupItem]:
+								index + 1 < groupedBoxes.length &&
+								getType(groupedBoxes[index + 1]) === getType(box),
+							[classes.prevGroupItem]:
+								index - 1 >= 0 && (getType(groupedBoxes[index - 1]) === getType(box)),
+						})}>
+						<Observer>
+							{() => (
+								<Box
+									box={box}
+									color={group?.color}
+									onSelect={box => {
+										props.setViewType('box');
+										boxesStore.selectBox(box);
+									}}
+									isSelected={boxesStore.selectedBox?.name === (box as BoxEntity).name}
+								/>
+							)}
+						</Observer>
+					</div>
+				);
+			}
+			if (isDictionaryEntity(box)) {
+				return (
+					<div className={classes.item}>
+						<Observer>
+							{() => (
+								<Dictionary
+									dictionary={box}
+									onClick={() => {
+										props.setViewType('dictionary');
+										selectedDictionaryStore.selectDictionary(box);
+									}}
+								/>
+							)}
+						</Observer>
+					</div>
+				);
+			}
+
 			return (
 				<Observer>
 					{() => (
-						<Box
-							box={box}
-							color={group?.color}
-							onSelect={box => {
-								appViewStore.setViewType(AppViewType.Box);
-								boxesStore.selectBox(box);
-							}}
-							isSelected={boxesStore.selectedBox?.name === box.name}
+						<ExpandGroup
+							group={box}
+							isExpand={expandedMap.get(box.name) || false}
+							onClick={() => expandGroup(box.name)}
 						/>
 					)}
 				</Observer>
 			);
-		}
-		return (
-			<Observer>
-				{() => (
-					<Dictionary
-						dictionary={box}
-						onClick={() => {
-							appViewStore.setViewType(AppViewType.Dictionary);
-							selectedDictionaryStore.selectDictionary(box);
-						}}
-					/>
-				)}
-			</Observer>
-		);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+		},
+		[boxesStore, expandGroup, expandedMap, props, selectedDictionaryStore],
+	);
 
 	const classes = useStyles();
 
@@ -114,17 +225,99 @@ function Boxes() {
 		<div className={classes.container}>
 			<BoxFilter filter={filter} setFilter={setFilter} />
 			<BoxSearch setValue={setSearchValue} />
-			<Virtuoso
-				data={boxes}
-				itemContent={renderBox}
-				components={{ Item: props => <div style={{ paddingBottom: 6 }} {...props} /> }}
-				className={classes.boxList}
-			/>
+			<Virtuoso data={groupedBoxes} itemContent={renderBox} className={classes.boxList} />
 		</div>
 	);
 }
 
 export default observer(Boxes);
+
+const useExpandGroupStyles = createUseStyles(
+	{
+		expandGroup: {
+			height: '25px',
+			width: '100%',
+			display: 'grid',
+			gridTemplateAreas: `
+				"button name"
+			`,
+			gridTemplateRows: '1fr',
+			gridTemplateColumns: '25px 1fr',
+			gap: '6px',
+			cursor: 'pointer',
+			margin: '10px 0',
+		},
+		expanded: {
+			margin: '10px 0 0 0',
+			background: '#fff',
+			borderRadius: '6px 6px 0 0',
+		},
+		expandButton: {
+			width: '25px',
+			height: '25px',
+			border: 'none',
+			gridArea: 'button',
+			lineHeight: '25px',
+			fontWeight: 'bold',
+			fontSize: '15px',
+			background: '#fff',
+			textAlign: 'center',
+			borderRadius: '50%',
+			transition: '250ms',
+			userSelect: 'none',
+			'&:hover': {
+				background: 'rgba(255, 255, 255, 0.8)',
+			},
+			'&:active': {
+				background: 'rgba(255, 255, 255, 0.5)',
+			},
+		},
+		rotateButton: {
+			transform: 'rotate(90deg)',
+		},
+		name: {
+			width: '100%',
+			height: '100%',
+			lineHeight: '25px',
+			gridArea: 'name',
+			background: 'transperent',
+			borderRadius: '7px',
+			padding: '0 15px',
+			'&:hover': {
+				background: 'rgba(0, 0, 0, 0.1)',
+			},
+			'&:active': {
+				background: 'rgba(0, 0, 0, 0.3)',
+			},
+		},
+	},
+	{ name: 'ExpandGroup' },
+);
+interface ExpandGroupProps {
+	group: GroupEntity;
+	isExpand: boolean;
+	onClick: () => void;
+}
+
+function ExpandGroup(props: ExpandGroupProps) {
+	const classes = useExpandGroupStyles();
+
+	return (
+		<div
+			onClick={() => props.onClick()}
+			className={classNames(classes.expandGroup, {
+				[classes.expanded]: props.isExpand && props.group.name !== 'dictionaries',
+			})}>
+			<div
+				className={classNames(classes.expandButton, {
+					[classes.rotateButton]: props.isExpand,
+				})}>
+				&gt;
+			</div>
+			<div className={classes.name}>{props.group.name}</div>
+		</div>
+	);
+}
 
 const useBoxSearchStyles = createUseStyles(
 	{
