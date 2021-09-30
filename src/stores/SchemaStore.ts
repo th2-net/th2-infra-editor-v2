@@ -41,8 +41,6 @@ export class SchemaStore {
 
 	dictionaryLinksStore: DictionaryLinksStore;
 
-	isDictionary: boolean = true;
-
 	constructor(private api: Api, private readonly rootStore: RootStore) {
 		makeObservable(this, {
 			boxesStore: observable,
@@ -50,7 +48,6 @@ export class SchemaStore {
 			schemas: observable,
 			selectedSchema: observable,
 			isLoading: observable,
-			isDictionary: observable,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -114,15 +111,10 @@ export class SchemaStore {
 						this.boxesStore.selectBox(resource);
 						this.rootStore.appViewStore.setViewType('box');
 					} else if (isDictionaryEntity(resource)) {
-						this.isDictionary = true;
 						this.selectedDictionaryStore.selectDictionary(resource);
 						this.rootStore.appViewStore.setViewType('dictionary');
 					}
-				} else {
-					this.isDictionary = false;
 				}
-			} else {
-				this.isDictionary = false;
 			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {
