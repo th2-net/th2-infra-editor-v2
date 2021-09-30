@@ -38,24 +38,27 @@ const ResizeDetector = ({ onWidthChange, onHeightChange, onSizeChange, children 
 	const rootRef = React.useRef<HTMLDivElement | null>(null);
 	const oldSize = React.useRef<Size>({ width: 0, height: 0 });
 
-	const onResize: ResizeObserverCallback = React.useCallback(entries => {
-		const { width: newWidth, height: newHeight } = entries[0].contentRect;
+	const onResize: ResizeObserverCallback = React.useCallback(
+		entries => {
+			const { width: newWidth, height: newHeight } = entries[0].contentRect;
 
-		const widthChanged = newWidth !== oldSize.current.width;
-		const heightChanged = newHeight !== oldSize.current.height;
+			const widthChanged = newWidth !== oldSize.current.width;
+			const heightChanged = newHeight !== oldSize.current.height;
 
-		if (widthChanged) {
-			oldSize.current.width = newWidth;
-			onWidthChange?.(newWidth);
-		}
+			if (widthChanged) {
+				oldSize.current.width = newWidth;
+				onWidthChange?.(newWidth);
+			}
 
-		if (heightChanged) {
-			oldSize.current.height = newHeight;
-			onHeightChange?.(newHeight);
-		}
+			if (heightChanged) {
+				oldSize.current.height = newHeight;
+				onHeightChange?.(newHeight);
+			}
 
-		onSizeChange?.({ width: newWidth, height: newHeight });
-	}, []);
+			onSizeChange?.({ width: newWidth, height: newHeight });
+		},
+		[onWidthChange, onHeightChange, onSizeChange],
+	);
 
 	React.useEffect(() => {
 		const resizeObserver = new ResizeObserver(onResize);

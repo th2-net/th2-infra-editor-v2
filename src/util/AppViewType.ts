@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable } from 'mobx';
-import AppViewType from '../util/AppViewType';
+type AppViewType = 'box' | 'dictionary';
 
-class AppViewStore {
-	public viewType: AppViewType = 'box';
-
-	constructor() {
-		makeObservable(this, { viewType: observable, setViewType: action });
-	}
-
-	setViewType = (viewType: AppViewType) => {
-		this.viewType = viewType;
-	};
-}
-
-export default AppViewStore;
+export default AppViewType;

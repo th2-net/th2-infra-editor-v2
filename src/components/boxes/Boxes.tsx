@@ -25,7 +25,6 @@ import Box, { getBoxType } from './Box';
 import Dictionary from './Dictionary';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity, isDictionaryEntity } from '../../models/Dictionary';
-import AppViewType from '../../models/AppViewType';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
@@ -177,7 +176,7 @@ function Boxes() {
 									box={box}
 									color={group?.color}
 									onSelect={box => {
-										appViewStore.setViewType(AppViewType.Box);
+										appViewStore.setViewType('box');
 										boxesStore.selectBox(box);
 									}}
 									isSelected={boxesStore.selectedBox?.name === (box as BoxEntity).name}
@@ -195,7 +194,7 @@ function Boxes() {
 								<Dictionary
 									dictionary={box}
 									onClick={() => {
-										appViewStore.setViewType(AppViewType.Dictionary);
+										appViewStore.setViewType('dictionary');
 										selectedDictionaryStore.selectDictionary(box);
 									}}
 								/>
@@ -217,7 +216,7 @@ function Boxes() {
 				</Observer>
 			);
 		},
-		[boxesStore, expandGroup, expandedMap, selectedDictionaryStore],
+		[boxesStore, appViewStore, expandGroup, expandedMap, selectedDictionaryStore],
 	);
 
 	const classes = useStyles();

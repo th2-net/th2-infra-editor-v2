@@ -26,7 +26,6 @@ import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 import HistoryStore from './HistoryStore';
 import { isDictionaryEntity } from '../models/Dictionary';
 import { RootStore } from './RootStore';
-import AppViewType from '../models/AppViewType';
 import { isBoxEntity } from '../models/Box';
 
 export class SchemaStore {
@@ -113,11 +112,11 @@ export class SchemaStore {
 				if (resource) {
 					if (isBoxEntity(resource)) {
 						this.boxesStore.selectBox(resource);
-						this.rootStore.appViewStore.setViewType(AppViewType.Box);
+						this.rootStore.appViewStore.setViewType('box');
 					} else if (isDictionaryEntity(resource)) {
 						this.isDictionary = true;
 						this.selectedDictionaryStore.selectDictionary(resource);
-						this.rootStore.appViewStore.setViewType(AppViewType.Dictionary);
+						this.rootStore.appViewStore.setViewType('dictionary');
 					}
 				} else {
 					this.isDictionary = false;
