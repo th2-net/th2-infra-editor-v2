@@ -27,8 +27,8 @@ interface StylesProps {
 	headerBgColor?: string;
 }
 
-const useStyles = createUseStyles(
-	(theme: Theme) => ({
+const useStyles = createUseStyles<string, StylesProps, Theme>(
+	theme => ({
 		container: {
 			width: '100%',
 			backgroundColor: '#fff',
@@ -44,8 +44,7 @@ const useStyles = createUseStyles(
 			display: 'flex',
 			alignItems: 'center',
 			padding: '0 10px',
-			backgroundColor: (props: StylesProps) =>
-				props.headerBgColor ? props.headerBgColor : 'rgb(102, 204, 145)',
+			backgroundColor: ({ headerBgColor }) => headerBgColor ?? 'rgb(102, 204, 145)',
 			color: '#fff',
 		},
 		name: {
