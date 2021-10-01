@@ -87,7 +87,7 @@ function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
 	const classes = useStyles();
-	const { viewType, setViewType } = useAppViewStore();
+	const { viewType } = useAppViewStore();
 	const { embedded } = useURLParamsStore();
 
 	useEffect(() => {
@@ -105,7 +105,7 @@ function App() {
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
 					<Boxes />
-					{viewType === 'dictionary' && <DictionaryLayout setViewType={setViewType} />}
+					{viewType === 'dictionary' && <DictionaryLayout />}
 					{viewType === 'box' && <BoxLayout />}
 				</div>
 			) : (

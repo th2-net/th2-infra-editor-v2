@@ -32,7 +32,7 @@ export class RootStore {
 
 	async init() {
 		try {
-			await this.schemaStore.fetchSchemas();
+			await this.schemaStore.init();
 		} catch (error) {
 			console.error(error);
 		}
