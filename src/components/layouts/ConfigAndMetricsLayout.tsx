@@ -17,9 +17,11 @@
 import { createUseStyles } from 'react-jss';
 import Config from '../config';
 import Metrics from '../Metrics';
+import { scrollBar } from '../../styles/mixins';
 
 const useStyles = createUseStyles({
 	container: {
+		...scrollBar(),
 		display: 'grid',
 		gridTemplateColumns: '1fr 1fr',
 		gap: 8,
