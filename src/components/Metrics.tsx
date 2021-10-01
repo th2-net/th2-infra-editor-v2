@@ -26,25 +26,27 @@ import Input from './util/Input';
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
-		gridArea: 'metrics',
-		borderRadius: 6,
-		overflow: 'hidden',
+		borderRadius: '6px',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
 	},
 	metricsSection: {
+		margin: '0 0 1px 0',
 		height: '33%',
+		borderRadius: '6px',
 	},
 	metrics: {
 		height: '100%',
 		width: '100%',
 		border: 'none',
+		borderRadius: '6px',
 	},
 	logs: {
 		height: 'calc(100% - 40px)',
 		width: '100%',
 		border: 'none',
+		borderRadius: '6px',
 	},
 });
 

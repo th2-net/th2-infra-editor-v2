@@ -18,7 +18,6 @@ import { useEffect } from 'react';
 import { isObservable, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import classnames from 'classnames';
 import { isValidJSONArray, isValidJSONObject } from '../../helpers/files';
 import { useInput } from '../../hooks/useInput';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
@@ -33,16 +32,11 @@ import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
 		border: '1px solid',
-		gridArea: 'config',
 		borderRadius: 6,
-		overflow: 'auto',
 		padding: '15px 10px',
 		...scrollBar(),
 	},
-	noBoxSelected: {
-		display: 'grid',
-		placeItems: 'center',
-	},
+
 	inputGroup: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(2, 1fr)',
@@ -156,7 +150,7 @@ function Config() {
 		}
 	}
 
-	return boxesStore.selectedBox ? (
+	return (
 		<div className={classes.container}>
 			<div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
@@ -171,10 +165,6 @@ function Config() {
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
 			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
 			<button onClick={saveChanges}>Save</button>
-		</div>
-	) : (
-		<div className={classnames(classes.container, classes.noBoxSelected)}>
-			<p>Select a box to edit</p>
 		</div>
 	);
 }

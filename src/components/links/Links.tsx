@@ -25,11 +25,12 @@ import { useBoxesStore } from '../../hooks/useBoxesStore';
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
-		gridArea: 'links',
-		borderRadius: 6,
+
+		borderRadius: '6px',
 		overflow: 'hidden',
 		display: 'grid',
 		gridTemplateColumns: '1.5fr 1fr 1.5fr',
+		height: '100%',
 		padding: 5,
 		'&>div': {
 			flex: 1,
@@ -68,7 +69,7 @@ function Links() {
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				<Box box={boxesStore.selectedBox} editableDictionaryRelations={true}/>
+				<Box box={boxesStore.selectedBox} editableDictionaryRelations={true} />
 			</div>
 			{outgoing && (
 				<BoxConnections

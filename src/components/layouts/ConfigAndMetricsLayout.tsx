@@ -15,39 +15,30 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import Links from '../links';
-import ConfigAndMetricsLayout from './ConfigAndMetricsLayout';
-import SplitView from '../splitView/SplitView';
-import { useBoxesStore } from '../../hooks/useBoxesStore';
-import { observer } from 'mobx-react-lite';
+import Config from '../config';
+import Metrics from '../Metrics';
+import { scrollBar } from '../../styles/mixins';
 
 const useStyles = createUseStyles({
 	container: {
+		...scrollBar(),
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr',
+		gap: 8,
 		height: '100%',
-		overflow: 'hidden',
-	},
-	noBoxSelected: {
-		width: '100%',
-		height: '100%',
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
+		overflow: 'auto',
 	},
 });
 
-function BoxLayout() {
+function ConfigAndMetricsLayout() {
 	const classes = useStyles();
-	const boxesStore = useBoxesStore();
 
-	return boxesStore.selectedBox ? (
+	return (
 		<div className={classes.container}>
-			<SplitView topComponent={<Links />} bottomComponent={<ConfigAndMetricsLayout />} />
-		</div>
-	) : (
-		<div className={classes.noBoxSelected}>
-			<p>Select a box to edit</p>
+			<Config />
+			<Metrics />
 		</div>
 	);
 }
 
-export default observer(BoxLayout);
+export default ConfigAndMetricsLayout;
