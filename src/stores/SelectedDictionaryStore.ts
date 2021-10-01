@@ -14,12 +14,11 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { action, makeObservable, observable } from "mobx";
-import { DictionaryEntity } from "../models/Dictionary";
-import { RequestsStore } from "./RequestsStore";
+import { action, makeObservable, observable } from 'mobx';
+import { DictionaryEntity } from '../models/Dictionary';
+import { RequestsStore } from './RequestsStore';
 
 export class SelectedDictionaryStore {
-
 	dictionary: DictionaryEntity | null = null;
 
 	constructor(private requestsStore: RequestsStore) {
@@ -29,7 +28,7 @@ export class SelectedDictionaryStore {
 			editDictionary: action,
 		});
 	}
-	
+
 	selectDictionary = (dictionary: DictionaryEntity | null) => {
 		this.dictionary = dictionary;
 	};
@@ -39,11 +38,11 @@ export class SelectedDictionaryStore {
 			this.dictionary = {
 				...this.dictionary,
 				spec: {
-					data
-				}
-			}
+					data,
+				},
+			};
 			this.requestsStore.saveEntityChanges(this.dictionary, 'update');
 			this.requestsStore.saveChanges();
 		}
-	}
+	};
 }
