@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { ExtendedConnectionOwner, isBoxEntity, Pin } from '../../models/Box';
 import { Theme } from '../../styles/theme';
@@ -22,9 +22,8 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { ConnectionDirection, Link } from '../../models/LinksDefinition';
-import { button } from '../../styles/mixins';
+import { button, scrollBar } from '../../styles/mixins';
 import ConnectionConfig from './ConnectionConfig';
-import { computed } from 'mobx';
 import { chain } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 
@@ -81,9 +80,10 @@ const useStyles = createUseStyles((t: Theme) => ({
 		},
 	},
 	content: {
+		...scrollBar(),
 		padding: '7px',
-		display: 'grid',
-		gridTemplateRows: 'repeat(auto-fit, minmax(30px, max-content))',
+		display: 'flex',
+		flexDirection: 'column',
 		height: 'auto',
 		width: '100%',
 		overflow: 'auto',
@@ -285,7 +285,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 	return (
 		<div className={classes.editor}>
 			<div className={classes.header}>
-				<span className={classes.title}>{editableLink ? 'Edit' : 'New link'}</span>
+				<span className={classes.title}>Link Config</span>
 				<span title={link?.name} className={classes.linkName}>{`(${linkName})`}</span>
 				<span className={classes.closeButton} onClick={() => onClose()}>
 					&#10006;

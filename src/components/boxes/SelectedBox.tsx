@@ -14,14 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useRef } from 'react';
+import { useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
 import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
 import { Theme } from '../../styles/theme';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 import { getBoxType, getImageNameWithoutDomain, Status } from './Box';
-import { button } from '../../styles/mixins';
+import { button, scrollBar } from '../../styles/mixins';
 
 interface StylesProps {
 	headerBgColor?: string;
@@ -52,8 +52,10 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 			fontSize: 12,
 		},
 		body: {
+			...scrollBar(),
 			height: '100%',
 			padding: '20px',
+			overflow: 'auto',
 		},
 		row: {
 			width: '100%',
@@ -109,14 +111,14 @@ function SelectedBox(props: Props) {
 	const classes = useStyles({ headerBgColor: color });
 
 	// TODO: fix status
-	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
+	const status = useMemo(() => Object.values(BoxStatus)[box.name.length % 2], [box.name.length]);
 
 	const slicedImageName = getImageNameWithoutDomain(box.spec['image-name']);
 
 	return (
 		<div className={classes.container}>
 			<div className={classes.header}>
-				<Status status={status.current} />
+				<Status status={status} />
 				<h5 className={classes.name}>{box.name}</h5>
 			</div>
 			<div className={classes.body}>
