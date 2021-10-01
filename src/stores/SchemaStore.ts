@@ -143,19 +143,15 @@ export class SchemaStore {
 	};
 
 	async init() {
-		try {
-			await this.fetchSchemas();
+		await this.fetchSchemas();
 
-			const { schema } = this.rootStore.urlParamsStore;
+		const { schema } = this.rootStore.urlParamsStore;
 
-			if (schema && this.schemas.includes(schema)) {
-				await this.selectSchema(schema);
-				this.selectEntityFromURLParams();
-			} else if (this.schemas.length > 0) {
-				this.selectSchema(this.schemas[0]);
-			}
-		} catch (error) {
-			console.error(error);
+		if (schema && this.schemas.includes(schema)) {
+			await this.selectSchema(schema);
+			this.selectEntityFromURLParams();
+		} else if (this.schemas.length > 0) {
+			this.selectSchema(this.schemas[0]);
 		}
 	}
 }
