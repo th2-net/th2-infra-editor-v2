@@ -14,11 +14,12 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import Editor from '@monaco-editor/react';
+import React from 'react';
 import { InputConfig } from '../../hooks/useInput';
 import { defineFileFormat } from '../../helpers/files';
 import { createUseStyles } from 'react-jss';
 import { scrollBar } from '../../styles/mixins';
+import AutoResizableEditor from '../util/AutoResizableEditor';
 
 interface ConfigEditorProps {
 	configInput: InputConfig;
@@ -29,39 +30,38 @@ const useStyle = createUseStyles({
 		...scrollBar(),
 		width: '100%',
 		backgroundColor: '#fff',
-		border: (props: InputConfig) =>  props.isValid ? '1px solid #7a99b8' : '2px solid red',
+		border: (props: InputConfig) => (props.isValid ? '1px solid #7a99b8' : '2px solid red'),
 		borderRadius: 4,
 		height: '100%',
 		resize: 'none',
 		padding: 0,
 		fontSize: 13,
 		lineHeight: 14,
-		outlineColor: (props: InputConfig) => props.isValid ? 'green' : 'none',
+		outlineColor: (props: InputConfig) => (props.isValid ? 'green' : 'none'),
 		color: '#333333',
 	},
 	textarea_wrapper: {
-		display: 'flex',
-		flexDirection: 'column',
-		marginBottom: 10,
+		height: '100%',
+		display: 'grid',
+		gridTemplateRows: 'auto 1fr',
+		overflow: 'hidden',
 	},
 	textarea_label: {
+		padding: '6px 0',
 		color: '#666666',
 		fontSize: 11,
-		margin: '6px 0',
-	}
-})
+	},
+});
 
 const ConfigEditor = ({ configInput }: ConfigEditorProps) => {
-	const classes = useStyle(configInput)
+	const classes = useStyle(configInput);
 
 	return (
 		<div className={classes.textarea_wrapper}>
 			<label htmlFor={configInput.bind.name} className={classes.textarea_label}>
 				{configInput.label}
 			</label>
-			<Editor
-				height={400}
-				width='auto'
+			<AutoResizableEditor
 				language={defineFileFormat(configInput.value)}
 				value={configInput.value}
 				options={{

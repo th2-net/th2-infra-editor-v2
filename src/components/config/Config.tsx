@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { useEffect } from 'react';
-import { isObservable, reaction, toJS } from 'mobx';
+import { isObservable, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import classnames from 'classnames';
@@ -107,29 +107,28 @@ function Config() {
 	});
 
 	useEffect(() => {
-		const boxSubscription = reaction(
-			() => boxesStore.selectedBox,
-			box => {
-				customConfig.setValue(
-					box && box?.spec['custom-config']
-						? JSON.stringify(box?.spec['custom-config'], null, 4)
-						: '',
-				);
-				pinsConfig.setValue(box && box.spec.pins ? JSON.stringify(box.spec.pins, null, 4) : '');
-				imageName.setValue(box?.spec['image-name'] || '');
-				imageVersion.setValue(box?.spec['image-version'] || '');
-				extendedSettings.setValue(
-					box?.spec['extended-settings']
-						? JSON.stringify(box?.spec['extended-settings'], null, 4)
-						: '',
-				);
-				name.setValue(box?.name || '');
-				type.setValue(box?.kind || '');
-			},
+		const box = boxesStore.selectedBox;
+		customConfig.setValue(
+			box && box?.spec['custom-config'] ? JSON.stringify(box?.spec['custom-config'], null, 4) : '',
 		);
-
-		return boxSubscription;
-	}, []);
+		pinsConfig.setValue(box && box.spec.pins ? JSON.stringify(box.spec.pins, null, 4) : '');
+		imageName.setValue(box?.spec['image-name'] || '');
+		imageVersion.setValue(box?.spec['image-version'] || '');
+		extendedSettings.setValue(
+			box?.spec['extended-settings'] ? JSON.stringify(box?.spec['extended-settings'], null, 4) : '',
+		);
+		name.setValue(box?.name || '');
+		type.setValue(box?.kind || '');
+	}, [
+		boxesStore.selectedBox,
+		customConfig,
+		extendedSettings,
+		imageName,
+		imageVersion,
+		name,
+		pinsConfig,
+		type,
+	]);
 
 	function saveChanges() {
 		const isConfigValid =

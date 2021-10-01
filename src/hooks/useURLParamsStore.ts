@@ -11,17 +11,13 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import Api from './api/api';
-import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
+import { useRootStore } from './useRootStore';
 
-const rootStore = createRootStore(new Api());
+export const useURLParamsStore = () => {
+	const rootStore = useRootStore();
 
-function StoresProvider({ children }: React.PropsWithChildren<{ api?: Api }>) {
-	return <RootStoreContext.Provider value={rootStore}>{children}</RootStoreContext.Provider>;
-}
-
-export default StoresProvider;
+	return rootStore.urlParamsStore;
+};

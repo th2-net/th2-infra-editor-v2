@@ -15,13 +15,43 @@
  ***************************************************************************** */
 
 import React from 'react';
-import Api from './api/api';
-import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
+import { createUseStyles } from 'react-jss';
 
-const rootStore = createRootStore(new Api());
+const useStyles = createUseStyles({
+	container: {
+		width: '100%',
+		height: '100%',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	'@keyframes spin': {
+		from: { transform: 'rotate(0deg)' },
+		to: { transform: 'rotate(360deg)' },
+	},
+	spinner: {
+		marginRight: 8,
+		height: '16px',
+		width: '16px',
+		border: '3px solid #1111',
+		borderTop: '3px solid #4D4D4D',
+		borderRadius: '50%',
+		animationName: '$spin',
+		animationDuration: '1s',
+		animationTimingFunction: 'linear',
+		animationIterationCount: 'infinite',
+	},
+});
 
-function StoresProvider({ children }: React.PropsWithChildren<{ api?: Api }>) {
-	return <RootStoreContext.Provider value={rootStore}>{children}</RootStoreContext.Provider>;
-}
+const LoadingScreen = () => {
+	const classes = useStyles();
 
-export default StoresProvider;
+	return (
+		<div className={classes.container}>
+			<div className={classes.spinner} />
+			<p>Loading</p>
+		</div>
+	);
+};
+
+export default LoadingScreen;
