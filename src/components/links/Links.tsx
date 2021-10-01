@@ -20,7 +20,7 @@ import { scrollBar } from '../../styles/mixins';
 import BoxConnections from './BoxConnections';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ConnectionEditor from '../editors/ConnectionEditor';
 import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
 import SelectedBox from '../boxes/SelectedBox';
@@ -113,6 +113,12 @@ function Links() {
 		setShowEditor(true);
 	};
 
+	const color = useMemo(() => {
+		return boxesStore.groupsConfig.find(group =>
+			group.types.includes(boxesStore?.selectedBox?.spec.type ?? ''),
+		)?.color;
+	}, [boxesStore.groupsConfig, boxesStore?.selectedBox?.spec.type]);
+
 	useEffect(() => {
 		setShowEditor(false);
 	}, [boxesStore.selectedBox]);
@@ -142,6 +148,7 @@ function Links() {
 					<SelectedBox
 						box={boxesStore.selectedBox}
 						createNewLink={() => openLinkEditor(true, 'from')}
+						color={color}
 					/>
 				)}
 			</div>

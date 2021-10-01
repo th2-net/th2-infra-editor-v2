@@ -70,7 +70,7 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		type: {
 			color: '#fff',
 			flexShrink: 0,
-			backgroundColor: 'rgb(102, 204, 145)',
+			backgroundColor: ({ headerBgColor }) => headerBgColor ?? 'rgb(102, 204, 145)',
 		},
 		selectable: {
 			cursor: 'pointer',
@@ -121,11 +121,7 @@ function SelectedBox(props: Props) {
 			</div>
 			<div className={classes.body}>
 				<div className={classes.row}>
-					<span
-						style={{ backgroundColor: color }}
-						className={classNames(classes.bodyValue, classes.type)}>
-						{getBoxType(box)}
-					</span>
+					<span className={classNames(classes.bodyValue, classes.type)}>{getBoxType(box)}</span>
 					<span className={classes.bodyValue}>{slicedImageName}</span>
 				</div>
 				<DictionaryLinksEditor />
