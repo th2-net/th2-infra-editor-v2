@@ -26,7 +26,8 @@ import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
 import { useSelectedDictionaryStore } from './hooks/useSelectedDictionaryStore';
 import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
-import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff'
+import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff';
+import loader from "@monaco-editor/loader";
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -94,6 +95,8 @@ function App() {
 
 	useEffect(() => {
 		rootStore.init();
+		loader.config({ paths: { vs: "vs" } });
+
 	}, []);
 
 	return (
