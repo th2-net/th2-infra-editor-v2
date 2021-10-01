@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import Header from './components/Header';
@@ -24,10 +24,12 @@ import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
-import { useSelectedDictionaryStore } from './hooks/useSelectedDictionaryStore';
 import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
 import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff';
-import loader from "@monaco-editor/loader";
+import { useAppViewStore } from './hooks/useAppViewStore';
+import { useURLParamsStore } from './hooks/useURLParamsStore';
+import EmbeddedLayout from './components/embedded/EmbeddedLayout';
+import loader from '@monaco-editor/loader';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -81,33 +83,29 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 }));
 
-export type AppView = 'dictionary' | 'box';
-
 function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
-	const selectedDictionaryStore = useSelectedDictionaryStore();
 	const classes = useStyles();
-
-	const [viewType, setViewType] = useState<AppView>(
-		selectedDictionaryStore.dictionary ? 'dictionary' : 'box',
-	);
+	const { viewType } = useAppViewStore();
+	const { embedded } = useURLParamsStore();
 
 	useEffect(() => {
 		rootStore.init();
-		loader.config({ paths: { vs: "vs" } });
+		loader.config({ paths: { vs: 'vs' } });
+	}, [rootStore]);
 
-	}, []);
+	if (embedded) {
+		return <EmbeddedLayout />;
+	}
 
 	return (
 		<div className={classes.app}>
 			<Header />
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
-					<Boxes setViewType={setViewType} />
-					{viewType === 'dictionary' && (
-						<DictionaryLayout setViewType={setViewType}/>
-					)}
+					<Boxes />
+					{viewType === 'dictionary' && <DictionaryLayout />}
 					{viewType === 'box' && <BoxLayout />}
 				</div>
 			) : (
