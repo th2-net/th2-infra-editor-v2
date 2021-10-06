@@ -27,9 +27,9 @@ import { useRootStore } from './hooks/useRootStore';
 import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
 import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff';
 import { useAppViewStore } from './hooks/useAppViewStore';
-import AppViewType from './models/AppViewType';
 import { useURLParamsStore } from './hooks/useURLParamsStore';
 import EmbeddedLayout from './components/embedded/EmbeddedLayout';
+import loader from '@monaco-editor/loader';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -87,13 +87,13 @@ function App() {
 	const rootStore = useRootStore();
 	const schemaStore = useSchemaStore();
 	const classes = useStyles();
-	const { viewType, setViewType } = useAppViewStore();
+	const { viewType } = useAppViewStore();
 	const { embedded } = useURLParamsStore();
 
 	useEffect(() => {
 		rootStore.init();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+		loader.config({ paths: { vs: 'vs' } });
+	}, [rootStore]);
 
 	if (embedded) {
 		return <EmbeddedLayout />;
@@ -105,8 +105,8 @@ function App() {
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
 					<Boxes />
-					{viewType === AppViewType.Dictionary && <DictionaryLayout setViewType={setViewType} />}
-					{viewType === AppViewType.Box && <BoxLayout />}
+					{viewType === 'dictionary' && <DictionaryLayout />}
+					{viewType === 'box' && <BoxLayout />}
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>

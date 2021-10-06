@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, makeObservable, observable, reaction } from 'mobx';
+import { action, flow, makeObservable, observable } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { Schema } from '../models/Schema';
@@ -26,7 +26,6 @@ import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 import HistoryStore from './HistoryStore';
 import { isDictionaryEntity } from '../models/Dictionary';
 import { RootStore } from './RootStore';
-import AppViewType from '../models/AppViewType';
 import { isBoxEntity } from '../models/Box';
 
 export class SchemaStore {
@@ -42,16 +41,14 @@ export class SchemaStore {
 
 	dictionaryLinksStore: DictionaryLinksStore;
 
-	isDictionary: boolean = true;
-
 	constructor(private api: Api, private readonly rootStore: RootStore) {
 		makeObservable(this, {
 			boxesStore: observable,
 			selectSchema: action,
 			schemas: observable,
+			selectedSchemaName: observable,
 			selectedSchema: observable,
 			isLoading: observable,
-			isDictionary: observable,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -65,13 +62,13 @@ export class SchemaStore {
 			this.selectedDictionaryStore,
 			this.boxesStore,
 		);
-
-		reaction(() => this.selectedSchema, this.onSchemaChange);
 	}
 
 	schemas: string[] = [];
 
-	selectedSchema: string | null = null;
+	selectedSchemaName: string | null = null;
+
+	selectedSchema: Schema | null = null;
 
 	isLoading = false;
 
@@ -86,14 +83,6 @@ export class SchemaStore {
 				console.error(error);
 			}
 		}
-
-		const { schema } = this.rootStore.urlParamsStore;
-
-		if (schema && this.schemas.includes(schema) && schema !== this.selectedSchema) {
-			this.selectSchema(schema);
-		} else if (this.schemas.length > 0) {
-			this.selectSchema(this.schemas[0]);
-		}
 	});
 
 	fetchSchemaState = flow(function* (this: SchemaStore, schemaName: string) {
@@ -101,30 +90,12 @@ export class SchemaStore {
 
 		try {
 			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
+
+			this.selectedSchema = schema;
 			this.boxesStore.setBoxes(schema.resources);
 			this.boxesStore.setDictionaries(schema.resources);
 			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
-
-			const { object } = this.rootStore.urlParamsStore;
-
-			if (object) {
-				const resource = schema.resources.find(resource => resource.name === object);
-				if (resource) {
-					if (isBoxEntity(resource)) {
-						this.boxesStore.selectBox(resource);
-						this.rootStore.appViewStore.setViewType(AppViewType.Box);
-					} else if (isDictionaryEntity(resource)) {
-						this.isDictionary = true;
-						this.selectedDictionaryStore.selectDictionary(resource);
-						this.rootStore.appViewStore.setViewType(AppViewType.Dictionary);
-					}
-				} else {
-					this.isDictionary = false;
-				}
-			} else {
-				this.isDictionary = false;
-			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
@@ -134,19 +105,53 @@ export class SchemaStore {
 		}
 	});
 
-	selectSchema = (schema: string) => {
-		this.selectedSchema = schema;
-	};
-
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
-	private onSchemaChange = (selectedSchema: string | null) => {
+	selectSchema = (schemaName: string): CancellablePromise<void> => {
+		this.selectedSchemaName = schemaName;
+		this.clearEntities();
 		this.currentSchemaRequest?.cancel();
-		this.currentSchemaRequest = selectedSchema ? this.fetchSchemaState(selectedSchema) : null;
+		this.currentSchemaRequest = this.fetchSchemaState(schemaName);
+
+		return this.currentSchemaRequest;
+	};
+
+	private clearEntities = () => {
 		this.boxesStore.setBoxes([]);
 		this.boxesStore.selectBox(null);
 		this.boxesStore.setDictionaries([]);
 		this.selectedDictionaryStore.selectDictionary(null);
 		this.boxUpdater.setLinkDefinitions([]);
 	};
+
+	private selectEntityFromURLParams = () => {
+		const { object } = this.rootStore.urlParamsStore;
+
+		if (object) {
+			const resource = this.selectedSchema?.resources.find(resource => resource.name === object);
+
+			if (resource) {
+				if (isBoxEntity(resource)) {
+					this.boxesStore.selectBox(resource);
+					this.rootStore.appViewStore.setViewType('box');
+				} else if (isDictionaryEntity(resource)) {
+					this.selectedDictionaryStore.selectDictionary(resource);
+					this.rootStore.appViewStore.setViewType('dictionary');
+				}
+			}
+		}
+	};
+
+	async init() {
+		await this.fetchSchemas();
+
+		const { schema } = this.rootStore.urlParamsStore;
+
+		if (schema && this.schemas.includes(schema)) {
+			await this.selectSchema(schema);
+			this.selectEntityFromURLParams();
+		} else if (this.schemas.length > 0) {
+			this.selectSchema(this.schemas[0]);
+		}
+	}
 }

@@ -18,27 +18,33 @@ import { createUseStyles } from 'react-jss';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import BoxLinksEditor from '../editors/BoxLinksEditor';
 import DictionaryEditor from '../editors/DictionaryEditor';
-import AppViewType from '../../models/AppViewType';
-
-interface Props {
-	setViewType: (viewType: AppViewType) => void;
-}
+import { useAppViewStore } from '../../hooks/useAppViewStore';
+import { observer } from 'mobx-react-lite';
 
 const useStyles = createUseStyles({
-	dictionaryLayout: {},
+	dictionaryLayout: {
+		width: '100%',
+		height: 700,
+		display: 'grid',
+		gridTemplateRows: 'auto 1fr auto',
+		placeItems: 'start',
+	},
 });
 
-function DictionaryLayout({ setViewType }: Props) {
+function DictionaryLayout() {
 	const classes = useStyles();
 	const { dictionary, editDictionary } = useSelectedDictionaryStore();
+	const { setViewType } = useAppViewStore();
 
 	return (
-		<div className={classes.dictionaryLayout}>
-			<button onClick={() => setViewType(AppViewType.Box)}>back</button>
-			<DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />
-			<BoxLinksEditor />
-		</div>
+		dictionary && (
+			<div className={classes.dictionaryLayout}>
+				<button onClick={() => setViewType('box')}>back</button>
+				<DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />
+				<BoxLinksEditor />
+			</div>
+		)
 	);
 }
 
-export default DictionaryLayout;
+export default observer(DictionaryLayout);

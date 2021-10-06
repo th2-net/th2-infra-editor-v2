@@ -14,19 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
-import DictionaryEditor from '../editors/DictionaryEditor';
-import { observer } from 'mobx-react-lite';
+type AppViewType = 'box' | 'dictionary';
 
-const EmbeddedDictionaryEditor = () => {
-	const { dictionary, editDictionary } = useSelectedDictionaryStore();
-
-	if (!dictionary) {
-		return <div>Dictionary not found</div>;
-	}
-
-	return <DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />;
-};
-
-export default observer(EmbeddedDictionaryEditor);
+export default AppViewType;

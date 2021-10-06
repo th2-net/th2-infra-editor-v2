@@ -15,33 +15,43 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { useURLParamsStore } from '../../hooks/useURLParamsStore';
-import EmbeddedDictionaryEditor from './EmbeddedDictionaryEditor';
-import { useSchemaStore } from '../../hooks/useSchemaStore';
-import LoadingScreen from './LoadingScreen';
-import { observer } from 'mobx-react-lite';
+import { createUseStyles } from 'react-jss';
 
-interface EmbeddedViews {
-	[editorMode: string]: React.ReactNode;
-}
+const useStyles = createUseStyles({
+	container: {
+		width: '100%',
+		height: '100%',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	'@keyframes spin': {
+		from: { transform: 'rotate(0deg)' },
+		to: { transform: 'rotate(360deg)' },
+	},
+	spinner: {
+		marginRight: 8,
+		height: '16px',
+		width: '16px',
+		border: '3px solid #1111',
+		borderTop: '3px solid #4D4D4D',
+		borderRadius: '50%',
+		animationName: '$spin',
+		animationDuration: '1s',
+		animationTimingFunction: 'linear',
+		animationIterationCount: 'infinite',
+	},
+});
 
-const embeddedViews: EmbeddedViews = {
-	dictionaryEditor: <EmbeddedDictionaryEditor />,
+const LoadingScreen = () => {
+	const classes = useStyles();
+
+	return (
+		<div className={classes.container}>
+			<div className={classes.spinner} />
+			<p>Loading</p>
+		</div>
+	);
 };
 
-const EmbeddedLayout = () => {
-	const { editorMode } = useURLParamsStore();
-	const { isLoading } = useSchemaStore();
-
-	if (!editorMode || !embeddedViews[editorMode]) {
-		return <div>Please provide a valid editorMode</div>;
-	}
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	return <>{embeddedViews[editorMode]}</>;
-};
-
-export default observer(EmbeddedLayout);
+export default LoadingScreen;

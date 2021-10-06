@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -63,10 +62,8 @@ function Metrics() {
 	const [component, setComponent] = useState<string>('');
 	const [searchDebouncedValue, setSearchDebouncedValue] = useState<string>('');
 
-	const options = computed(
-		() =>
-			schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`,
-	).get();
+	const options =
+		schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`;
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {
