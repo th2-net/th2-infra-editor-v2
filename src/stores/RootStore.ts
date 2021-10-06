@@ -16,17 +16,23 @@
 
 import Api from '../api/api';
 import { SchemaStore } from './SchemaStore';
+import URLParamsStore from './URLParamsStore';
+import AppViewStore from './AppViewStore';
 
 export class RootStore {
 	schemaStore: SchemaStore;
 
+	readonly urlParamsStore = new URLParamsStore();
+
+	readonly appViewStore: AppViewStore = new AppViewStore();
+
 	constructor(private api: Api) {
-		this.schemaStore = new SchemaStore(api);
+		this.schemaStore = new SchemaStore(api, this);
 	}
 
 	async init() {
 		try {
-			await this.schemaStore.fetchSchemas();
+			await this.schemaStore.init();
 		} catch (error) {
 			console.error(error);
 		}

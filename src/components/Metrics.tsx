@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { computed, reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
@@ -27,25 +26,27 @@ import Input from './util/Input';
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
-		gridArea: 'metrics',
-		borderRadius: 6,
-		overflow: 'hidden',
+		borderRadius: '6px',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
 	},
 	metricsSection: {
+		margin: '0 0 1px 0',
 		height: '33%',
+		borderRadius: '6px',
 	},
 	metrics: {
 		height: '100%',
 		width: '100%',
 		border: 'none',
+		borderRadius: '6px',
 	},
 	logs: {
 		height: 'calc(100% - 40px)',
 		width: '100%',
 		border: 'none',
+		borderRadius: '6px',
 	},
 });
 
@@ -63,7 +64,8 @@ function Metrics() {
 	const [component, setComponent] = useState<string>('');
 	const [searchDebouncedValue, setSearchDebouncedValue] = useState<string>('');
 
-	const options = computed(() => schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`).get()
+	const options =
+		schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`;
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {
@@ -90,15 +92,8 @@ function Metrics() {
 	}, [search.value, setDebouncedValue]);
 
 	useEffect(() => {
-		const boxSubscription = reaction(
-			() => boxesStore.selectedBox,
-			box => {
-				setComponent(box?.name || '');
-			},
-		);
-
-		return boxSubscription;
-	}, [boxesStore]);
+		setComponent(boxesStore.selectedBox?.name || '');
+	}, [boxesStore.selectedBox]);
 
 	if (!options || !logsOptions || !metricsOptions) return null;
 

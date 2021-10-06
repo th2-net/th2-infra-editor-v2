@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,19 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import Api from './api/api';
-import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
+import { action, makeObservable, observable } from 'mobx';
+import AppViewType from '../util/AppViewType';
 
-const rootStore = createRootStore(new Api());
+class AppViewStore {
+	public viewType: AppViewType = 'box';
 
-function StoresProvider({ children }: React.PropsWithChildren<{ api?: Api }>) {
-	return <RootStoreContext.Provider value={rootStore}>{children}</RootStoreContext.Provider>;
+	constructor() {
+		makeObservable(this, { viewType: observable, setViewType: action });
+	}
+
+	setViewType = (viewType: AppViewType) => {
+		this.viewType = viewType;
+	};
 }
 
-export default StoresProvider;
+export default AppViewStore;
