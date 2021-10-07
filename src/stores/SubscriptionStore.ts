@@ -51,7 +51,9 @@ export default class SubscriptionStore {
 	};
 
 	async init() {
-		if (!this.schemasStore.selectedSchema) return;
+		if (!this.schemasStore.selectedSchema) {
+			throw new Error("'selectedSchema' field shouldn't be undefined");
+		}
 		this.subscription = this.api.subscribeOnChanges(this.schemasStore.selectedSchemaName ?? '');
 
 		this.subscription.onopen = () => {
