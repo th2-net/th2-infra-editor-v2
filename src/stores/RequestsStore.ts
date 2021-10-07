@@ -14,24 +14,23 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { isEqual } from "lodash";
-import { action, computed, makeObservable, observable } from "mobx";
-import Api from "../api/api";
-import { BoxEntity } from "../models/Box";
-import { DictionaryEntity, DictionaryLinksEntity } from "../models/Dictionary";
-import { RequestModel } from "../models/FileBase";
-import { LinksDefinition } from "../models/LinksDefinition";
-import { SchemaStore } from "./SchemaStore";
+import { isEqual } from 'lodash';
+import { action, computed, makeObservable, observable } from 'mobx';
+import Api from '../api/api';
+import { BoxEntity } from '../models/Box';
+import { DictionaryEntity, DictionaryLinksEntity } from '../models/Dictionary';
+import { RequestModel } from '../models/FileBase';
+import { LinksDefinition } from '../models/LinksDefinition';
+import { SchemaStore } from './SchemaStore';
 
 export class RequestsStore {
-
 	constructor(private api: Api, private schemaStore: SchemaStore) {
 		makeObservable(this, {
 			isSaving: observable,
 			preparedRequests: observable,
-			selectedSchema: computed,
+			selectedSchemaName: computed,
 			saveChanges: action,
-			saveEntityChanges: action
+			saveEntityChanges: action,
 		});
 	}
 
@@ -39,8 +38,8 @@ export class RequestsStore {
 
 	preparedRequests: RequestModel[] = [];
 
-	public get selectedSchema(): string | null {
-		return this.schemaStore.selectedSchema;
+	public get selectedSchemaName(): string | null {
+		return this.schemaStore.selectedSchemaName;
 	}
 
 	saveEntityChanges = (
@@ -50,11 +49,11 @@ export class RequestsStore {
 		if (
 			!this.preparedRequests.some(
 				request =>
-				request.payload.name === entity.name &&
-				request.operation === operation &&
-				isEqual(request.payload, entity)
+					request.payload.name === entity.name &&
+					request.operation === operation &&
+					isEqual(request.payload, entity),
 			)
-				) {
+		) {
 			this.preparedRequests.push({
 				operation,
 				payload: entity,
@@ -63,10 +62,10 @@ export class RequestsStore {
 	};
 
 	saveChanges = async () => {
-		if (!this.selectedSchema || this.preparedRequests.length === 0) return;
+		if (!this.selectedSchemaName || this.preparedRequests.length === 0) return;
 		try {
 			this.isSaving = true;
-			await this.api.sendSchemaRequest(this.selectedSchema, this.preparedRequests);
+			await this.api.sendSchemaRequest(this.selectedSchemaName, this.preparedRequests);
 			this.preparedRequests = [];
 		} catch (error) {
 			alert("Couldn't save changes");

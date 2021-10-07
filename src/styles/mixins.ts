@@ -68,3 +68,25 @@ export function buttonReset(): Styles {
 		backgroundColor: 'transparent'
 	}
 }
+
+export function button(): Styles {
+	return {
+		...buttonReset(),
+		height: '30px',
+		width: 'auto',
+		borderRadius: '17px',
+		color: '#fff',
+		padding: '7px 12px',
+		textTransform: 'capitalize',
+		outline: 'none',
+		border: 'none',
+		margin: '0 15px',
+		boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
+		fontWeight: '600',
+		fontSize: '13px',
+		lineHeight: '16px',
+		position: 'relative',
+		transition: '250ms',
+		userSelect: 'none',
+	}
+}

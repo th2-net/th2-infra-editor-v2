@@ -15,10 +15,9 @@
  ***************************************************************************** */
 
 import { useEffect } from 'react';
-import { isObservable, reaction, toJS } from 'mobx';
+import { isObservable, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import classnames from 'classnames';
 import { isValidJSONArray, isValidJSONObject } from '../../helpers/files';
 import { useInput } from '../../hooks/useInput';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
@@ -34,16 +33,12 @@ const useStyles = createUseStyles((t: Theme) => ({
 	container: {
 		border: '1px solid',
 		borderRadius: 6,
-		overflow: 'auto',
 		padding: '15px 10px',
 		height: '100%',
 		width: '100%',
 		...scrollBar(),
 	},
-	noBoxSelected: {
-		display: 'grid',
-		placeItems: 'center',
-	},
+
 	inputGroup: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(2, 1fr)',
@@ -108,29 +103,28 @@ function Config() {
 	});
 
 	useEffect(() => {
-		const boxSubscription = reaction(
-			() => boxesStore.selectedBox,
-			box => {
-				customConfig.setValue(
-					box && box?.spec['custom-config']
-						? JSON.stringify(box?.spec['custom-config'], null, 4)
-						: '',
-				);
-				pinsConfig.setValue(box && box.spec.pins ? JSON.stringify(box.spec.pins, null, 4) : '');
-				imageName.setValue(box?.spec['image-name'] || '');
-				imageVersion.setValue(box?.spec['image-version'] || '');
-				extendedSettings.setValue(
-					box?.spec['extended-settings']
-						? JSON.stringify(box?.spec['extended-settings'], null, 4)
-						: '',
-				);
-				name.setValue(box?.name || '');
-				type.setValue(box?.kind || '');
-			},
+		const box = boxesStore.selectedBox;
+		customConfig.setValue(
+			box && box?.spec['custom-config'] ? JSON.stringify(box?.spec['custom-config'], null, 4) : '',
 		);
-
-		return boxSubscription;
-	}, []);
+		pinsConfig.setValue(box && box.spec.pins ? JSON.stringify(box.spec.pins, null, 4) : '');
+		imageName.setValue(box?.spec['image-name'] || '');
+		imageVersion.setValue(box?.spec['image-version'] || '');
+		extendedSettings.setValue(
+			box?.spec['extended-settings'] ? JSON.stringify(box?.spec['extended-settings'], null, 4) : '',
+		);
+		name.setValue(box?.name || '');
+		type.setValue(box?.kind || '');
+	}, [
+		boxesStore.selectedBox,
+		customConfig,
+		extendedSettings,
+		imageName,
+		imageVersion,
+		name,
+		pinsConfig,
+		type,
+	]);
 
 	function saveChanges() {
 		const isConfigValid =
@@ -158,7 +152,7 @@ function Config() {
 		}
 	}
 
-	return boxesStore.selectedBox ? (
+	return (
 		<div className={classes.container}>
 			<div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
@@ -173,10 +167,6 @@ function Config() {
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
 			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
 			<button onClick={saveChanges}>Save</button>
-		</div>
-	) : (
-		<div className={classnames(classes.container, classes.noBoxSelected)}>
-			<p>Select a box to edit</p>
 		</div>
 	);
 }

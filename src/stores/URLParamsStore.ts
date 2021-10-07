@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,25 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import Api from './api/api';
-import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
+class URLParamsStore {
+	readonly schema: string | null = null;
 
-const rootStore = createRootStore(new Api());
+	readonly object: string | null = null;
 
-function StoresProvider({ children }: React.PropsWithChildren<{ api?: Api }>) {
-	return <RootStoreContext.Provider value={rootStore}>{children}</RootStoreContext.Provider>;
+	readonly editorMode: string | null = null;
+
+	readonly embedded: boolean = false;
+
+	constructor() {
+		const searchParams = new URLSearchParams(window.location.search.slice(1));
+
+		this.schema = searchParams.get('schema');
+		this.object = searchParams.get('object');
+		this.editorMode = searchParams.get('editorMode');
+		this.embedded = searchParams.get('embedded') === 'true';
+
+		window.history.replaceState({}, '', window.location.pathname);
+	}
 }
 
-export default StoresProvider;
+export default URLParamsStore;

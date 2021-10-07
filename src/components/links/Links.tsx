@@ -16,19 +16,25 @@
 
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
-import Box from '../boxes/Box';
 import { scrollBar } from '../../styles/mixins';
 import BoxConnections from './BoxConnections';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useEffect, useMemo, useState } from 'react';
+import ConnectionEditor from '../editors/ConnectionEditor';
+import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
+import SelectedBox from '../boxes/SelectedBox';
+import { ConnectionDirection, Link } from '../../models/LinksDefinition';
+import { chain } from 'lodash';
 
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
-		borderRadius: 6,
+		borderRadius: '6px',
 		overflow: 'hidden',
 		display: 'grid',
 		gridTemplateColumns: '1.5fr 1fr 1.5fr',
+		height: '100%',
 		padding: 5,
 		'&>div': {
 			flex: 1,
@@ -36,8 +42,6 @@ const useStyles = createUseStyles({
 			...scrollBar(),
 		},
 		position: 'relative',
-		height: '100%',
-		width: '100%',
 	},
 	selectedBox: {
 		display: 'grid',
@@ -55,6 +59,69 @@ function Links() {
 	const boxUpdater = useBoxUpdater();
 
 	const [incoming, outgoing] = boxUpdater.selectedBoxConnections;
+	const [showEditor, setShowEditor] = useState(false);
+	const [linkToEdit, setLinkToEdit] = useState<Link<ExtendedConnectionOwner>>();
+
+	const onSubmit = (value: Link<ExtendedConnectionOwner>) => {
+		if (linkToEdit) {
+			boxUpdater.changeLink(linkToEdit, value);
+		} else {
+			boxUpdater.addLink(value);
+		}
+	};
+
+	const onDelete = () => {
+		if (linkToEdit) {
+			boxUpdater.deleteLink(linkToEdit).then();
+		}
+	};
+
+	const onClose = () => setShowEditor(false);
+
+	const openLinkEditor = (
+		create: boolean,
+		direction: ConnectionDirection,
+		box?: BoxEntity,
+		pin?: Pin,
+	) => {
+		if (create) {
+			setLinkToEdit(undefined);
+			setShowEditor(true);
+			return;
+		}
+
+		if (!box && !pin) {
+			setLinkToEdit({
+				name: boxesStore.selectedBox?.name || '',
+				[direction]: {
+					box: boxesStore.selectedBox?.name,
+					pin: '',
+				},
+			});
+			setShowEditor(true);
+			return;
+		}
+
+		const selectedLink = chain(boxUpdater.links)
+			.filter(link => link[direction]?.box === boxesStore.selectedBox?.name)
+			.filter(link => link[direction]?.pin === pin?.name)
+			.filter(link => link[direction]?.connectionType === pin?.['connection-type'])
+			.head()
+			.value();
+
+		setLinkToEdit(selectedLink);
+		setShowEditor(true);
+	};
+
+	const color = useMemo(() => {
+		return boxesStore.groupsConfig.find(group =>
+			group.types.includes(boxesStore?.selectedBox?.spec.type ?? ''),
+		)?.color;
+	}, [boxesStore.groupsConfig, boxesStore?.selectedBox?.spec.type]);
+
+	useEffect(() => {
+		setShowEditor(false);
+	}, [boxesStore.selectedBox]);
 
 	if (!boxesStore.selectedBox) return null;
 
@@ -66,10 +133,24 @@ function Links() {
 					onBoxSelect={boxesStore.selectBox}
 					direction='to'
 					maxDepth={2}
+					editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
 				/>
 			)}
 			<div className={classes.selectedBox}>
-				<Box box={boxesStore.selectedBox} editableDictionaryRelations={true}/>
+				{showEditor ? (
+					<ConnectionEditor
+						editableLink={linkToEdit}
+						onSubmit={onSubmit}
+						onDelete={onDelete}
+						onClose={onClose}
+					/>
+				) : (
+					<SelectedBox
+						box={boxesStore.selectedBox}
+						createNewLink={() => openLinkEditor(true, 'from')}
+						color={color}
+					/>
+				)}
 			</div>
 			{outgoing && (
 				<BoxConnections
@@ -77,6 +158,7 @@ function Links() {
 					onBoxSelect={boxesStore.selectBox}
 					direction='from'
 					maxDepth={2}
+					editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
 				/>
 			)}
 		</div>
