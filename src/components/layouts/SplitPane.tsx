@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useMemo, useRef, useState } from 'react';
+import { ReactNode, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-
-interface StylesProps {
-	rows: string;
-	columns: string;
-	rowsPreview: string;
-	columnsPreview: string;
-}
 
 const pane = {
 	display: 'grid',
@@ -74,23 +67,23 @@ const splitter = {
 	},
 };
 
-const useStyles = createUseStyles<string, StylesProps>({
-	verticalSplitPane: props => ({
+const useStyles = createUseStyles({
+	verticalSplitPane: {
 		gridTemplateAreas: `
              "first"
              "splitter"
              "second"
          `,
-		gridTemplateRows: props.columns,
-		gridTemplateColumns: props.rows,
+		gridTemplateRows: '1fr 16px 1fr',
+		gridTemplateColumns: '1fr',
 		...pane,
-	}),
+	},
 	horizontalSplitPane: props => ({
 		gridTemplateAreas: `
              "first splitter second"
          `,
-		gridTemplateRows: props.rows,
-		gridTemplateColumns: props.columns,
+		gridTemplateRows: '1fr',
+		gridTemplateColumns: '1fr 16px 1fr',
 		...pane,
 	}),
 	verticalSplitPreview: props => ({
@@ -99,8 +92,8 @@ const useStyles = createUseStyles<string, StylesProps>({
              "splitter"
              "second"
          `,
-		gridTemplateRows: props.columnsPreview,
-		gridTemplateColumns: props.rowsPreview,
+		gridTemplateRows: '1fr 16px 1fr',
+		gridTemplateColumns: '1fr',
 		cursor: 'row-resize',
 		...preview,
 	}),
@@ -108,8 +101,8 @@ const useStyles = createUseStyles<string, StylesProps>({
 		gridTemplateAreas: `
              "first splitter second"
          `,
-		gridTemplateRows: props.rowsPreview,
-		gridTemplateColumns: props.columnsPreview,
+		gridTemplateRows: '1fr',
+		gridTemplateColumns: '1fr 16px 1fr',
 		cursor: 'col-resize',
 		...preview,
 	}),
@@ -170,8 +163,8 @@ const useStyles = createUseStyles<string, StylesProps>({
 });
 
 export interface Props {
-	first: React.ReactNode;
-	second: React.ReactNode;
+	first: ReactNode;
+	second: ReactNode;
 	isVertical?: boolean;
 	firstMinSize?: number;
 	secondMinSize?: number;
@@ -184,48 +177,67 @@ function SplitPane({
 	firstMinSize = 0,
 	secondMinSize = 0,
 }: Props) {
-	const [offset, setOffset] = useState(50);
-	const [offsetPreview, setOffsetPreview] = useState(50);
 	const [isDragging, setIsDragging] = useState(false);
-
-	const stylesProps = useMemo<StylesProps>(() => {
-		return {
-			rows: '1fr',
-			columns: `minmax(${firstMinSize}px, ${offset}%) 16px minmax(${secondMinSize}px, 1fr)`,
-			rowsPreview: '1fr',
-			columnsPreview: `minmax(${firstMinSize}px, ${offsetPreview}%) 16px  minmax(${secondMinSize}px, 1fr)`,
-		};
-	}, [offset, offsetPreview, firstMinSize, secondMinSize]);
-
-	const classes = useStyles(stylesProps);
+	const [startMousePos, setStartMousePos] = useState({ x: 0, y: 0 });
 
 	const root = useRef<HTMLDivElement>(null);
+	const preview = useRef<HTMLDivElement>(null);
+
+	const updateStyles = useCallback(
+		(el: RefObject<HTMLElement>, offset: number): void => {
+			if (el.current) {
+				if (!isVertical) {
+					el.current.style.gridTemplateColumns = `minmax(${firstMinSize}px, ${offset}%) 16px  minmax(${secondMinSize}px, 1fr)`;
+					el.current.style.gridTemplateRows = '1fr';
+				} else {
+					el.current.style.gridTemplateRows = `minmax(${firstMinSize}px, ${offset}%) 16px  minmax(${secondMinSize}px, 1fr)`;
+					el.current.style.gridTemplateColumns = '1fr';
+				}
+			}
+		},
+		[firstMinSize, isVertical, secondMinSize],
+	);
+
+	console.log('++');
+
+	const classes = useStyles();
 
 	const splitterMouseDown = (e: React.MouseEvent) => {
 		e.preventDefault();
 		if (root.current) {
-			root.current.addEventListener('mousemove', onMouseMove);
-			root.current.addEventListener('mouseleave', onMouseUpOrLeave);
-			root.current.addEventListener('mouseup', onMouseUpOrLeave);
-		}
+			root.current.addEventListener('mousemove', onMouseMove, { passive: true });
+			root.current.addEventListener('mouseleave', onMouseUpOrLeave, { passive: true });
+			root.current.addEventListener('mouseup', onMouseUpOrLeave, { passive: true });
 
-		setIsDragging(true);
-	};
-
-	const getOffset = (x: number, y: number): number => {
-		const splitterOffset = 8;
-
-		const clientRect = root.current!.getBoundingClientRect();
-		const moveValue = { x: x - clientRect.left, y: y - clientRect.top };
-		if (isVertical) {
-			return ((moveValue.y - splitterOffset) / root.current!.offsetHeight) * 100;
-		} else {
-			return ((moveValue.x - splitterOffset) / root.current!.offsetWidth) * 100;
+			setIsDragging(true);
+			// updateStyles(preview, getOffset(e.clientX, e.clientY));
+			setStartMousePos({ x: e.clientX, y: e.clientY });
 		}
 	};
+
+	const getOffset = useCallback(
+		(x: number, y: number): number => {
+			const splitterOffset = 8;
+
+			const clientRect = root.current!.getBoundingClientRect();
+			const moveValue = { x: x - clientRect.left, y: y - clientRect.top };
+			if (isVertical) {
+				return ((moveValue.y - splitterOffset) / root.current!.offsetHeight) * 100;
+			} else {
+				return ((moveValue.x - splitterOffset) / root.current!.offsetWidth) * 100;
+			}
+		},
+		[isVertical],
+	);
+
+	useEffect(() => {
+		if (isDragging) {
+			updateStyles(preview, getOffset(startMousePos.x, startMousePos.y));
+		}
+	}, [getOffset, isDragging, startMousePos.x, startMousePos.y, updateStyles]);
 
 	const onMouseMove = (e: MouseEvent) => {
-		setOffsetPreview(getOffset(e.clientX, e.clientY));
+		updateStyles(preview, getOffset(e.clientX, e.clientY));
 	};
 
 	const onMouseUpOrLeave = (e: MouseEvent) => {
@@ -235,7 +247,7 @@ function SplitPane({
 			root.current.removeEventListener('mouseleave', onMouseUpOrLeave);
 		}
 		setIsDragging(false);
-		setOffset(getOffset(e.clientX, e.clientY));
+		updateStyles(root, getOffset(e.clientX, e.clientY));
 	};
 
 	return (
@@ -243,7 +255,9 @@ function SplitPane({
 			className={isVertical ? classes.verticalSplitPane : classes.horizontalSplitPane}
 			ref={root}>
 			{isDragging ? (
-				<div className={isVertical ? classes.verticalSplitPreview : classes.horizontalSplitPreview}>
+				<div
+					ref={preview}
+					className={isVertical ? classes.verticalSplitPreview : classes.horizontalSplitPreview}>
 					<div className={classes.splitPreviewFirst} />
 					<div className={classes.splitPreviewSecond} />
 				</div>
@@ -251,7 +265,8 @@ function SplitPane({
 			<div className={classes.splitPaneFirst}>{first}</div>
 			<div
 				className={isVertical ? classes.verticalSplitter : classes.horizontalSplitter}
-				onMouseDown={splitterMouseDown}></div>
+				onMouseDown={splitterMouseDown}
+			/>
 			<div className={classes.splitPaneSecond}>{second}</div>
 		</div>
 	);
