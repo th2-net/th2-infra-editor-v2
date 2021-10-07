@@ -26,3 +26,5 @@ test-schema.json
 
 # ide
 .idea
+
+/public/vs
