@@ -14,10 +14,10 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, makeObservable, observable } from 'mobx';
+import { action, flow, flowResult, makeObservable, observable } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
-import { Schema } from '../models/Schema';
+import { isSettingsEntity, Schema, SchemaSettings } from '../models/Schema';
 import { BoxesStore } from './BoxesStore';
 import { BoxUpdater } from './BoxUpdater';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
@@ -27,6 +27,8 @@ import HistoryStore from './HistoryStore';
 import { isDictionaryEntity } from '../models/Dictionary';
 import { RootStore } from './RootStore';
 import { isBoxEntity } from '../models/Box';
+import SubscriptionStore from './SubscriptionStore';
+import { chain } from 'lodash';
 
 export class SchemaStore {
 	boxesStore = new BoxesStore();
@@ -41,6 +43,10 @@ export class SchemaStore {
 
 	dictionaryLinksStore: DictionaryLinksStore;
 
+	subscriptionStore: SubscriptionStore;
+
+	schemaSettings: SchemaSettings | null;
+
 	constructor(private api: Api, private readonly rootStore: RootStore) {
 		makeObservable(this, {
 			boxesStore: observable,
@@ -49,6 +55,8 @@ export class SchemaStore {
 			selectedSchemaName: observable,
 			selectedSchema: observable,
 			isLoading: observable,
+			schemaSettings: observable,
+			fetchSchemaState: flow,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -62,6 +70,10 @@ export class SchemaStore {
 			this.selectedDictionaryStore,
 			this.boxesStore,
 		);
+
+		this.subscriptionStore = new SubscriptionStore(this.api, this);
+
+		this.schemaSettings = null;
 	}
 
 	schemas: string[] = [];
@@ -78,14 +90,14 @@ export class SchemaStore {
 		try {
 			this.schemas = yield this.api.fetchSchemasList();
 		} catch (error) {
-			if (error.name !== 'AbortError') {
+			if (error instanceof DOMException && error.code === error.ABORT_ERR) {
 				console.error('Error occured while loading schemas');
 				console.error(error);
 			}
 		}
 	});
 
-	fetchSchemaState = flow(function* (this: SchemaStore, schemaName: string) {
+	fetchSchemaState = function* (this: SchemaStore, schemaName: string) {
 		this.isLoading = true;
 
 		try {
@@ -96,14 +108,15 @@ export class SchemaStore {
 			this.boxesStore.setDictionaries(schema.resources);
 			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
+			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
 		} catch (error) {
-			if (error.name !== 'AbortError') {
+			if (error instanceof DOMException && error.code === error.ABORT_ERR) {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
 			}
 		} finally {
 			this.isLoading = false;
 		}
-	});
+	};
 
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
@@ -111,7 +124,7 @@ export class SchemaStore {
 		this.selectedSchemaName = schemaName;
 		this.clearEntities();
 		this.currentSchemaRequest?.cancel();
-		this.currentSchemaRequest = this.fetchSchemaState(schemaName);
+		this.currentSchemaRequest = flowResult(this.fetchSchemaState(schemaName));
 
 		return this.currentSchemaRequest;
 	};

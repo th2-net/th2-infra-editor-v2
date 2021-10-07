@@ -100,6 +100,7 @@ interface ConnectionBoxProps {
 	onBoxSelect: (box: BoxEntity) => void;
 	isEditable: boolean;
 	onClickLink: () => void;
+	status?: BoxStatus;
 }
 
 export default function ConnectedBox({
@@ -109,11 +110,9 @@ export default function ConnectedBox({
 	onBoxSelect,
 	onClickLink,
 	isEditable,
+	status,
 }: ConnectionBoxProps) {
 	const classes = useConnectionBoxStyles();
-
-	// TODO: fix status
-	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
 
 	const hueValue = useMemo(() => {
 		const hashCode = getHashCode(pin.name);
@@ -131,7 +130,7 @@ export default function ConnectedBox({
 	return (
 		<div className={classes.box} style={{ direction: direction === 'to' ? 'rtl' : 'ltr' }}>
 			<div className={classes.header} onClick={handleBoxClick}>
-				<Status status={status.current} />
+				<Status status={status ?? BoxStatus.PENDING} />
 				<div className={classes.values}>
 					<span className={classes.name} title={box.name}>
 						{box.name}

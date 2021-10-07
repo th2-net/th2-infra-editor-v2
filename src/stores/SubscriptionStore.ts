@@ -9,18 +9,10 @@ enum Events {
 }
 
 export default class SubscriptionStore {
-	constructor(
-		private api: ApiSchema,
-		private schemasStore: SchemaStore,
-	) {
+	constructor(private api: ApiSchema, private schemasStore: SchemaStore) {
 		makeObservable(this, {
-			subscription: observable,
-			isSubscriptionSuccessful: observable,
-			isConnectionOpen: observable,
 			boxStates: observable,
-			isReconnecting: observable,
-			closeConnection: action,
-			init: action
+			init: action,
 		});
 
 		reaction(
@@ -28,7 +20,7 @@ export default class SubscriptionStore {
 			schemaSettings => {
 				const propagation = schemaSettings?.spec['k8s-propagation'];
 				if (propagation) {
-					this.subscription?.close();
+					this.closeConnection();
 					if (['sync', 'rule'].includes(propagation)) {
 						this.init();
 					}
@@ -37,32 +29,32 @@ export default class SubscriptionStore {
 		);
 	}
 
-	subscription: EventSource | null = null;
+	private subscription: EventSource | null = null;
 
-	public isSubscriptionSuccessful = false;
+	private isSubscriptionSuccessful = false;
 
-	public isConnectionOpen = false;
+	private isConnectionOpen = false;
 
 	public boxStates = new Map<string, BoxStatus>();
 
-	 isReconnecting = false;
+	private isReconnecting = false;
 
-	public closeConnection = () => {
+	private closeConnection = () => {
 		this.subscription?.close();
+		this.boxStates.clear();
 	};
 
 	private fetchChanges = async () => {
 		if (this.schemasStore.selectedSchema) {
-			this.schemasStore.fetchSchemaState(this.schemasStore.selectedSchema);
+			this.schemasStore.fetchSchemaState(this.schemasStore.selectedSchemaName ?? '');
 		}
 	};
 
 	async init() {
 		if (!this.schemasStore.selectedSchema) return;
-		this.subscription = this.api.subscribeOnChanges(this.schemasStore.selectedSchema);
+		this.subscription = this.api.subscribeOnChanges(this.schemasStore.selectedSchemaName ?? '');
 
 		this.subscription.onopen = () => {
-
 			this.isSubscriptionSuccessful = true;
 			this.isConnectionOpen = true;
 			if (this.isReconnecting) {
@@ -85,7 +77,7 @@ export default class SubscriptionStore {
 		});
 
 		this.subscription.addEventListener(Events.RepositoryUpdate, () => {
-			this.fetchChanges()
+			this.fetchChanges();
 		});
 	}
 }
