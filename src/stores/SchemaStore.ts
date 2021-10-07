@@ -14,21 +14,21 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, makeObservable, observable, reaction } from 'mobx';
+import { action, flow, makeObservable, observable } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
-import { isSettingsEntity, Schema, SchemaSettings } from '../models/Schema';
+import { Schema } from '../models/Schema';
 import { BoxesStore } from './BoxesStore';
 import { BoxUpdater } from './BoxUpdater';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
 import { RequestsStore } from './RequestsStore';
 import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 import HistoryStore from './HistoryStore';
-import { chain } from 'lodash';
-import SubscriptionStore from './SubscriptionStore';
+import { isDictionaryEntity } from '../models/Dictionary';
+import { RootStore } from './RootStore';
+import { isBoxEntity } from '../models/Box';
 
 export class SchemaStore {
-
 	boxesStore = new BoxesStore();
 
 	history = new HistoryStore(this);
@@ -41,83 +41,42 @@ export class SchemaStore {
 
 	dictionaryLinksStore: DictionaryLinksStore;
 
-	subscriptionStore: SubscriptionStore;
-
-	schemaSettings: SchemaSettings | null;
-
-	schemas: string[] = [];
-
-	selectedSchema: string | null = null;
-
-	isLoading = false;
-
-	public fetchSchemaState = flow(function* (this: SchemaStore, schemaName: string) {
-		this.isLoading = true;
-
-		try {
-			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
-			this.boxesStore.setBoxes(schema.resources);
-			this.boxesStore.setDictionaries(schema.resources);
-			this.boxUpdater.setLinkDefinitions(schema.resources);
-			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
-			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
-		} catch (error) {
-			if (error.name !== 'AbortError') {
-				console.error(`Error occured while fetching schema ${schemaName}`, error);
-			}
-		} finally {
-			this.isLoading = false;
-		}
-	});
-	private currentSchemaRequest: CancellablePromise<void> | null = null;
-
-	constructor(private api: Api) {
+	constructor(private api: Api, private readonly rootStore: RootStore) {
 		makeObservable(this, {
+			boxesStore: observable,
 			selectSchema: action,
 			schemas: observable,
+			selectedSchemaName: observable,
 			selectedSchema: observable,
 			isLoading: observable,
-			fetchSchemaState: action,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
 
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
 
-		this.boxUpdater = new BoxUpdater(
-			this.requestsStore,
-			this.boxesStore,
-			this.history,
-		);
+		this.boxUpdater = new BoxUpdater(this.requestsStore, this.boxesStore, this.history);
 
 		this.dictionaryLinksStore = new DictionaryLinksStore(
 			this.requestsStore,
 			this.selectedDictionaryStore,
 			this.boxesStore,
 		);
-
-		this.subscriptionStore = new SubscriptionStore(
-			this.api,
-			this,
-		);
-
-		this.schemaSettings = null;
-
-		reaction(() => this.selectedSchema, this.onSchemaChange);
 	}
 
-	selectSchema = (schema: string) => {
-		this.selectedSchema = schema;
-	};
+	schemas: string[] = [];
+
+	selectedSchemaName: string | null = null;
+
+	selectedSchema: Schema | null = null;
+
+	isLoading = false;
 
 	fetchSchemas = flow(function* (this: SchemaStore) {
 		this.isLoading = true;
 
 		try {
 			this.schemas = yield this.api.fetchSchemasList();
-			if (this.schemas.length > 0) {
-				this.selectSchema(this.schemas[0]);
-			}
 		} catch (error) {
 			if (error.name !== 'AbortError') {
 				console.error('Error occured while loading schemas');
@@ -126,13 +85,73 @@ export class SchemaStore {
 		}
 	});
 
-	private onSchemaChange = (selectedSchema: string | null) => {
+	fetchSchemaState = flow(function* (this: SchemaStore, schemaName: string) {
+		this.isLoading = true;
+
+		try {
+			const schema: Schema = yield this.api.fetchSchemaState(schemaName);
+
+			this.selectedSchema = schema;
+			this.boxesStore.setBoxes(schema.resources);
+			this.boxesStore.setDictionaries(schema.resources);
+			this.boxUpdater.setLinkDefinitions(schema.resources);
+			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
+		} catch (error) {
+			if (error.name !== 'AbortError') {
+				console.error(`Error occured while fetching schema ${schemaName}`, error);
+			}
+		} finally {
+			this.isLoading = false;
+		}
+	});
+
+	private currentSchemaRequest: CancellablePromise<void> | null = null;
+
+	selectSchema = (schemaName: string): CancellablePromise<void> => {
+		this.selectedSchemaName = schemaName;
+		this.clearEntities();
 		this.currentSchemaRequest?.cancel();
-		this.currentSchemaRequest = selectedSchema ? this.fetchSchemaState(selectedSchema) : null;
+		this.currentSchemaRequest = this.fetchSchemaState(schemaName);
+
+		return this.currentSchemaRequest;
+	};
+
+	private clearEntities = () => {
 		this.boxesStore.setBoxes([]);
 		this.boxesStore.selectBox(null);
 		this.boxesStore.setDictionaries([]);
 		this.selectedDictionaryStore.selectDictionary(null);
 		this.boxUpdater.setLinkDefinitions([]);
 	};
+
+	private selectEntityFromURLParams = () => {
+		const { object } = this.rootStore.urlParamsStore;
+
+		if (object) {
+			const resource = this.selectedSchema?.resources.find(resource => resource.name === object);
+
+			if (resource) {
+				if (isBoxEntity(resource)) {
+					this.boxesStore.selectBox(resource);
+					this.rootStore.appViewStore.setViewType('box');
+				} else if (isDictionaryEntity(resource)) {
+					this.selectedDictionaryStore.selectDictionary(resource);
+					this.rootStore.appViewStore.setViewType('dictionary');
+				}
+			}
+		}
+	};
+
+	async init() {
+		await this.fetchSchemas();
+
+		const { schema } = this.rootStore.urlParamsStore;
+
+		if (schema && this.schemas.includes(schema)) {
+			await this.selectSchema(schema);
+			this.selectEntityFromURLParams();
+		} else if (this.schemas.length > 0) {
+			this.selectSchema(this.schemas[0]);
+		}
+	}
 }

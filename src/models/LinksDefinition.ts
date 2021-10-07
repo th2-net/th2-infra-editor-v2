@@ -33,8 +33,8 @@ export interface LinksDefinition extends FileBase {
 
 export interface Link<T extends ConnectionOwner | ExtendedConnectionOwner> {
 	name: string;
-	from: T;
-	to: T;
+	from?: T;
+	to?: T;
 }
 
 export interface LinkArrow {
@@ -57,3 +57,5 @@ export function isLink(object: unknown): object is Link<ConnectionOwner | Extend
 		(object as Link<ConnectionOwner | ExtendedConnectionOwner>).from !== undefined
 	);
 }
+
+export type ConnectionDirection = 'to' | 'from';

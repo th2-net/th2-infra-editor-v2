@@ -14,14 +14,31 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import Api from './api/api';
-import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
+import { createUseStyles } from 'react-jss';
+import Config from '../config';
+import Metrics from '../Metrics';
+import { scrollBar } from '../../styles/mixins';
 
-const rootStore = createRootStore(new Api());
+const useStyles = createUseStyles({
+	container: {
+		...scrollBar(),
+		display: 'grid',
+		gridTemplateColumns: '1fr 1fr',
+		gap: 8,
+		height: '100%',
+		overflow: 'auto',
+	},
+});
 
-function StoresProvider({ children }: React.PropsWithChildren<{ api?: Api }>) {
-	return <RootStoreContext.Provider value={rootStore}>{children}</RootStoreContext.Provider>;
+function ConfigAndMetricsLayout() {
+	const classes = useStyles();
+
+	return (
+		<div className={classes.container}>
+			<Config />
+			<Metrics />
+		</div>
+	);
 }
 
-export default StoresProvider;
+export default ConfigAndMetricsLayout;
