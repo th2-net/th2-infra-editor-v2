@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /.pnp
+/.vscode
 .pnp.js
 
 # testing
@@ -27,4 +28,5 @@ test-schema.json
 # ide
 .idea
 
+licenses.csv
 /public/vs
