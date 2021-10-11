@@ -1,7 +1,7 @@
 {
 	"homepage": ".",
 	"name": "th2-infra-editor",
-	"version": "2.0.9",
+	"version": "2.0.10",
 	"private": true,
 	"dependencies": {
 		"@monaco-editor/react": "^4.2.1",
@@ -33,7 +33,7 @@
 	},
 	"scripts": {
 		"start": "react-scripts start",
-		"build": "npm run validate && react-scripts build && npm run initEditor",
+		"build": "npm ci && npm run validate && npm run initEditor && react-scripts build",
 		"postinstall": "npm run initEditor",
 		"initEditor": "node initEditor.js",
 		"test": "react-scripts test",
