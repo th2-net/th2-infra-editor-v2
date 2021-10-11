@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
@@ -25,11 +25,11 @@ import Box, { getBoxType } from './Box';
 import Dictionary from './Dictionary';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity, isDictionaryEntity } from '../../models/Dictionary';
-import { AppView } from '../../App';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import Icon from '../Icon';
 import classNames from 'classnames';
+import { useAppViewStore } from '../../hooks/useAppViewStore';
 
 const useStyles = createUseStyles(
 	{
@@ -67,19 +67,16 @@ const useStyles = createUseStyles(
 	{ name: 'Boxes' },
 );
 
-interface Props {
-	setViewType: (viewType: AppView) => void;
-}
-
 interface GroupEntity {
 	name: string;
 }
 
 type Entity = GroupEntity | BoxEntity | DictionaryEntity;
 
-function Boxes(props: Props) {
+function Boxes() {
 	const boxesStore = useBoxesStore();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
+	const appViewStore = useAppViewStore();
 
 	const [searchValue, setSearchValue] = useState('');
 	const [filter, setFilter] = useState<BoxFilters>('all');
@@ -171,7 +168,7 @@ function Boxes(props: Props) {
 								index + 1 < groupedBoxes.length &&
 								getType(groupedBoxes[index + 1]) === getType(box),
 							[classes.prevGroupItem]:
-								index - 1 >= 0 && (getType(groupedBoxes[index - 1]) === getType(box)),
+								index - 1 >= 0 && getType(groupedBoxes[index - 1]) === getType(box),
 						})}>
 						<Observer>
 							{() => (
@@ -179,7 +176,7 @@ function Boxes(props: Props) {
 									box={box}
 									color={group?.color}
 									onSelect={box => {
-										props.setViewType('box');
+										appViewStore.setViewType('box');
 										boxesStore.selectBox(box);
 									}}
 									isSelected={boxesStore.selectedBox?.name === (box as BoxEntity).name}
@@ -197,7 +194,7 @@ function Boxes(props: Props) {
 								<Dictionary
 									dictionary={box}
 									onClick={() => {
-										props.setViewType('dictionary');
+										appViewStore.setViewType('dictionary');
 										selectedDictionaryStore.selectDictionary(box);
 									}}
 								/>
@@ -219,7 +216,7 @@ function Boxes(props: Props) {
 				</Observer>
 			);
 		},
-		[boxesStore, expandGroup, expandedMap, props, selectedDictionaryStore],
+		[boxesStore, appViewStore, expandGroup, expandedMap, selectedDictionaryStore],
 	);
 
 	const classes = useStyles();
@@ -283,7 +280,7 @@ const useExpandGroupStyles = createUseStyles(
 			height: '100%',
 			lineHeight: '25px',
 			gridArea: 'name',
-			background: 'transperent',
+			background: 'transparent',
 			borderRadius: '7px',
 			padding: '0 15px',
 			'&:hover': {

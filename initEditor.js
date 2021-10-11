@@ -14,14 +14,26 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
-import Api from './api/api';
-import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
+const fs = require('fs-extra');
 
-const rootStore = createRootStore(new Api());
+const dir = './public/vs';
 
-function StoresProvider({ children }: React.PropsWithChildren<{ api?: Api }>) {
-	return <RootStoreContext.Provider value={rootStore}>{children}</RootStoreContext.Provider>;
+if (!fs.existsSync(dir)) {
+	fs.mkdirSync(dir);
+} else {
+	fs.emptyDirSync(dir);
 }
 
-export default StoresProvider;
+Promise.all([
+	fs.copy('./node_modules/monaco-editor/min/vs/base', './public/vs/base'),
+	fs.copy('./node_modules/monaco-editor/min/vs/editor/', './public/vs/editor', {
+		filter: (src) => {
+			const files = ['editor.main.css', 'editor.main.js', 'editor.main.nls.js'];
+			return !/\.(js|css)?$/.test(src) || files.some(file => src.includes(file));
+		},
+	}),
+	fs.copy('./node_modules/monaco-editor/min/vs/language/json', './public/vs/language/json'),
+	fs.copy('./node_modules/monaco-editor/min/vs/loader.js', './public/vs/loader.js'),
+]).catch(() => {
+	throw new Error('Failed to copy editor files');
+});

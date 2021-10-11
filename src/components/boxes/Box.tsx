@@ -25,6 +25,11 @@ export function getBoxType(box: BoxEntity) {
 	return box.spec.type ? box.spec.type.replace(/^(th2-)/, '') : box.name;
 }
 
+export function getImageNameWithoutDomain(imageName: string): string {
+	const splitedImageName = imageName.split('/');
+	return splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
+}
+
 interface StylesProps {
 	boxBodySpacing: number;
 }
@@ -137,9 +142,7 @@ function Box(props: Props) {
 	// TODO: fix status
 	const status = useRef(Object.values(BoxStatus)[box.name.length % 2]);
 
-	const imageName = box.spec['image-name'];
-	const splitedImageName = imageName.split('/');
-	const slicedImageName = splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
+	const slicedImageName = getImageNameWithoutDomain(box.spec['image-name']);
 
 	return (
 		<div

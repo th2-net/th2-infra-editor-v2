@@ -15,13 +15,33 @@
  ***************************************************************************** */
 
 import React from 'react';
-import Api from './api/api';
-import RootStoreContext, { createRootStore } from './contexts/rootStoreContext';
+import { useURLParamsStore } from '../../hooks/useURLParamsStore';
+import EmbeddedDictionaryEditor from './EmbeddedDictionaryEditor';
+import { useSchemaStore } from '../../hooks/useSchemaStore';
+import LoadingScreen from './LoadingScreen';
+import { observer } from 'mobx-react-lite';
 
-const rootStore = createRootStore(new Api());
-
-function StoresProvider({ children }: React.PropsWithChildren<{ api?: Api }>) {
-	return <RootStoreContext.Provider value={rootStore}>{children}</RootStoreContext.Provider>;
+interface EmbeddedViews {
+	[editorMode: string]: React.ReactNode;
 }
 
-export default StoresProvider;
+const embeddedViews: EmbeddedViews = {
+	dictionaryEditor: <EmbeddedDictionaryEditor />,
+};
+
+const EmbeddedLayout = () => {
+	const { editorMode } = useURLParamsStore();
+	const { isLoading } = useSchemaStore();
+
+	if (!editorMode || !embeddedViews[editorMode]) {
+		return <div>Please provide a valid editorMode</div>;
+	}
+
+	if (isLoading) {
+		return <LoadingScreen />;
+	}
+
+	return <>{embeddedViews[editorMode]}</>;
+};
+
+export default observer(EmbeddedLayout);

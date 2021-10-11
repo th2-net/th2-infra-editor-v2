@@ -40,7 +40,7 @@ function Header() {
 			{schemaStore.schemas.length !== 0 && (
 				<select
 					onChange={e => schemaStore.selectSchema(e.target.value)}
-					value={schemaStore.selectedSchema || undefined}>
+					value={schemaStore.selectedSchemaName || undefined}>
 					{schemaStore.schemas.map(schema => (
 						<option key={schema} value={schema}>
 							{schema}

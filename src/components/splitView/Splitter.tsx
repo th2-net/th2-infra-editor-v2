@@ -11,43 +11,64 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import Links from '../links';
-import ConfigAndMetricsLayout from './ConfigAndMetricsLayout';
-import SplitView from '../splitView/SplitView';
-import { useBoxesStore } from '../../hooks/useBoxesStore';
-import { observer } from 'mobx-react-lite';
 
 const useStyles = createUseStyles({
 	container: {
 		height: '100%',
-		overflow: 'hidden',
+		display: 'grid',
+		alignContent: 'center',
+		gridAutoFlow: 'column',
+		justifyItems: 'center',
 	},
-	noBoxSelected: {
-		width: '100%',
-		height: '100%',
+	item: {
 		display: 'flex',
+		alignContent: 'center',
+		gap: 8,
+		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
+	triangleUp: {
+		width: 0,
+		height: 0,
+		borderLeft: '5px solid transparent',
+		borderRight: '5px solid transparent',
+		borderBottom: ' 5px solid black',
+	},
+	triangleDown: {
+		width: 0,
+		height: 0,
+		borderLeft: '5px solid transparent',
+		borderRight: '5px solid transparent',
+		borderTop: ' 5px solid black',
+	},
+	dots: {
+		alignSelf: 'center',
+		height: '150%',
+	},
 });
 
-function BoxLayout() {
+function Splitter() {
 	const classes = useStyles();
-	const boxesStore = useBoxesStore();
 
-	return boxesStore.selectedBox ? (
+	return (
 		<div className={classes.container}>
-			<SplitView topComponent={<Links />} bottomComponent={<ConfigAndMetricsLayout />} />
-		</div>
-	) : (
-		<div className={classes.noBoxSelected}>
-			<p>Select a box to edit</p>
+			<div className={classes.item}>
+				<div className={classes.triangleUp} />
+				<div className={classes.dots}>. . .</div>
+				<div className={classes.triangleDown} />
+			</div>
+			<div className={classes.item}>
+				<div className={classes.triangleUp} />
+				<div className={classes.dots}>. . .</div>
+				<div className={classes.triangleDown} />
+			</div>
 		</div>
 	);
 }
 
-export default observer(BoxLayout);
+export default Splitter;

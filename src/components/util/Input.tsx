@@ -61,6 +61,7 @@ const Input = ({ inputConfig }: InputProps) => {
 				{inputConfig.label}
 			</label>
 			<input
+				disabled={inputConfig.isDisabled}
 				{...inputConfig.bind}
 				type='text'
 				className={classNames(classes.input, {

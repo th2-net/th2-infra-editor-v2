@@ -28,6 +28,7 @@ interface UseInputProps {
 	validate?: (value: string) => boolean;
 	autoFocus?: boolean;
 	spellCheck?: boolean;
+	disabled?: boolean;
 }
 
 export interface InputConfig {
@@ -37,6 +38,7 @@ export interface InputConfig {
 	reset: () => void;
 	isValid: boolean;
 	isDirty: boolean;
+	isDisabled: boolean;
 	autocomplete?: {
 		datalistKey: string;
 		variants: string[];
@@ -60,6 +62,7 @@ export const useInput = ({
 	autocomplete,
 	autoFocus,
 	spellCheck = false,
+ disabled = false,
 }: UseInputProps): InputConfig => {
 	const [value, setValue] = React.useState(initialValue);
 	const [isValid, setIsValid] = React.useState(true);
@@ -87,6 +90,7 @@ export const useInput = ({
 		reset: () => setValue(''),
 		isValid,
 		isDirty,
+		isDisabled: disabled,
 		autocomplete,
 		bind: {
 			value,
