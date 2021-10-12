@@ -33,6 +33,7 @@ Promise.all([
 		},
 	}),
 	fs.copy('./node_modules/monaco-editor/min/vs/language/json', './public/vs/language/json'),
+	fs.copy('./node_modules/monaco-editor/min/vs/basic-languages/xml', './public/vs/basic-languages/xml'),
 	fs.copy('./node_modules/monaco-editor/min/vs/loader.js', './public/vs/loader.js'),
 ]).catch(() => {
 	throw new Error('Failed to copy editor files');
