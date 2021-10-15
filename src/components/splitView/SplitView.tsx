@@ -17,24 +17,19 @@
 import React from 'react';
 import { createUseStyles } from 'react-jss';
 import Splitter from './Splitter';
+import classNames from 'classnames';
 
 type SplitViewProps = {
 	topComponent: React.ReactNode;
 	bottomComponent: React.ReactNode;
 };
 
-type StylesProps = {
-	topComponentHeight: number;
-	isDragging: boolean;
-};
-
-const useStyles = createUseStyles<string, StylesProps>({
+const useStyles = createUseStyles({
 	container: {
 		display: 'grid',
 		height: '100%',
 		overflow: 'hidden',
-
-		gridTemplateRows: ({ topComponentHeight }) => `${topComponentHeight}px 15px 1fr`,
+		position: 'relative',
 	},
 
 	splitter: {
@@ -45,18 +40,22 @@ const useStyles = createUseStyles<string, StylesProps>({
 		position: 'relative',
 		overflow: 'hidden',
 		borderRadius: '6px',
+	},
 
-		'&:after': {
-			content: "''",
-			position: 'absolute',
-			top: 0,
-			bottom: 0,
-			left: 0,
-			right: 0,
+	preview: {
+		position: 'absolute',
+		top: '0',
+		left: '0',
+		height: '100%',
+		width: '100%',
+	},
 
-			cursor: ({ isDragging }) => (isDragging ? 'row-resize' : 'default'),
-			display: ({ isDragging }) => (isDragging ? 'block' : 'none'),
-		},
+	previewPanel: {
+		background: 'rgba(0, 0, 0, 0.25)',
+	},
+
+	none: {
+		display: 'none',
 	},
 });
 
@@ -67,27 +66,25 @@ type MouseEvents = {
 
 function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 	const rootRef = React.useRef<HTMLDivElement>(null);
+	const rootRefPreview = React.useRef<HTMLDivElement>(null);
+	const topComponentRef = React.useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = React.useState(false);
-	const [topComponentHeight, setTopComponentHeight] = React.useState(200);
 	const [mouseEvents, setMouseEvents] = React.useState<MouseEvents | null>(null);
 
 	const startY = React.useRef(0);
-	const lastTopComponentHeight = React.useRef(topComponentHeight);
-
-	const classes = useStyles({ isDragging, topComponentHeight });
+	const lastTopComponentHeight = React.useRef(0);
+	const classes = useStyles();
 
 	const splitterMouseDown = (e: React.MouseEvent) => {
-		setIsDragging(true);
-		lastTopComponentHeight.current = topComponentHeight;
-		startY.current = e.pageY;
-		e.preventDefault();
+		if (topComponentRef.current) {
+			setIsDragging(true);
+			startY.current = e.pageY;
+			lastTopComponentHeight.current = topComponentRef.current.getBoundingClientRect().height;
+			e.preventDefault();
+		}
 	};
 
-	const onMouseUp = React.useCallback(() => {
-		setIsDragging(false);
-	}, []);
-
-	const onMouseMove = React.useCallback((e: MouseEvent) => {
+	const calculateHeight = React.useCallback((e: MouseEvent): string => {
 		if (rootRef.current) {
 			const newHeight = lastTopComponentHeight.current - startY.current + e.pageY;
 
@@ -95,11 +92,29 @@ function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 
 			const maxHeight = rootRef.current.getBoundingClientRect().height - 15;
 
-			const limitedHeight = Math.min(nonNegativeHeight, maxHeight);
-
-			setTopComponentHeight(limitedHeight);
+			return `${Math.min(nonNegativeHeight, maxHeight)}px 15px 1fr`;
 		}
+		return '1fr 15px 1fr';
 	}, []);
+
+	const onMouseUp = React.useCallback(
+		(e: MouseEvent) => {
+			setIsDragging(false);
+			if (rootRef.current) {
+				rootRef.current.style.gridTemplateRows = calculateHeight(e);
+			}
+		},
+		[calculateHeight],
+	);
+
+	const onMouseMove = React.useCallback(
+		(e: MouseEvent) => {
+			if (rootRefPreview.current) {
+				rootRefPreview.current.style.gridTemplateRows = calculateHeight(e);
+			}
+		},
+		[calculateHeight],
+	);
 
 	const setupEvents = React.useCallback(() => {
 		document.addEventListener('mouseup', onMouseUp);
@@ -127,13 +142,29 @@ function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 		};
 	});
 
+	React.useEffect(() => {
+		if (isDragging && rootRefPreview.current) {
+			rootRefPreview.current.style.gridTemplateRows = `${lastTopComponentHeight.current}px 15px 1fr`;
+		}
+	}, [isDragging]);
+
 	return (
 		<div className={classes.container} ref={rootRef}>
-			<div className={classes.panel}>{topComponent}</div>
+			<div className={classes.panel} ref={topComponentRef}>
+				{topComponent}
+			</div>
 			<div className={classes.splitter} onMouseDown={splitterMouseDown}>
 				<Splitter />
 			</div>
 			<div className={classes.panel}>{bottomComponent}</div>
+
+			{isDragging && (
+				<div className={classNames(classes.container, classes.preview)} ref={rootRefPreview}>
+					<div className={classNames(classes.panel, classes.previewPanel)} />
+					<div className={classes.splitter} />
+					<div className={classNames(classes.panel, classes.previewPanel)} />
+				</div>
+			)}
 		</div>
 	);
 }
