@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
 import { getBoxType, Status } from '../boxes/Box';
 import { BoxEntity, BoxStatus, Pin } from '../../models/Box';

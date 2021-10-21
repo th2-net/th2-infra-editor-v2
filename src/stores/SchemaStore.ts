@@ -48,7 +48,7 @@ export class SchemaStore {
 	schemaSettings: SchemaSettings | null;
 
 	constructor(private api: Api, private readonly rootStore: RootStore) {
-		makeObservable(this, {
+		makeObservable<SchemaStore, 'fetchSchemasFlow' | 'fetchSchemaStateFlow'>(this, {
 			boxesStore: observable,
 			selectSchema: action,
 			schemas: observable,
@@ -56,7 +56,8 @@ export class SchemaStore {
 			selectedSchema: observable,
 			isLoading: observable,
 			schemaSettings: observable,
-			fetchSchemaState: flow,
+			fetchSchemaStateFlow: flow,
+			fetchSchemasFlow: flow,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -84,20 +85,28 @@ export class SchemaStore {
 
 	isLoading = false;
 
-	fetchSchemas = flow(function* (this: SchemaStore) {
+	fetchSchemas = () => {
+		return flowResult(this.fetchSchemasFlow());
+	}
+
+	private *fetchSchemasFlow(this: SchemaStore) {
 		this.isLoading = true;
 
 		try {
 			this.schemas = yield this.api.fetchSchemasList();
 		} catch (error) {
-			if (error instanceof DOMException && error.code === error.ABORT_ERR) {
+			if (error instanceof DOMException && error.code !== error.ABORT_ERR) {
 				console.error('Error occured while loading schemas');
 				console.error(error);
 			}
 		}
-	});
+	};
 
-	fetchSchemaState = function* (this: SchemaStore, schemaName: string) {
+	fetchSchemaState = (schemaName: string) => {
+		return flowResult(this.fetchSchemaStateFlow(schemaName));
+	}
+
+	private *fetchSchemaStateFlow(this: SchemaStore, schemaName: string) {
 		this.isLoading = true;
 
 		try {
@@ -110,7 +119,7 @@ export class SchemaStore {
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
 		} catch (error) {
-			if (error instanceof DOMException && error.code === error.ABORT_ERR) {
+			if (error instanceof DOMException && error.code !== error.ABORT_ERR) {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
 			}
 		} finally {

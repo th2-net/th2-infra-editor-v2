@@ -45,9 +45,9 @@ export default class SubscriptionStore {
 	};
 
 	private fetchChanges = async () => {
-		if (this.schemasStore.selectedSchema) {
-			this.schemasStore.fetchSchemaState(this.schemasStore.selectedSchemaName ?? '');
-		}
+		if (!this.schemasStore.selectedSchemaName) throw new Error('selectedSchemaName isn\'t exists');
+
+		this.schemasStore.fetchSchemaState(this.schemasStore.selectedSchemaName);
 	};
 
 	async init() {

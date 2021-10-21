@@ -101,8 +101,8 @@ export default function BoxConnections(props: GroupProps) {
 			</div>
 			{pinConnections
 				.filter(g => g.boxes.length > 0)
-				.map(connection => (
-					<div className={classes.root}>
+				.map((connection, index) => (
+					<div key={index} className={classes.root}>
 						<PinConnections
 							connections={connection}
 							direction={direction}
@@ -182,6 +182,7 @@ function PinConnections({
 			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				{connections.boxes.slice(0, isExpanded ? connections.boxes.length : 1).map((box, index) => (
 					<div
+						key={box.box.name}
 						style={{
 							display: 'flex',
 							direction: direction === 'to' ? 'rtl' : 'ltr',
@@ -218,8 +219,9 @@ function PinConnections({
 							<div>
 								{box.pins
 									.slice(0, isExpandedMap.get(box.box.name) ? box.pins.length : 1)
-									.map(pinsConnection => (
+									.map((pinsConnection, index) => (
 										<PinConnections
+											key={index}
 											connections={pinsConnection}
 											direction={direction}
 											onBoxSelect={onBoxSelect}
