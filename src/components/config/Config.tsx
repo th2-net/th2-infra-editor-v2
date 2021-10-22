@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useEffect } from 'react';
 import { isObservable, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';

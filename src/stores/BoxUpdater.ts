@@ -287,11 +287,17 @@ export class BoxUpdater {
 		const hasChanges = !isEqual(toJS(box), updatedBox);
 
 		if (hasChanges) {
+			const boxIndex = this.boxesStore.boxes.findIndex((b) => b.name === box.name);
+
+			if (boxIndex === -1) throw new Error(`Cannot find box with name "${box.name}"`);
+
+			this.boxesStore.boxes = [
+				...this.boxesStore.boxes.slice(0, boxIndex),
+				updatedBox,
+				...this.boxesStore.boxes.slice(boxIndex + 1),
+			];
+
 			if (box.name !== updatedBox.name) {
-				this.boxesStore.boxes = [
-					...this.boxesStore.boxes.filter(b => b.name !== box.name),
-					updatedBox,
-				];
 				this.updateLinks(box.name, updatedBox.name);
 				this.dictionaryLinksStore.updateLinksDictionary(box.name, updatedBox.name);
 			}
@@ -299,6 +305,8 @@ export class BoxUpdater {
 			if (box.name === this.boxesStore.selectedBox?.name) {
 				this.boxesStore.selectBox(observable(updatedBox));
 			}
+
+			this.requestsStore.saveEntityChanges(updatedBox, 'update');
 		}
 
 		this.history.addSnapshot({

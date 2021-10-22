@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { computed } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles, Styles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
@@ -34,9 +33,20 @@ const button: Styles = {
 	fontSize: '13px',
 	lineHeight: '16px',
 	position: 'relative',
+	backgroundColor: '#ffa666',
+	'&:hover': {
+		backgroundColor: '#ffb37c',
+	},
+	'&:active': {
+		backgroundColor: '#ffc093',
+	},
+	'&:disabled': {
+		backgroundColor: '#979797',
+	}
 };
 
 const useStyles = createUseStyles({
+	button,
 	container: {
 		gridArea: 'header',
 		backgroundColor: '#7a99b8',
@@ -45,20 +55,6 @@ const useStyles = createUseStyles({
 		padding: '15px 60px',
 		display: 'flex',
 		alignItems: 'center',
-	},
-	submitButton: {
-		...button,
-		background: '#ffa666',
-		'&:hover': {
-			background: '#ffb37c',
-		},
-		'&:active': {
-			background: '#ffc093',
-		},
-	},
-	disableButton: {
-		...button,
-		background: '#979797',
 	},
 	badge: {
 		height: '15px',
@@ -81,18 +77,28 @@ const useStyles = createUseStyles({
 });
 
 function Header() {
-	const schemaStore = useSchemaStore();
-	const requestsExist = schemaStore.requestsStore.requestsExist;
+	const {
+		requestsStore,
+		schemas,
+		selectSchema,
+		selectedSchemaName,
+
+	} = useSchemaStore();
+	const {
+		requestsExist,
+		saveChanges,
+		preparedRequests,
+	} = requestsStore;
 
 	const classes = useStyles();
 
 	return (
 		<div className={classes.container}>
-			{schemaStore.schemas.length !== 0 && (
+			{schemas.length !== 0 && (
 				<select
-					onChange={e => schemaStore.selectSchema(e.target.value)}
-					value={schemaStore.selectedSchemaName || undefined}>
-					{schemaStore.schemas.map(schema => (
+					onChange={e => selectSchema(e.target.value)}
+					value={selectedSchemaName || undefined}>
+					{schemas.map(schema => (
 						<option key={schema} value={schema}>
 							{schema}
 						</option>
@@ -101,10 +107,10 @@ function Header() {
 			)}
 			<button
 				disabled={!requestsExist}
-				className={requestsExist ? classes.submitButton : classes.disableButton}
-				onClick={schemaStore.requestsStore.saveChanges}>
+				className={classes.button}
+				onClick={saveChanges}>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
-					{schemaStore.requestsStore.preparedRequests.length}
+					{preparedRequests.length}
 				</span>
 				Submit changes
 			</button>
