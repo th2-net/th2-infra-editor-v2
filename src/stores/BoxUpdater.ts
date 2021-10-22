@@ -67,6 +67,7 @@ export class BoxUpdater {
 			changeLink: action,
 			addLink: action,
 			deleteLink: action,
+			saveBoxChanges: action,
 		});
 	}
 

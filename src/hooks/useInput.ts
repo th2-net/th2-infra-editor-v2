@@ -62,7 +62,7 @@ export const useInput = ({
 	autocomplete,
 	autoFocus,
 	spellCheck = false,
- disabled = false,
+	disabled = false,
 }: UseInputProps): InputConfig => {
 	const [value, setValue] = React.useState(initialValue);
 	const [isValid, setIsValid] = React.useState(true);
