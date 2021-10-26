@@ -180,34 +180,18 @@ export class BoxUpdater {
 	changeLink = (
 		link: Link<ExtendedConnectionOwner>,
 		newLink: Link<ExtendedConnectionOwner>,
-		createSnapshot = true,
 	) => {
-		this.deleteLink(link);
-		this.addLink(newLink);
-
-		const oldValue = cloneDeep(toJS(link));
-		const newValue = cloneDeep(toJS(newLink));
+		this.deleteLink(link, false);
+		this.addLink(newLink, false);
 
 		const changedLinkBox = this.findBoxRelationLink(newLink);
 
-		if (createSnapshot && changedLinkBox) {
+		if (changedLinkBox) {
 			this.requestsStore.saveEntityChanges(changedLinkBox, 'update');
-			this.history.addSnapshot({
-				object: oldValue.name,
-				type: 'link',
-				operation: 'change',
-				changeList: [
-					{
-						object: oldValue.name,
-						from: oldValue,
-						to: newValue,
-					},
-				],
-			});
 		}
 	};
 
-	deleteLink = async (linkToRemove: Link<ExtendedConnectionOwner>, createSnapshot = true) => {
+	deleteLink = async (linkToRemove: Link<ExtendedConnectionOwner>, saveChanges = true) => {
 		const changedLink = this.findBoxRelationLink(linkToRemove);
 
 		if (changedLink) {
@@ -219,25 +203,13 @@ export class BoxUpdater {
 				);
 			}
 
-			if (createSnapshot) {
+			if (saveChanges) {
 				this.requestsStore.saveEntityChanges(changedLink, 'update');
-				this.history.addSnapshot({
-					object: linkToRemove.name,
-					type: 'link',
-					operation: 'remove',
-					changeList: [
-						{
-							object: linkToRemove.name,
-							from: linkToRemove,
-							to: null,
-						},
-					],
-				});
 			}
 		}
 	};
 
-	addLink(link: Link<ExtendedConnectionOwner>, createSnapshot = true) {
+	addLink(link: Link<ExtendedConnectionOwner>, saveChanges = true) {
 		if (!link.from) {
 			throw new Error("'from' field shouldn't be undefined");
 		}
@@ -258,20 +230,8 @@ export class BoxUpdater {
 			oprationType = 'add';
 		}
 
-		if (createSnapshot) {
+		if (saveChanges) {
 			this.requestsStore.saveEntityChanges(editorGeneratedLink, oprationType);
-			this.history.addSnapshot({
-				object: link.name,
-				type: 'link',
-				operation: 'add',
-				changeList: [
-					{
-						object: link.name,
-						from: null,
-						to: link,
-					},
-				],
-			});
 		}
 	}
 
@@ -308,19 +268,6 @@ export class BoxUpdater {
 
 			this.requestsStore.saveEntityChanges(updatedBox, 'update');
 		}
-
-		this.history.addSnapshot({
-			object: box.name,
-			type: 'link',
-			operation: 'change',
-			changeList: [
-				{
-					object: box.name,
-					from: box,
-					to: updatedBox,
-				},
-			],
-		});
 	};
 
 	private findBoxRelationLink = (

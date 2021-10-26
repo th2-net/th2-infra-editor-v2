@@ -42,7 +42,6 @@ export class SelectedDictionaryStore {
 				},
 			};
 			this.requestsStore.saveEntityChanges(this.dictionary, 'update');
-			this.requestsStore.saveChanges();
 		}
 	};
 }
