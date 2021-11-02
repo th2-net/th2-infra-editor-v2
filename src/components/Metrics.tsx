@@ -21,6 +21,7 @@ import { useDebouncedCallback } from 'use-debounce/lib';
 import { useBoxesStore } from '../hooks/useBoxesStore';
 import { useInput } from '../hooks/useInput';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+import { cpuPanel, memoryPanel, logsPanel } from '../api/grafanaPaths.json';
 import Input from './util/Input';
 
 const useStyles = createUseStyles({
@@ -72,7 +73,7 @@ function Metrics() {
 			return null;
 		}
 
-		return `orgId=1&refresh=10s&${options}&var-component=${component}&var-search=${searchDebouncedValue}&panelId=8`;
+		return `orgId=1&refresh=10s&${options}&var-workload=${component}&var-search=${searchDebouncedValue}&panelId=8`;
 	}, [options, component, searchDebouncedValue]);
 
 	const setDebouncedValue = useDebouncedCallback((value: string) => {
@@ -103,14 +104,14 @@ function Metrics() {
 				<iframe
 					title={component}
 					className={classes.metrics}
-					src={`/grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=1`}
+					src={`${cpuPanel}?${metricsOptions}`}
 				/>
 			</section>
 			<section className={classes.metricsSection}>
 				<iframe
 					title={component}
 					className={classes.metrics}
-					src={`grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=3`}
+					src={`${memoryPanel}?${metricsOptions}`}
 				/>
 			</section>
 			<section className={classes.metricsSection}>
@@ -118,7 +119,7 @@ function Metrics() {
 				<iframe
 					title={component}
 					className={classes.logs}
-					src={`grafana/d-solo/logs/logs?${logsOptions}`}
+					src={`${logsPanel}?${logsOptions}`}
 				/>
 			</section>
 		</div>
