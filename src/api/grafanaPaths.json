@@ -1,5 +1,5 @@
 {
-    "cpuPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/dashboard-template?panelId=6",
-    "memoryPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/dashboard-template?panelId=4",
-    "logsPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/dashboard-template?panelId=2"
+    "cpuPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/infra-editor-dashboard?panelId=6",
+    "memoryPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/infra-editor-dashboard?panelId=4",
+    "logsPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/infra-editor-dashboard?panelId=2"
 }
