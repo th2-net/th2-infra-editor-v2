@@ -64,12 +64,17 @@ export class SchemaStore {
 
 		this.selectedDictionaryStore = new SelectedDictionaryStore(this.requestsStore);
 
-		this.boxUpdater = new BoxUpdater(this.requestsStore, this.boxesStore, this.history);
-
 		this.dictionaryLinksStore = new DictionaryLinksStore(
 			this.requestsStore,
 			this.selectedDictionaryStore,
 			this.boxesStore,
+		);
+
+		this.boxUpdater = new BoxUpdater(
+			this.requestsStore,
+			this.boxesStore,
+			this.history,
+			this.dictionaryLinksStore
 		);
 
 		this.subscriptionStore = new SubscriptionStore(this.api, this);

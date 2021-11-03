@@ -104,6 +104,7 @@ function Links() {
 
 		const selectedLink = chain(boxUpdater.links)
 			.filter(link => link[direction]?.box === boxesStore.selectedBox?.name)
+			.filter(link => link[direction === 'from' ? 'to' : 'from']?.box === box?.name)
 			.filter(link => link[direction]?.pin === pin?.name)
 			.filter(link => link[direction]?.connectionType === pin?.['connection-type'])
 			.head()

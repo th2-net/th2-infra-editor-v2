@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useEffect } from 'react';
 import { isObservable, toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
@@ -53,40 +52,44 @@ const useStyles = createUseStyles((t: Theme) => ({
 function Config() {
 	const classes = useStyles();
 
-	const boxesStore = useBoxesStore();
+	const { selectedBox } = useBoxesStore();
 	const boxUpdater = useBoxUpdater();
 
 	const customConfig = useInput({
-		initialValue: '',
+		initialValue: selectedBox?.spec['custom-config']
+			? JSON.stringify(selectedBox?.spec['custom-config'], null, 4)
+			: '',
 		id: 'custom-config',
 	});
 
 	const pinsConfig = useInput({
-		initialValue: '',
+		initialValue: selectedBox?.spec.pins ? JSON.stringify(selectedBox.spec.pins, null, 4) : '',
 		id: 'custom-config',
 	});
 
 	const extendedSettings = useInput({
-		initialValue: '',
+		initialValue: selectedBox?.spec['extended-settings']
+			? JSON.stringify(selectedBox.spec['extended-settings'], null, 4)
+			: '',
 		id: 'extended-settings',
 	});
 
 	const imageName = useInput({
-		initialValue: '',
+		initialValue: selectedBox?.spec['image-name'] || '',
 		validate: name => name.length > 0,
 		id: 'imageName',
 		label: 'Image name',
 	});
 
 	const imageVersion = useInput({
-		initialValue: '',
+		initialValue: selectedBox?.spec['image-version'] || '',
 		validate: version => version.length > 0,
 		id: 'imageVersion',
 		label: 'Image version',
 	});
 
 	const name = useInput({
-		initialValue: '',
+		initialValue: selectedBox?.name || '',
 		validate: name =>
 			name.trim().length > 0 &&
 			/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/gm.test(name),
@@ -95,34 +98,10 @@ function Config() {
 	});
 
 	const type = useInput({
-		initialValue: '',
+		initialValue: selectedBox?.kind || '',
 		id: 'type',
 		label: 'Type',
 	});
-
-	useEffect(() => {
-		const box = boxesStore.selectedBox;
-		customConfig.setValue(
-			box && box?.spec['custom-config'] ? JSON.stringify(box?.spec['custom-config'], null, 4) : '',
-		);
-		pinsConfig.setValue(box && box.spec.pins ? JSON.stringify(box.spec.pins, null, 4) : '');
-		imageName.setValue(box?.spec['image-name'] || '');
-		imageVersion.setValue(box?.spec['image-version'] || '');
-		extendedSettings.setValue(
-			box?.spec['extended-settings'] ? JSON.stringify(box?.spec['extended-settings'], null, 4) : '',
-		);
-		name.setValue(box?.name || '');
-		type.setValue(box?.kind || '');
-	}, [
-		boxesStore.selectedBox,
-		customConfig,
-		extendedSettings,
-		imageName,
-		imageVersion,
-		name,
-		pinsConfig,
-		type,
-	]);
 
 	function saveChanges() {
 		const isConfigValid =
@@ -132,7 +111,7 @@ function Config() {
 			isValidJSONArray(pinsConfig.value) &&
 			isValidJSONObject(customConfig.value);
 
-		const originalBox = toJS(boxesStore.selectedBox);
+		const originalBox = toJS(selectedBox);
 		if (isConfigValid && originalBox) {
 			const updatedBox = applyBoxChanges(originalBox, {
 				kind: type.value,
