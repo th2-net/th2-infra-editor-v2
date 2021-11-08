@@ -93,7 +93,7 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 			<div className={classes.controls}>
 				<button
 					className={classes.applyChanges}
-					disabled={prevValue === dictionaryInputConfig.value}
+					disabled={prevValue === dictionaryInputConfig.value || !dictionaryInputConfig.isValid}
 					onClick={() => {
 						if (dictionaryInputConfig.isValid) {
 							editDictionary(dictionaryInputConfig.value);

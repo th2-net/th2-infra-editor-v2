@@ -65,7 +65,7 @@ function Metrics() {
 	const [searchDebouncedValue, setSearchDebouncedValue] = useState<string>('');
 
 	const options =
-		schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchema}&theme=light`;
+		schemaStore.selectedSchema && `var-namespace=th2-${schemaStore.selectedSchemaName}&theme=light`;
 
 	const logsOptions = useMemo(() => {
 		if (component === '') {

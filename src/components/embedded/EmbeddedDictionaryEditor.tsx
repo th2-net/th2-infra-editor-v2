@@ -18,15 +18,22 @@ import React from 'react';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import DictionaryEditor from '../editors/DictionaryEditor';
 import { observer } from 'mobx-react-lite';
+import { useSchemaStore } from '../../hooks/useSchemaStore';
 
 const EmbeddedDictionaryEditor = () => {
 	const { dictionary, editDictionary } = useSelectedDictionaryStore();
+	const { requestsStore } = useSchemaStore();
+	
+	const saveChanges = React.useCallback((data: string) => {
+		editDictionary(data);
+		requestsStore.saveChanges();
+	}, [editDictionary, requestsStore]);
 
 	if (!dictionary) {
 		return <div>Dictionary not found</div>;
 	}
 
-	return <DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />;
+	return <DictionaryEditor dictionary={dictionary} editDictionary={saveChanges} />;
 };
 
 export default observer(EmbeddedDictionaryEditor);

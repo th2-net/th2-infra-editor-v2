@@ -20,6 +20,7 @@ import EmbeddedDictionaryEditor from './EmbeddedDictionaryEditor';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 import LoadingScreen from './LoadingScreen';
 import { observer } from 'mobx-react-lite';
+import { createUseStyles } from 'react-jss';
 
 interface EmbeddedViews {
 	[editorMode: string]: React.ReactNode;
@@ -29,19 +30,28 @@ const embeddedViews: EmbeddedViews = {
 	dictionaryEditor: <EmbeddedDictionaryEditor />,
 };
 
+const useStyles = createUseStyles({
+	container: {
+		width: '100%',
+		height: '100%',
+		padding: '5px',
+	},
+});
+
 const EmbeddedLayout = () => {
 	const { editorMode } = useURLParamsStore();
-	const { isLoading } = useSchemaStore();
+	const { isLoading, selectedSchema } = useSchemaStore();
+	const classes = useStyles();
 
 	if (!editorMode || !embeddedViews[editorMode]) {
 		return <div>Please provide a valid editorMode</div>;
 	}
 
-	if (isLoading) {
+	if (isLoading && !selectedSchema) {
 		return <LoadingScreen />;
 	}
 
-	return <>{embeddedViews[editorMode]}</>;
+	return <div className={classes.container}>{embeddedViews[editorMode]}</div>;
 };
 
 export default observer(EmbeddedLayout);
