@@ -42,7 +42,7 @@ export function ellipsis(): Styles {
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-	}
+	};
 }
 
 export function visuallyHidden(): Styles {
@@ -54,10 +54,9 @@ export function visuallyHidden(): Styles {
 		height: '1px',
 		margin: '-1px',
 		padding: '0',
-		clipPath: 'inset(50%)'
-	}
+		clipPath: 'inset(50%)',
+	};
 }
-
 
 export function buttonReset(): Styles {
 	return {
@@ -65,8 +64,8 @@ export function buttonReset(): Styles {
 		border: 'none',
 		outline: 'none',
 		cursor: 'pointer',
-		backgroundColor: 'transparent'
-	}
+		backgroundColor: 'transparent',
+	};
 }
 
 export function button(): Styles {
@@ -88,5 +87,5 @@ export function button(): Styles {
 		position: 'relative',
 		transition: '250ms',
 		userSelect: 'none',
-	}
+	};
 }

@@ -27,11 +27,11 @@ const ConfigEditor = ({ value, setValue }: Props) => {
 			<Editor
 				height={300}
 				width='auto'
-				language={'json'}
+				defaultLanguage={'json'}
 				options={{
 					fontSize: 12,
 					codeLens: false,
-					lineNumbers: 'off',
+					lineNumbers: 'on',
 					minimap: {
 						enabled: false,
 					},

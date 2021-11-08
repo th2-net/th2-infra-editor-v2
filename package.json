@@ -42,7 +42,9 @@
 		"test:ci": "jest --no-cache"
 	},
 	"eslintConfig": {
-		"ignorePatterns": ["**/public/**"],
+		"ignorePatterns": [
+			"**/public/**"
+		],
 		"extends": [
 			"react-app",
 			"react-app/jest"

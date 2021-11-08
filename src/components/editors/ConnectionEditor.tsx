@@ -179,6 +179,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 					},
 			  },
 	);
+	alert(link.name);
 
 	const cancelOrDelete = () => {
 		if (editableLink) {
@@ -219,14 +220,21 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 				return [];
 			}
 
-			return chain(boxesStore.boxes)
-				.filter(
-					box =>
-						(box.spec?.pins || []).filter(box => box['connection-type'] === pin['connection-type'])
-							.length > 0,
-				)
-				.map(box => box.name)
-				.value();
+			const collectionChain = chain(boxesStore.boxes)
+			.filter(
+				box =>
+					(box.spec?.pins || []).filter(box => box['connection-type'] === pin['connection-type'])
+						.length > 0,
+			)
+			.map(box => box.name)
+			.value();
+
+			alert(`
+			${collectionChain.length}
+			`);
+
+
+			return collectionChain;
 		},
 		[boxesStore.boxes, isExistBox],
 	);
@@ -293,7 +301,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 			</div>
 
 			<div className={classes.content}>
-				<ConnectionConfig
+				{/* <ConnectionConfig
 					label='from'
 					id='boxFrom'
 					owner={link.from}
@@ -315,7 +323,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 					disabled={direction === 'to' && editableLink !== undefined}
 					isBoxFieldDisabled={direction === 'to' && editableLink === undefined}
 					isSelected={direction === 'to'}
-				/>
+				/> */}
 			</div>
 
 			<div className={classes.actions}>
