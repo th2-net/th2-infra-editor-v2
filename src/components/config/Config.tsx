@@ -28,6 +28,7 @@ import Input from '../util/Input';
 import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { extenedSchema, pinSchema } from '../../models/Schemas';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
@@ -159,12 +160,12 @@ function Config() {
 				<Input inputConfig={type} />
 			</div>
 			<h5 className={classes.codeEditorLabel}>Custom Config</h5>
-			<ConfigEditor value={customConfig.value} setValue={customConfig.setValue} />
+			<ConfigEditor value={customConfig.value} setValue={customConfig.setValue}/>
 			<h5 className={classes.codeEditorLabel}>Pins</h5>
-			<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} />
+			<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} schema={pinSchema} pinsConnectionsLenses={true}/>
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
-			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
-			<button onClick={saveChanges}>Save</button>
+			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} schema={extenedSchema}/>
+			<button disabled={!boxesStore.isSelectedBoxValid} onClick={saveChanges}>Save</button>
 		</div>
 	);
 }
