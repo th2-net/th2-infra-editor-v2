@@ -29,6 +29,7 @@ export class BoxesStore {
 			allEntities: computed,
 			setBoxes: action,
 			setDictionaries: action,
+			isSelectedBoxValid: observable,
 		});
 	}
 
@@ -64,6 +65,8 @@ export class BoxesStore {
 			color: '#CACC66',
 		},
 	];
+
+	isSelectedBoxValid: boolean = true;
 
 	selectedBox: BoxEntity | null = null;
 
