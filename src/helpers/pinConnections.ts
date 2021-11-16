@@ -16,7 +16,8 @@
 
 import { IPosition } from 'monaco-editor';
 import { IPinConnections } from '../components/links/BoxConnections';
-import { Pin } from '../models/Box';
+import { ExtendedConnectionOwner, Pin } from '../models/Box';
+import { Link } from '../models/LinksDefinition';
 import { BoxesStore } from '../stores/BoxesStore';
 import { BoxUpdater } from '../stores/BoxUpdater';
 
@@ -28,6 +29,29 @@ export type PinsPositions = {
 export type PinsInfo = {
 	name: string;
 	numOfConnections: number;
+};
+
+export type InvalidLink = {
+	lostBoxes: {
+		box: string;
+		link: Link<ExtendedConnectionOwner>;
+	}[];
+	lostPins: {
+		pin: string;
+		link: Link<ExtendedConnectionOwner>;
+		box: string;
+	}[];
+};
+
+export type InvalidLink1 = {
+	link: Link<ExtendedConnectionOwner>;
+	lostBoxes: {
+		box: string;
+	}[];
+	lostPins: {
+		pin: string;
+		box: string;
+	}[];
 };
 
 export function getCountPinsConnections(
@@ -53,4 +77,47 @@ export function getCountPinsConnections(
 		return pinsInfoArray;
 	}
 	return null;
+}
+
+export function detectInvalidLinks(boxesStore: BoxesStore, boxUpdater: BoxUpdater): InvalidLink1[] {
+	console.log(boxUpdater.links.length);
+	const invalidLinks: InvalidLink1[] = [];
+	boxUpdater.links.forEach(link => {
+		var invalidLink: InvalidLink1 = {
+			link: link,
+			lostBoxes: [],
+			lostPins: [],
+		};
+		for (let i = 0; i < 2; i++) {
+			const box = boxesStore.boxes.find(
+				box => box.name === (i === 0 ? link.from?.box : link.to?.box),
+			);
+			if (box === undefined) {
+				invalidLink.lostBoxes.push({
+					box: i === 0 ? link.from?.box || '' : link.to?.box || '',
+				});
+			} else {
+				const pins = box.spec.pins?.find(
+					pin => pin.name === (i === 0 ? link.from?.pin : link.to?.pin),
+				);
+				if (pins === undefined) {
+					invalidLink.lostPins.push({
+						pin: i === 0 ? link.from?.pin || '' : link.to?.pin || '',
+						box: box.name,
+					});
+				}
+			}
+		}
+		if (invalidLink.lostBoxes.length > 0 || invalidLink.lostPins.length > 0) {
+			invalidLinks.push(invalidLink);
+		}
+	});
+	return invalidLinks;
+}
+
+export function deleteInvalidLinks(invalidLinks: InvalidLink1[], boxUpdater: BoxUpdater) {
+	console.log(invalidLinks.length);
+	invalidLinks.forEach(link => {
+		boxUpdater.deleteLink(link.link);
+	});
 }

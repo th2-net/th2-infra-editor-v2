@@ -17,6 +17,10 @@
 import { observer } from 'mobx-react-lite';
 import { createUseStyles, Styles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+import Modal from '@material-ui/core/Modal';
+import { useState } from 'react';
+import { InvalidLinkItems } from './layouts/InvalidLink';
+import { deleteInvalidLinks } from '../helpers/pinConnections';
 
 const button: Styles = {
 	height: '30px',
@@ -42,7 +46,7 @@ const button: Styles = {
 	},
 	'&:disabled': {
 		backgroundColor: '#979797',
-	}
+	},
 };
 
 const useStyles = createUseStyles({
@@ -74,6 +78,31 @@ const useStyles = createUseStyles({
 	disableBadge: {
 		display: 'none',
 	},
+	modalWindow: {
+		position: 'relative',
+		padding: '10px',
+		overflow: 'auto',
+		top: `${document.documentElement.scrollHeight / 4}px`,
+		marginRight: 'auto',
+		marginLeft: 'auto',
+		width: '80%',
+		height: document.documentElement.scrollHeight / 2,
+		backgroundColor: 'white',
+	},
+	modalWindowContent: {
+		display: 'grid',
+		gridTemplateRows: '90% 10%',
+		gridRowGap: '5px',
+		height: '100%',
+	},
+	linksListContainer: {
+		overflowY: 'auto',
+	},
+	buttonArea: {
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
+	},
 });
 
 function Header() {
@@ -82,15 +111,15 @@ function Header() {
 		schemas,
 		selectSchema,
 		selectedSchemaName,
-
+		isSchemaValid,
+		invalidLinks,
+		boxUpdater,
 	} = useSchemaStore();
-	const {
-		requestsExist,
-		saveChanges,
-		preparedRequests,
-	} = requestsStore;
+	const { requestsExist, saveChanges, preparedRequests } = requestsStore;
 
 	const classes = useStyles();
+
+	const [openModal, setOpenModal] = useState(false);
 
 	return (
 		<div className={classes.container}>
@@ -105,14 +134,40 @@ function Header() {
 					))}
 				</select>
 			)}
-			<button
-				disabled={!requestsExist}
-				className={classes.button}
-				onClick={saveChanges}>
+			<button disabled={!requestsExist} className={classes.button} onClick={saveChanges}>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
 					{preparedRequests.length}
 				</span>
 				Submit changes
+			</button>
+			{openModal ? (
+				<Modal open={openModal} onClose={() => setOpenModal(false)}>
+					<div className={classes.modalWindow}>
+						<div className={classes.modalWindowContent}>
+							<div className={classes.linksListContainer}>
+								<InvalidLinkItems invalidLinks={invalidLinks} />
+							</div>
+
+							<div className={classes.buttonArea}>
+								<button
+									onClick={() => {
+										deleteInvalidLinks(invalidLinks, boxUpdater);
+										setOpenModal(false);
+									}}>
+									Delete invalid links
+								</button>
+							</div>
+						</div>
+					</div>
+				</Modal>
+			) : (
+				<></>
+			)}
+			<button
+				disabled={isSchemaValid}
+				className={classes.button}
+				onClick={() => setOpenModal(true)}>
+				{isSchemaValid ? 'valid' : 'schema is not valid'}
 			</button>
 		</div>
 	);

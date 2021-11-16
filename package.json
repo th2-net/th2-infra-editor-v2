@@ -15,6 +15,7 @@
 		"classnames": "^2.3.1",
 		"http-proxy-middleware": "^2.0.0",
 		"lodash": "^4.17.21",
+		"material-ui-modal": "^1.0.0",
 		"mobx": "^6.3.2",
 		"mobx-react-lite": "^3.2.0",
 		"monaco-editor": "^0.25.2",

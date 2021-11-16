@@ -29,6 +29,7 @@ import { RootStore } from './RootStore';
 import { isBoxEntity } from '../models/Box';
 import SubscriptionStore from './SubscriptionStore';
 import { chain } from 'lodash';
+import { detectInvalidLinks, InvalidLink, InvalidLink1 } from '../helpers/pinConnections';
 
 export class SchemaStore {
 	boxesStore = new BoxesStore();
@@ -58,6 +59,8 @@ export class SchemaStore {
 			schemaSettings: observable,
 			fetchSchemaStateFlow: flow,
 			fetchSchemasFlow: flow,
+			isSchemaValid: observable,
+			invalidLinks: observable,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -74,13 +77,17 @@ export class SchemaStore {
 			this.requestsStore,
 			this.boxesStore,
 			this.history,
-			this.dictionaryLinksStore
+			this.dictionaryLinksStore,
 		);
 
 		this.subscriptionStore = new SubscriptionStore(this.api, this);
 
 		this.schemaSettings = null;
 	}
+
+	invalidLinks: InvalidLink1[] = [];
+
+	isSchemaValid: boolean = true;
 
 	schemas: string[] = [];
 
@@ -92,7 +99,7 @@ export class SchemaStore {
 
 	fetchSchemas = () => {
 		return flowResult(this.fetchSchemasFlow());
-	}
+	};
 
 	private *fetchSchemasFlow(this: SchemaStore) {
 		this.isLoading = true;
@@ -105,11 +112,11 @@ export class SchemaStore {
 				console.error(error);
 			}
 		}
-	};
+	}
 
 	fetchSchemaState = (schemaName: string) => {
 		return flowResult(this.fetchSchemaStateFlow(schemaName));
-	}
+	};
 
 	private *fetchSchemaStateFlow(this: SchemaStore, schemaName: string) {
 		this.isLoading = true;
@@ -123,6 +130,12 @@ export class SchemaStore {
 			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
+			this.invalidLinks = detectInvalidLinks(this.boxesStore, this.boxUpdater);
+			this.isSchemaValid = this.invalidLinks.find(
+				link => link.lostBoxes.length + link.lostPins.length > 0,
+			)
+				? false
+				: true;
 		} catch (error) {
 			if (error instanceof DOMException && error.code !== error.ABORT_ERR) {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);
@@ -130,7 +143,7 @@ export class SchemaStore {
 		} finally {
 			this.isLoading = false;
 		}
-	};
+	}
 
 	private currentSchemaRequest: CancellablePromise<void> | null = null;
 
@@ -139,7 +152,6 @@ export class SchemaStore {
 		this.clearEntities();
 		this.currentSchemaRequest?.cancel();
 		this.currentSchemaRequest = flowResult(this.fetchSchemaState(schemaName));
-
 		return this.currentSchemaRequest;
 	};
 
