@@ -81,7 +81,6 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses }: Props)
 				selectZeroConnectionsPins(ranges);
 			}
 		}
-		console.log({ ...lenses });
 		return lenses;
 	};
 

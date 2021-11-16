@@ -129,6 +129,8 @@ function Config() {
 			boxUpdater.saveBoxChanges(originalBox, updatedBox);
 		}
 	}
+	const bstr = useBoxesStore();
+	// detectMissingLinks(bstr, boxUpdater);
 
 	return (
 		<div className={classes.container}>
@@ -141,10 +143,21 @@ function Config() {
 			<h5 className={classes.codeEditorLabel}>Custom Config</h5>
 			<ConfigEditor value={customConfig.value} setValue={customConfig.setValue} />
 			<h5 className={classes.codeEditorLabel}>Pins</h5>
-			<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} schema={pinSchema} pinsConnectionsLenses={true}/>
+			<ConfigEditor
+				value={pinsConfig.value}
+				setValue={pinsConfig.setValue}
+				schema={pinSchema}
+				pinsConnectionsLenses={true}
+			/>
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
-			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} schema={extenedSchema}/>
-			<button disabled={!isSelectedBoxValid} onClick={saveChanges}>Save</button>
+			<ConfigEditor
+				value={extendedSettings.value}
+				setValue={extendedSettings.setValue}
+				schema={extenedSchema}
+			/>
+			<button disabled={!isSelectedBoxValid} onClick={saveChanges}>
+				Save
+			</button>
 		</div>
 	);
 }
