@@ -18,7 +18,7 @@ import { observer } from 'mobx-react-lite';
 import { createUseStyles, Styles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
 import Modal from '@material-ui/core/Modal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InvalidLinkItems } from './layouts/InvalidLink';
 import { deleteInvalidLinks } from '../helpers/pinConnections';
 
@@ -114,12 +114,17 @@ function Header() {
 		isSchemaValid,
 		invalidLinks,
 		boxUpdater,
+		boxesStore,
 	} = useSchemaStore();
 	const { requestsExist, saveChanges, preparedRequests } = requestsStore;
 
 	const classes = useStyles();
 
 	const [openModal, setOpenModal] = useState(false);
+
+	useEffect(() => {
+		setOpenModal(false);
+	}, [boxesStore.selectedBox]);
 
 	return (
 		<div className={classes.container}>
@@ -145,7 +150,7 @@ function Header() {
 					<div className={classes.modalWindow}>
 						<div className={classes.modalWindowContent}>
 							<div className={classes.linksListContainer}>
-								<InvalidLinkItems invalidLinks={invalidLinks} />
+								<InvalidLinkItems invalidLinks={invalidLinks} boxesStore={boxesStore} />
 							</div>
 
 							<div className={classes.buttonArea}>

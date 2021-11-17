@@ -32,18 +32,6 @@ export type PinsInfo = {
 };
 
 export type InvalidLink = {
-	lostBoxes: {
-		box: string;
-		link: Link<ExtendedConnectionOwner>;
-	}[];
-	lostPins: {
-		pin: string;
-		link: Link<ExtendedConnectionOwner>;
-		box: string;
-	}[];
-};
-
-export type InvalidLink1 = {
 	link: Link<ExtendedConnectionOwner>;
 	lostBoxes: {
 		box: string;
@@ -79,11 +67,11 @@ export function getCountPinsConnections(
 	return null;
 }
 
-export function detectInvalidLinks(boxesStore: BoxesStore, boxUpdater: BoxUpdater): InvalidLink1[] {
+export function detectInvalidLinks(boxesStore: BoxesStore, boxUpdater: BoxUpdater): InvalidLink[] {
 	console.log(boxUpdater.links.length);
-	const invalidLinks: InvalidLink1[] = [];
+	const invalidLinks: InvalidLink[] = [];
 	boxUpdater.links.forEach(link => {
-		var invalidLink: InvalidLink1 = {
+		var invalidLink: InvalidLink = {
 			link: link,
 			lostBoxes: [],
 			lostPins: [],
@@ -115,9 +103,18 @@ export function detectInvalidLinks(boxesStore: BoxesStore, boxUpdater: BoxUpdate
 	return invalidLinks;
 }
 
-export function deleteInvalidLinks(invalidLinks: InvalidLink1[], boxUpdater: BoxUpdater) {
+export function deleteInvalidLinks(invalidLinks: InvalidLink[], boxUpdater: BoxUpdater) {
 	console.log(invalidLinks.length);
 	invalidLinks.forEach(link => {
 		boxUpdater.deleteLink(link.link);
 	});
+}
+
+export function selectBox(boxName: string, boxesStore: BoxesStore){
+	const boxEntity = boxesStore.boxes.find(box => box.name === boxName);
+	if(boxEntity){
+		boxesStore.selectBox(boxEntity);
+	} else {
+		console.log('error select box');
+	}
 }
