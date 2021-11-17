@@ -14,16 +14,39 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { InvalidLink, InvalidLink1 } from '../../helpers/pinConnections';
+import { createUseStyles } from 'react-jss';
+import { InvalidLink, selectBox } from '../../helpers/pinConnections';
+import { BoxesStore } from '../../stores/BoxesStore';
 
-export function InvalidLinkItems(props: { invalidLinks: InvalidLink1[] }) {
-	const f = 0;
+const useStyles = createUseStyles({
+	clicableLink: {
+		textDecoration: 'underline',
+		cursor: 'pointer',
+		color: 'blue',
+		'&:hover': {
+			color: 'red',
+		},
+	},
+});
+
+function BoxСlickableLink(props: { boxName: string; boxesStore: BoxesStore }) {
+	const classes = useStyles();
+	return (
+		<a className={classes.clicableLink} onClick={() => selectBox(props.boxName, props.boxesStore)}>
+			{props.boxName}
+		</a>
+	);
+}
+
+export function InvalidLinkItems(props: { invalidLinks: InvalidLink[]; boxesStore: BoxesStore }) {
 	return (
 		<ul style={{ listStyleType: 'decimal' }}>
 			{props.invalidLinks.map(link =>
 				link.lostPins.map(pin => (
 					<li style={{ marginBottom: '10px' }}>
-						pin <b>{pin.pin}</b> not found in box <b>{pin.box}</b> in link <b>{link.link.name}</b>
+						pin <b>{pin.pin}</b> not found in box{' '}
+						<BoxСlickableLink boxName={pin.box} boxesStore={props.boxesStore} /> in link{' '}
+						<b>{link.link.name}</b>
 					</li>
 				)),
 			)}

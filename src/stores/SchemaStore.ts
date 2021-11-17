@@ -29,7 +29,7 @@ import { RootStore } from './RootStore';
 import { isBoxEntity } from '../models/Box';
 import SubscriptionStore from './SubscriptionStore';
 import { chain } from 'lodash';
-import { detectInvalidLinks, InvalidLink, InvalidLink1 } from '../helpers/pinConnections';
+import { detectInvalidLinks, InvalidLink } from '../helpers/pinConnections';
 
 export class SchemaStore {
 	boxesStore = new BoxesStore();
@@ -85,7 +85,7 @@ export class SchemaStore {
 		this.schemaSettings = null;
 	}
 
-	invalidLinks: InvalidLink1[] = [];
+	invalidLinks: InvalidLink[] = [];
 
 	isSchemaValid: boolean = true;
 
