@@ -80,6 +80,8 @@ const useStyles = createUseStyles({
 	},
 	modalWindow: {
 		position: 'relative',
+		borderRadius: 6,
+		boxShadow: '0 2px 5px rgb(0 0 0 / 25%)',
 		padding: '10px',
 		overflow: 'auto',
 		top: `${document.documentElement.scrollHeight / 4}px`,
