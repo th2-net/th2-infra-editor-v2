@@ -105,6 +105,11 @@ const useStyles = createUseStyles({
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 	},
+	invalidSchemaIndicator: {
+		backgroundColor: 'orange',
+		borderRadius: 4,
+		color: 'white',
+	},
 });
 
 function Header() {
@@ -170,12 +175,15 @@ function Header() {
 			) : (
 				<></>
 			)}
-			<button
+			<div className={classes.invalidSchemaIndicator} onClick={() => setOpenModal(true)}>
+			{isSchemaValid ? 'valid' : 'schema is not valid'}
+			</div>
+			{/* <button
 				disabled={isSchemaValid}
 				className={classes.button}
 				onClick={() => setOpenModal(true)}>
 				{isSchemaValid ? 'valid' : 'schema is not valid'}
-			</button>
+			</button> */}
 		</div>
 	);
 }
