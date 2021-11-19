@@ -21,6 +21,7 @@ import Modal from '@material-ui/core/Modal';
 import { useEffect, useState } from 'react';
 import { InvalidLinkItems } from './layouts/InvalidLink';
 import { deleteInvalidLinks } from '../helpers/pinConnections';
+import warningIcon from '../assets/icons/attention-error.svg';
 
 const button: Styles = {
 	height: '30px',
@@ -106,9 +107,21 @@ const useStyles = createUseStyles({
 		justifyContent: 'flex-end',
 	},
 	invalidSchemaIndicator: {
+		display: 'grid',
+		gridTemplateColumns: '20px auto',
+		gridColumnGap: 3,
 		backgroundColor: 'orange',
 		borderRadius: 4,
 		color: 'white',
+		padding: 3,
+	},
+	warningIcon: {
+		width: 20,
+		height: 20,
+		backgroundImage: `url(${warningIcon})`,
+		backgroundSize: '100%',
+		placeSelf: 'center',
+		backgroundRepeat: 'no-repeat',
 	},
 });
 
@@ -175,9 +188,14 @@ function Header() {
 			) : (
 				<></>
 			)}
-			<div className={classes.invalidSchemaIndicator} onClick={() => setOpenModal(true)}>
-			{isSchemaValid ? 'valid' : 'schema is not valid'}
-			</div>
+			{!isSchemaValid ? (
+				<div className={classes.invalidSchemaIndicator} onClick={() => setOpenModal(true)}>
+					<div className={classes.warningIcon}></div>
+					<div>schema is not valid</div>
+				</div>
+			) : (
+				<></>
+			)}
 			{/* <button
 				disabled={isSchemaValid}
 				className={classes.button}
