@@ -20,7 +20,7 @@ import { useSchemaStore } from '../hooks/useSchemaStore';
 import Modal from '@material-ui/core/Modal';
 import { useEffect, useState } from 'react';
 import { InvalidLinkItems } from './layouts/InvalidLink';
-import { deleteInvalidLinks } from '../helpers/pinConnections';
+import { deleteInvalidLinks, detectInvalidLinks } from '../helpers/pinConnections';
 import warningIcon from '../assets/icons/attention-error.svg';
 
 const button: Styles = {
@@ -82,13 +82,17 @@ const useStyles = createUseStyles({
 	modalWindow: {
 		position: 'relative',
 		borderRadius: 6,
-		boxShadow: '0 2px 5px rgb(0 0 0 / 25%)',
-		padding: '10px',
+		boxShadow:
+			'0 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)',
+		paddingTop: 20,
+		paddingBottom: 20,
+		paddingRight: 30,
+		paddingLeft: 30,
 		overflow: 'auto',
-		top: `${document.documentElement.scrollHeight / 4}px`,
+		top: 50,
 		marginRight: 'auto',
 		marginLeft: 'auto',
-		width: '80%',
+		width: '50%',
 		height: document.documentElement.scrollHeight / 2,
 		backgroundColor: 'white',
 	},
@@ -114,6 +118,7 @@ const useStyles = createUseStyles({
 		borderRadius: 4,
 		color: 'white',
 		padding: 3,
+		cursor: 'pointer',
 	},
 	warningIcon: {
 		width: 20,
@@ -135,6 +140,7 @@ function Header() {
 		invalidLinks,
 		boxUpdater,
 		boxesStore,
+		updateIsSchemaValid,
 	} = useSchemaStore();
 	const { requestsExist, saveChanges, preparedRequests } = requestsStore;
 
@@ -166,7 +172,11 @@ function Header() {
 				Submit changes
 			</button>
 			{openModal ? (
-				<Modal open={openModal} onClose={() => setOpenModal(false)}>
+				<Modal
+					BackdropProps={{ style: { backgroundColor: 'transparent' } }}
+					disableBackdropClick={false}
+					open={openModal}
+					onClose={() => setOpenModal(false)}>
 					<div className={classes.modalWindow}>
 						<div className={classes.modalWindowContent}>
 							<div className={classes.linksListContainer}>
@@ -178,6 +188,7 @@ function Header() {
 									onClick={() => {
 										deleteInvalidLinks(invalidLinks, boxUpdater);
 										setOpenModal(false);
+										updateIsSchemaValid();
 									}}>
 									Delete invalid links
 								</button>
@@ -196,12 +207,6 @@ function Header() {
 			) : (
 				<></>
 			)}
-			{/* <button
-				disabled={isSchemaValid}
-				className={classes.button}
-				onClick={() => setOpenModal(true)}>
-				{isSchemaValid ? 'valid' : 'schema is not valid'}
-			</button> */}
 		</div>
 	);
 }

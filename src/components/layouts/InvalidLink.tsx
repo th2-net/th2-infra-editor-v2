@@ -16,7 +16,9 @@
 
 import { createUseStyles } from 'react-jss';
 import { InvalidLink, selectBox } from '../../helpers/pinConnections';
+import { BoxEntity } from '../../models/Box';
 import { BoxesStore } from '../../stores/BoxesStore';
+import Box from '../boxes/Box';
 
 const useStyles = createUseStyles({
 	clicableLink: {
@@ -27,32 +29,77 @@ const useStyles = createUseStyles({
 			color: 'red',
 		},
 	},
+	boxCardContainer: {
+		borderRadius: 7,
+		backgroundColor: 'lightgray',
+		padding: 3,
+		width: 295,
+		height: 31,
+		marginTop: 5,
+		marginBottom: 5,
+	},
+	invalidLinksUl: {
+		listStyleType: 'decimal',
+		'& li': {
+			marginBottom: 10,
+		},
+	},
 });
 
 function BoxСlickableLink(props: { boxName: string; boxesStore: BoxesStore }) {
 	const classes = useStyles();
 	return (
-		<a className={classes.clicableLink} onClick={() => selectBox(props.boxName, props.boxesStore)}>
+		<a
+			href='//'
+			className={classes.clicableLink}
+			onClick={() => selectBox(props.boxName, props.boxesStore)}>
 			{props.boxName}
 		</a>
 	);
 }
 
+function BoxCard(props: { box: BoxEntity | undefined; boxName: string; boxesStore: BoxesStore }) {
+	const classes = useStyles();
+	if (props.box !== undefined) {
+		const group = props.boxesStore.groupsConfig.find(group =>
+			group.types.includes((props.box as BoxEntity).spec.type),
+		);
+		return (
+			<div className={classes.boxCardContainer}>
+				<Box
+					box={props.box}
+					color={group?.color}
+					onSelect={box => {
+						selectBox(box.name, props.boxesStore);
+					}}
+				/>
+			</div>
+		);
+	} else {
+		return <BoxСlickableLink boxName={props.boxName} boxesStore={props.boxesStore} />;
+	}
+}
+
 export function InvalidLinkItems(props: { invalidLinks: InvalidLink[]; boxesStore: BoxesStore }) {
+	const classes = useStyles();
 	return (
-		<ul style={{ listStyleType: 'decimal' }}>
+		<ul className={classes.invalidLinksUl}>
 			{props.invalidLinks.map(link =>
 				link.lostPins.map(pin => (
-					<li style={{ marginBottom: '10px' }}>
+					<li>
 						pin <b>{pin.pin}</b> not found in box{' '}
-						<BoxСlickableLink boxName={pin.box} boxesStore={props.boxesStore} /> in link{' '}
-						<b>{link.link.name}</b>
+						<BoxCard
+							box={props.boxesStore.boxes.find(box => box.name === pin.box)}
+							boxName={pin.box}
+							boxesStore={props.boxesStore}
+						/>{' '}
+						in link <b>{link.link.name}</b>
 					</li>
 				)),
 			)}
 			{props.invalidLinks.map(link =>
 				link.lostBoxes.map(box => (
-					<li style={{ marginBottom: '10px' }}>
+					<li>
 						box <b>{box.box}</b> not found in link <b>{link.link.name}</b>
 					</li>
 				)),
