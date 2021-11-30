@@ -61,6 +61,7 @@ export class SchemaStore {
 			fetchSchemasFlow: flow,
 			isSchemaValid: observable,
 			invalidLinks: observable,
+			updateIsSchemaValid: action,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -118,6 +119,13 @@ export class SchemaStore {
 		return flowResult(this.fetchSchemaStateFlow(schemaName));
 	};
 
+	updateIsSchemaValid = () => {
+		this.invalidLinks = detectInvalidLinks(this.boxesStore, this.boxUpdater);
+		this.isSchemaValid = !this.invalidLinks.find(
+			link => link.lostBoxes.length + link.lostPins.length > 0,
+		);
+	};
+
 	private *fetchSchemaStateFlow(this: SchemaStore, schemaName: string) {
 		this.isLoading = true;
 
@@ -131,11 +139,9 @@ export class SchemaStore {
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
 			this.invalidLinks = detectInvalidLinks(this.boxesStore, this.boxUpdater);
-			this.isSchemaValid = this.invalidLinks.find(
+			this.isSchemaValid = !this.invalidLinks.find(
 				link => link.lostBoxes.length + link.lostPins.length > 0,
-			)
-				? false
-				: true;
+			);
 		} catch (error) {
 			if (error instanceof DOMException && error.code !== error.ABORT_ERR) {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);

@@ -68,7 +68,6 @@ export function getCountPinsConnections(
 }
 
 export function detectInvalidLinks(boxesStore: BoxesStore, boxUpdater: BoxUpdater): InvalidLink[] {
-	console.log(boxUpdater.links.length);
 	const invalidLinks: InvalidLink[] = [];
 	boxUpdater.links.forEach(link => {
 		var invalidLink: InvalidLink = {
@@ -104,17 +103,12 @@ export function detectInvalidLinks(boxesStore: BoxesStore, boxUpdater: BoxUpdate
 }
 
 export function deleteInvalidLinks(invalidLinks: InvalidLink[], boxUpdater: BoxUpdater) {
-	console.log(invalidLinks.length);
 	invalidLinks.forEach(link => {
 		boxUpdater.deleteLink(link.link);
 	});
 }
 
-export function selectBox(boxName: string, boxesStore: BoxesStore){
+export function selectBox(boxName: string, boxesStore: BoxesStore) {
 	const boxEntity = boxesStore.boxes.find(box => box.name === boxName);
-	if(boxEntity){
-		boxesStore.selectBox(boxEntity);
-	} else {
-		console.log('error select box');
-	}
+	boxEntity && boxesStore.selectBox(boxEntity);
 }
