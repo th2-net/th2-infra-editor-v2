@@ -61,6 +61,7 @@ export class SchemaStore {
 			fetchSchemasFlow: flow,
 			isSchemaValid: observable,
 			invalidLinks: observable,
+			backupInvalidLinks: observable,
 			updateIsSchemaValid: action,
 		});
 
@@ -87,6 +88,8 @@ export class SchemaStore {
 	}
 
 	invalidLinks: InvalidLink[] = [];
+
+	backupInvalidLinks: InvalidLink[] = [];
 
 	isSchemaValid: boolean = true;
 
@@ -139,6 +142,7 @@ export class SchemaStore {
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
 			this.invalidLinks = detectInvalidLinks(this.boxesStore, this.boxUpdater);
+			this.backupInvalidLinks = this.invalidLinks.concat();
 			this.isSchemaValid = !this.invalidLinks.find(
 				link => link.lostBoxes.length + link.lostPins.length > 0,
 			);

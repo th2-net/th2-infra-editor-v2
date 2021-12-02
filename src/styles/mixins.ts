@@ -42,7 +42,7 @@ export function ellipsis(): Styles {
 		whiteSpace: 'nowrap',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
-	}
+	};
 }
 
 export function visuallyHidden(): Styles {
@@ -54,10 +54,9 @@ export function visuallyHidden(): Styles {
 		height: '1px',
 		margin: '-1px',
 		padding: '0',
-		clipPath: 'inset(50%)'
-	}
+		clipPath: 'inset(50%)',
+	};
 }
-
 
 export function buttonReset(): Styles {
 	return {
@@ -65,8 +64,8 @@ export function buttonReset(): Styles {
 		border: 'none',
 		outline: 'none',
 		cursor: 'pointer',
-		backgroundColor: 'transparent'
-	}
+		backgroundColor: 'transparent',
+	};
 }
 
 export function button(): Styles {
@@ -88,5 +87,20 @@ export function button(): Styles {
 		position: 'relative',
 		transition: '250ms',
 		userSelect: 'none',
-	}
+	};
+}
+
+export function modalWindow(): Styles {
+	return {
+		position: 'relative',
+		borderRadius: '6px',
+		boxShadow:
+			'0 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)',
+		padding: '20px 30px',
+		overflow: 'auto',
+		top: '50px',
+		marginRight: 'auto',
+		marginLeft: 'auto',
+		backgroundColor: 'white',
+	};
 }

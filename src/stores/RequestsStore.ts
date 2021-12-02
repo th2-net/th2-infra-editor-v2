@@ -17,6 +17,7 @@
 import { isEqual } from 'lodash';
 import { action, computed, makeObservable, observable } from 'mobx';
 import Api from '../api/api';
+import { returnInvalidLinks } from '../helpers/pinConnections';
 import { BoxEntity } from '../models/Box';
 import { DictionaryEntity, DictionaryLinksEntity } from '../models/Dictionary';
 import { RequestModel } from '../models/FileBase';
@@ -32,6 +33,7 @@ export class RequestsStore {
 			requestsExist: computed,
 			saveChanges: action,
 			saveEntityChanges: action,
+			discardChanges: action,
 		});
 	}
 
@@ -44,7 +46,7 @@ export class RequestsStore {
 	}
 
 	public get requestsExist(): boolean {
-		return this.preparedRequests.length > 0
+		return this.preparedRequests.length > 0;
 	}
 
 	saveEntityChanges = (
@@ -77,5 +79,11 @@ export class RequestsStore {
 		} finally {
 			this.isSaving = false;
 		}
+	};
+
+	discardChanges = () => {
+		this.preparedRequests = [];
+		returnInvalidLinks(this.schemaStore.backupInvalidLinks, this.schemaStore.boxUpdater);
+		this.schemaStore.updateIsSchemaValid();
 	};
 }

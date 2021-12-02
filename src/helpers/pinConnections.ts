@@ -108,6 +108,11 @@ export function deleteInvalidLinks(invalidLinks: InvalidLink[], boxUpdater: BoxU
 	});
 }
 
+export function returnInvalidLinks(invalidLinks: InvalidLink[], boxUpdater: BoxUpdater) {
+	invalidLinks.forEach(link => 
+		boxUpdater.addLink(link.link, false));
+}
+
 export function selectBox(boxName: string, boxesStore: BoxesStore) {
 	const boxEntity = boxesStore.boxes.find(box => box.name === boxName);
 	boxEntity && boxesStore.selectBox(boxEntity);

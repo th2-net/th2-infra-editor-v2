@@ -15,43 +15,31 @@
  ***************************************************************************** */
 
 import { observer } from 'mobx-react-lite';
-import { createUseStyles, Styles } from 'react-jss';
+import { createUseStyles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
-import Modal from '@material-ui/core/Modal';
 import { useEffect, useState } from 'react';
-import { InvalidLinkItems } from './layouts/InvalidLink';
-import { deleteInvalidLinks, detectInvalidLinks } from '../helpers/pinConnections';
 import warningIcon from '../assets/icons/attention-error.svg';
-
-const button: Styles = {
-	height: '30px',
-	width: 'auto',
-	borderRadius: '17px',
-	color: '#fff',
-	padding: '7px 12px',
-	textTransform: 'capitalize',
-	outline: 'none',
-	border: 'none',
-	margin: '0 25px',
-	boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
-	fontWeight: '600',
-	fontSize: '13px',
-	lineHeight: '16px',
-	position: 'relative',
-	backgroundColor: '#ffa666',
-	'&:hover': {
-		backgroundColor: '#ffb37c',
-	},
-	'&:active': {
-		backgroundColor: '#ffc093',
-	},
-	'&:disabled': {
-		backgroundColor: '#979797',
-	},
-};
+import CustomizedTooltip from './util/CustomizedTooltip';
+import ModalConfirmation from './util/ModalConfirmation';
+import InvalidLinksList from './util/InvalidLinksList';
+import { button } from '../styles/mixins';
 
 const useStyles = createUseStyles({
-	button,
+	button: {
+		...button(),
+		color: '#fff',
+		margin: '0 25px',
+		backgroundColor: '#ffa666',
+		'&:hover': {
+			backgroundColor: '#ffb37c',
+		},
+		'&:active': {
+			backgroundColor: '#ffc093',
+		},
+		'&:disabled': {
+			backgroundColor: '#979797',
+		},
+	},
 	container: {
 		gridArea: 'header',
 		backgroundColor: '#7a99b8',
@@ -79,37 +67,6 @@ const useStyles = createUseStyles({
 	disableBadge: {
 		display: 'none',
 	},
-	modalWindow: {
-		position: 'relative',
-		borderRadius: 6,
-		boxShadow:
-			'0 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)',
-		paddingTop: 20,
-		paddingBottom: 20,
-		paddingRight: 30,
-		paddingLeft: 30,
-		overflow: 'auto',
-		top: 50,
-		marginRight: 'auto',
-		marginLeft: 'auto',
-		width: '50%',
-		height: document.documentElement.scrollHeight / 2,
-		backgroundColor: 'white',
-	},
-	modalWindowContent: {
-		display: 'grid',
-		gridTemplateRows: '90% 10%',
-		gridRowGap: '5px',
-		height: '100%',
-	},
-	linksListContainer: {
-		overflowY: 'auto',
-	},
-	buttonArea: {
-		display: 'flex',
-		flexDirection: 'row',
-		justifyContent: 'flex-end',
-	},
 	invalidSchemaIndicator: {
 		display: 'grid',
 		gridTemplateColumns: '20px auto',
@@ -131,22 +88,19 @@ const useStyles = createUseStyles({
 });
 
 function Header() {
-	const {
-		requestsStore,
-		schemas,
-		selectSchema,
-		selectedSchemaName,
-		isSchemaValid,
-		invalidLinks,
-		boxUpdater,
-		boxesStore,
-		updateIsSchemaValid,
-	} = useSchemaStore();
-	const { requestsExist, saveChanges, preparedRequests } = requestsStore;
+	const { requestsStore, schemas, selectSchema, selectedSchemaName, isSchemaValid, boxesStore } =
+		useSchemaStore();
+	const { requestsExist, saveChanges, preparedRequests, discardChanges } = requestsStore;
 
 	const classes = useStyles();
 
 	const [openModal, setOpenModal] = useState(false);
+
+	const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
+
+	const [save, setSaveChanges] = useState(false);
+
+	const [message, setMessage] = useState('');
 
 	useEffect(() => {
 		setOpenModal(false);
@@ -155,50 +109,57 @@ function Header() {
 	return (
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
-				<select
-					onChange={e => selectSchema(e.target.value)}
-					value={selectedSchemaName || undefined}>
-					{schemas.map(schema => (
-						<option key={schema} value={schema}>
-							{schema}
-						</option>
-					))}
-				</select>
+				<CustomizedTooltip
+					title='submit pending changes first'
+					disableCondition={!requestsExist}>
+					<select
+						disabled={requestsExist}
+						onChange={e => selectSchema(e.target.value)}
+						value={selectedSchemaName || undefined}>
+						{schemas.map(schema => (
+							<option key={schema} value={schema}>
+								{schema}
+							</option>
+						))}
+					</select>
+				</CustomizedTooltip>
 			)}
-			<button disabled={!requestsExist} className={classes.button} onClick={saveChanges}>
+			<button
+				disabled={!requestsExist}
+				className={classes.button}
+				onClick={() => {
+					setOpenConfirmationModal(true);
+					setMessage('Do you want to submit pending changes?');
+					setSaveChanges(true);
+				}}>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
 					{preparedRequests.length}
 				</span>
 				Submit changes
 			</button>
-			{openModal ? (
-				<Modal
-					BackdropProps={{ style: { backgroundColor: 'transparent' } }}
-					disableBackdropClick={false}
-					open={openModal}
-					onClose={() => setOpenModal(false)}>
-					<div className={classes.modalWindow}>
-						<div className={classes.modalWindowContent}>
-							<div className={classes.linksListContainer}>
-								<InvalidLinkItems invalidLinks={invalidLinks} boxesStore={boxesStore} />
-							</div>
-
-							<div className={classes.buttonArea}>
-								<button
-									onClick={() => {
-										deleteInvalidLinks(invalidLinks, boxUpdater);
-										setOpenModal(false);
-										updateIsSchemaValid();
-									}}>
-									Delete invalid links
-								</button>
-							</div>
-						</div>
-					</div>
-				</Modal>
+			{requestsExist ? (
+				<button
+					className={classes.button}
+					onClick={() => {
+						setOpenConfirmationModal(true);
+						setMessage('Do you want to discard pending changes?');
+						setSaveChanges(false);
+					}}>
+					Discard changes
+				</button>
 			) : (
 				<></>
 			)}
+			{openConfirmationModal ? (
+				<ModalConfirmation
+					setOpen={setOpenConfirmationModal}
+					message={message}
+					action={save ? saveChanges : discardChanges}
+				/>
+			) : (
+				<></>
+			)}
+			{openModal ? <InvalidLinksList setOpen={setOpenModal} /> : <></>}
 			{!isSchemaValid ? (
 				<div className={classes.invalidSchemaIndicator} onClick={() => setOpenModal(true)}>
 					<div className={classes.warningIcon}></div>
