@@ -74,6 +74,7 @@ export class RequestsStore {
 			this.isSaving = true;
 			await this.api.sendSchemaRequest(this.selectedSchemaName, this.preparedRequests);
 			this.preparedRequests = [];
+			this.schemaStore.updateIsSchemaValid();
 		} catch (error) {
 			alert("Couldn't save changes");
 		} finally {
