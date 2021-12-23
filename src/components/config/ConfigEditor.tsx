@@ -38,48 +38,52 @@ const useStyle = createUseStyles({
 	},
 });
 
-const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses }: Props) => {
+const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }: Props) => {
 	const classes = useStyle();
 	const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor>();
 	const monacoRef = React.useRef<Monaco>();
 	const boxesStore = useBoxesStore();
-	const boxesUpdater = useBoxUpdater();
+	const boxUpdater = useBoxUpdater();
 	const [lensesDisposer, setLensesDisposer] = React.useState<monacoEditor.IDisposable>();
 	const setLens = () => {
 		const lenses: monacoEditor.languages.CodeLens[] = [];
-		const pinsConnections = getCountPinsConnections(boxesStore, boxesUpdater);
+		const pinsConnections = getCountPinsConnections(
+			boxesStore.selectedBox?.spec.pins,
+			boxUpdater.selectedBoxConnections,
+		);
 		const pinsPositions: PinsPositions[] = [];
 		if (pinsConnections) {
 			const model = editorRef.current?.getModel();
-			if (model) {
-				pinsConnections.forEach((connection, index) => {
-					const matches = model.findMatches(
-						`"name": "${connection.name}"`,
-						false,
-						false,
-						false,
-						null,
-						false,
-					);
-					matches.forEach(match => {
-						const range = match.range;
-						pinsPositions.push({
-							connections: connection.numOfConnections,
-							position: {
-								lineNumber: range.startLineNumber,
-								column: range.startColumn,
-							},
-						});
 
-						lenses.push({
-							range: range.setStartPosition(range.getStartPosition().lineNumber - 1, 1),
-							command: { id: '', title: `connections: ${connection.numOfConnections}` },
-						});
+			if (!model) throw new Error(`Couldn't get editor model`);
+
+			pinsConnections.forEach((connection, index) => {
+				const matches = model.findMatches(
+					`"name": "${connection.name}"`,
+					false,
+					false,
+					false,
+					null,
+					false,
+				);
+				matches.forEach(match => {
+					const range = match.range;
+					pinsPositions.push({
+						connections: connection.numOfConnections,
+						position: {
+							lineNumber: range.startLineNumber,
+							column: range.startColumn,
+						},
+					});
+
+					lenses.push({
+						range: range.setStartPosition(range.getStartPosition().lineNumber - 1, 1),
+						command: { id: '', title: `connections: ${connection.numOfConnections}` },
 					});
 				});
-				const ranges = rangesOfUnusedPin(pinsPositions, model);
-				selectZeroConnectionsPins(ranges);
-			}
+			});
+			const ranges = rangesOfUnusedPin(pinsPositions, model);
+			selectZeroConnectionsPins(ranges);
 		}
 		return lenses;
 	};
@@ -138,7 +142,7 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses }: Props)
 	};
 
 	const validate = (markers: monacoEditor.editor.IMarker[]) => {
-		boxesStore.isSelectedBoxValid = !(markers.length > 0);
+		boxesStore.setIsSelectedBoxValid(!(markers.length > 0));
 	};
 
 	const lensRegistrator = () => {
@@ -183,7 +187,7 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses }: Props)
 				language={'json'}
 				options={{
 					fontSize: 12,
-					codeLens: pinsConnectionsLenses || false,
+					codeLens: pinsConnectionsLenses,
 					lineNumbers: 'off',
 					minimap: {
 						enabled: false,

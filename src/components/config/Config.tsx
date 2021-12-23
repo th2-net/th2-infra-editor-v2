@@ -129,8 +129,6 @@ function Config() {
 			boxUpdater.saveBoxChanges(originalBox, updatedBox);
 		}
 	}
-	const bstr = useBoxesStore();
-	// detectMissingLinks(bstr, boxUpdater);
 
 	return (
 		<div className={classes.container}>
@@ -147,7 +145,7 @@ function Config() {
 				value={pinsConfig.value}
 				setValue={pinsConfig.setValue}
 				schema={pinSchema}
-				pinsConnectionsLenses={true}
+				pinsConnectionsLenses
 			/>
 			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
 			<ConfigEditor

@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, flowResult, makeObservable, observable } from 'mobx';
+import { action, flow, flowResult, makeObservable, observable, computed } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { isSettingsEntity, Schema, SchemaSettings } from '../models/Schema';
@@ -29,7 +29,7 @@ import { RootStore } from './RootStore';
 import { isBoxEntity } from '../models/Box';
 import SubscriptionStore from './SubscriptionStore';
 import { chain } from 'lodash';
-import { detectInvalidLinks, InvalidLink } from '../helpers/pinConnections';
+import { InvalidLink } from '../helpers/pinConnections';
 
 export class SchemaStore {
 	boxesStore = new BoxesStore();
@@ -59,10 +59,9 @@ export class SchemaStore {
 			schemaSettings: observable,
 			fetchSchemaStateFlow: flow,
 			fetchSchemasFlow: flow,
-			isSchemaValid: observable,
-			invalidLinks: observable,
+			isSchemaValid: computed,
+			invalidLinks: computed,
 			backupInvalidLinks: observable,
-			updateIsSchemaValid: action,
 		});
 
 		this.requestsStore = new RequestsStore(api, this);
@@ -87,11 +86,46 @@ export class SchemaStore {
 		this.schemaSettings = null;
 	}
 
-	invalidLinks: InvalidLink[] = [];
+	public get invalidLinks(): InvalidLink[] {
+		const invalidLinks: InvalidLink[] = [];
+		this.boxUpdater.links.forEach(link => {
+			var invalidLink: InvalidLink = {
+				link: link,
+				lostBoxes: [],
+				lostPins: [],
+			};
+			for (let i = 0; i < 2; i++) {
+				const box = this.boxesStore.boxes.find(
+					box => box.name === (i === 0 ? link.from?.box : link.to?.box),
+				);
+				if (box === undefined) {
+					invalidLink.lostBoxes.push({
+						box: i === 0 ? link.from?.box || '' : link.to?.box || '',
+					});
+				} else {
+					const pins = box.spec.pins?.find(
+						pin => pin.name === (i === 0 ? link.from?.pin : link.to?.pin),
+					);
+					if (pins === undefined) {
+						invalidLink.lostPins.push({
+							pin: i === 0 ? link.from?.pin || '' : link.to?.pin || '',
+							box: box.name,
+						});
+					}
+				}
+			}
+			if (invalidLink.lostBoxes.length > 0 || invalidLink.lostPins.length > 0) {
+				invalidLinks.push(invalidLink);
+			}
+		});
+		return invalidLinks;
+	}
 
 	backupInvalidLinks: InvalidLink[] = [];
 
-	isSchemaValid: boolean = true;
+	public get isSchemaValid(): boolean {
+		return !this.invalidLinks.find(link => link.lostBoxes.length + link.lostPins.length > 0);
+	}
 
 	schemas: string[] = [];
 
@@ -122,13 +156,6 @@ export class SchemaStore {
 		return flowResult(this.fetchSchemaStateFlow(schemaName));
 	};
 
-	updateIsSchemaValid = () => {
-		this.invalidLinks = detectInvalidLinks(this.boxesStore, this.boxUpdater);
-		this.isSchemaValid = !this.invalidLinks.find(
-			link => link.lostBoxes.length + link.lostPins.length > 0,
-		);
-	};
-
 	private *fetchSchemaStateFlow(this: SchemaStore, schemaName: string) {
 		this.isLoading = true;
 
@@ -141,11 +168,7 @@ export class SchemaStore {
 			this.boxUpdater.setLinkDefinitions(schema.resources);
 			this.dictionaryLinksStore.setLinkDictionaries(schema.resources);
 			this.schemaSettings = chain(schema.resources).filter(isSettingsEntity).head().value();
-			this.invalidLinks = detectInvalidLinks(this.boxesStore, this.boxUpdater);
 			this.backupInvalidLinks = this.invalidLinks.concat();
-			this.isSchemaValid = !this.invalidLinks.find(
-				link => link.lostBoxes.length + link.lostPins.length > 0,
-			);
 		} catch (error) {
 			if (error instanceof DOMException && error.code !== error.ABORT_ERR) {
 				console.error(`Error occured while fetching schema ${schemaName}`, error);

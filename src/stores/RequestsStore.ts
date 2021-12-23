@@ -17,7 +17,6 @@
 import { isEqual } from 'lodash';
 import { action, computed, makeObservable, observable } from 'mobx';
 import Api from '../api/api';
-import { returnInvalidLinks } from '../helpers/pinConnections';
 import { BoxEntity } from '../models/Box';
 import { DictionaryEntity, DictionaryLinksEntity } from '../models/Dictionary';
 import { RequestModel } from '../models/FileBase';
@@ -74,7 +73,6 @@ export class RequestsStore {
 			this.isSaving = true;
 			await this.api.sendSchemaRequest(this.selectedSchemaName, this.preparedRequests);
 			this.preparedRequests = [];
-			this.schemaStore.updateIsSchemaValid();
 		} catch (error) {
 			alert("Couldn't save changes");
 		} finally {
@@ -84,7 +82,8 @@ export class RequestsStore {
 
 	discardChanges = () => {
 		this.preparedRequests = [];
-		returnInvalidLinks(this.schemaStore.backupInvalidLinks, this.schemaStore.boxUpdater);
-		this.schemaStore.updateIsSchemaValid();
+		this.schemaStore.backupInvalidLinks.forEach(link =>
+			this.schemaStore.boxUpdater.addLink(link.link, false),
+		);
 	};
 }
