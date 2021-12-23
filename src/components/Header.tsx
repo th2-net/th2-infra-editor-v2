@@ -98,9 +98,22 @@ function Header() {
 
 	const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
-	const [save, setSaveChanges] = useState(false);
+	const [confirmationModalType, setConfirmationModalType] = useState<'save' | 'discard' | null>(
+		null,
+	);
 
-	const [message, setMessage] = useState('');
+	const confirmationModalConfig = {
+		save: {
+			setOpen: setOpenConfirmationModal,
+			message: 'Do you want to submit pending changes?',
+			action: saveChanges,
+		},
+		discard: {
+			setOpen: setOpenConfirmationModal,
+			message: 'Do you want to discard pending changes?',
+			action: discardChanges,
+		},
+	};
 
 	useEffect(() => {
 		setOpenModal(false);
@@ -109,9 +122,7 @@ function Header() {
 	return (
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
-				<CustomizedTooltip
-					title='submit pending changes first'
-					disableCondition={!requestsExist}>
+				<CustomizedTooltip title='submit pending changes first' disableCondition={!requestsExist}>
 					<select
 						disabled={requestsExist}
 						onChange={e => selectSchema(e.target.value)}
@@ -129,44 +140,32 @@ function Header() {
 				className={classes.button}
 				onClick={() => {
 					setOpenConfirmationModal(true);
-					setMessage('Do you want to submit pending changes?');
-					setSaveChanges(true);
+					setConfirmationModalType('save');
 				}}>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
 					{preparedRequests.length}
 				</span>
 				Submit changes
 			</button>
-			{requestsExist ? (
+			{requestsExist && (
 				<button
 					className={classes.button}
 					onClick={() => {
 						setOpenConfirmationModal(true);
-						setMessage('Do you want to discard pending changes?');
-						setSaveChanges(false);
+						setConfirmationModalType('discard');
 					}}>
 					Discard changes
 				</button>
-			) : (
-				<></>
 			)}
-			{openConfirmationModal ? (
-				<ModalConfirmation
-					setOpen={setOpenConfirmationModal}
-					message={message}
-					action={save ? saveChanges : discardChanges}
-				/>
-			) : (
-				<></>
+			{openConfirmationModal && confirmationModalType && (
+				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} />
 			)}
-			{openModal ? <InvalidLinksList setOpen={setOpenModal} /> : <></>}
-			{!isSchemaValid ? (
+			{openModal && <InvalidLinksList setOpen={setOpenModal} />}
+			{!isSchemaValid && (
 				<div className={classes.invalidSchemaIndicator} onClick={() => setOpenModal(true)}>
 					<div className={classes.warningIcon}></div>
 					<div>schema is not valid</div>
 				</div>
-			) : (
-				<></>
 			)}
 		</div>
 	);

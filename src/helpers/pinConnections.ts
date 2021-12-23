@@ -18,8 +18,7 @@ import { IPosition } from 'monaco-editor';
 import { IPinConnections } from '../components/links/BoxConnections';
 import { ExtendedConnectionOwner, Pin } from '../models/Box';
 import { Link } from '../models/LinksDefinition';
-import { BoxesStore } from '../stores/BoxesStore';
-import { BoxUpdater } from '../stores/BoxUpdater';
+import { IBoxConnections } from '../components/links/BoxConnections';
 
 export type PinsPositions = {
 	connections: number;
@@ -43,11 +42,10 @@ export type InvalidLink = {
 };
 
 export function getCountPinsConnections(
-	boxesStore: BoxesStore,
-	boxUpdater: BoxUpdater,
+	selectedBoxPins: any,
+	selectedBoxConnections: [IBoxConnections, IBoxConnections] | [null, null],
 ): PinsInfo[] | null {
-	const selectedBoxPins = boxesStore.selectedBox?.spec.pins;
-	const [toConnections, fromConnections] = boxUpdater.selectedBoxConnections;
+	const [toConnections, fromConnections] = selectedBoxConnections;
 	const allConnections = [...(toConnections?.pins || []), ...(fromConnections?.pins || [])];
 	if (selectedBoxPins && allConnections) {
 		const pinsInfoArray: PinsInfo[] = [];
@@ -65,55 +63,4 @@ export function getCountPinsConnections(
 		return pinsInfoArray;
 	}
 	return null;
-}
-
-export function detectInvalidLinks(boxesStore: BoxesStore, boxUpdater: BoxUpdater): InvalidLink[] {
-	const invalidLinks: InvalidLink[] = [];
-	boxUpdater.links.forEach(link => {
-		var invalidLink: InvalidLink = {
-			link: link,
-			lostBoxes: [],
-			lostPins: [],
-		};
-		for (let i = 0; i < 2; i++) {
-			const box = boxesStore.boxes.find(
-				box => box.name === (i === 0 ? link.from?.box : link.to?.box),
-			);
-			if (box === undefined) {
-				invalidLink.lostBoxes.push({
-					box: i === 0 ? link.from?.box || '' : link.to?.box || '',
-				});
-			} else {
-				const pins = box.spec.pins?.find(
-					pin => pin.name === (i === 0 ? link.from?.pin : link.to?.pin),
-				);
-				if (pins === undefined) {
-					invalidLink.lostPins.push({
-						pin: i === 0 ? link.from?.pin || '' : link.to?.pin || '',
-						box: box.name,
-					});
-				}
-			}
-		}
-		if (invalidLink.lostBoxes.length > 0 || invalidLink.lostPins.length > 0) {
-			invalidLinks.push(invalidLink);
-		}
-	});
-	return invalidLinks;
-}
-
-export function deleteInvalidLinks(invalidLinks: InvalidLink[], boxUpdater: BoxUpdater) {
-	invalidLinks.forEach(link => {
-		boxUpdater.deleteLink(link.link);
-	});
-}
-
-export function returnInvalidLinks(invalidLinks: InvalidLink[], boxUpdater: BoxUpdater) {
-	invalidLinks.forEach(link => 
-		boxUpdater.addLink(link.link, false));
-}
-
-export function selectBox(boxName: string, boxesStore: BoxesStore) {
-	const boxEntity = boxesStore.boxes.find(box => box.name === boxName);
-	boxEntity && boxesStore.selectBox(boxEntity);
 }

@@ -17,7 +17,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { createUseStyles } from 'react-jss';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
-import { deleteInvalidLinks } from '../../helpers/pinConnections';
 import { InvalidLinkItems } from './InvalidLink';
 import ModalWindow from './ModalWindow';
 import { modalWindow, button } from '../../styles/mixins';
@@ -64,24 +63,26 @@ const useStyles = createUseStyles({
 });
 
 const InvalidLinksList = (props: { setOpen: Dispatch<SetStateAction<boolean>> }) => {
-	const { invalidLinks, boxUpdater, boxesStore, updateIsSchemaValid } = useSchemaStore();
-
+	const { invalidLinks, boxUpdater } = useSchemaStore();
 	const classes = useStyles();
+	var count = 0;
 
 	return (
 		<ModalWindow setOpen={props.setOpen}>
 			<div className={classes.modalWindow}>
 				<div className={classes.linksListContainer}>
-					<InvalidLinkItems invalidLinks={invalidLinks} boxesStore={boxesStore} />
+					<InvalidLinkItems />
 				</div>
 
 				<div className={classes.buttonArea}>
 					<button
 						className={classes.button}
 						onClick={() => {
-							deleteInvalidLinks(invalidLinks, boxUpdater);
+							invalidLinks.forEach(link => {
+								count++;
+								boxUpdater.deleteLink(link.link);
+							});
 							props.setOpen(false);
-							updateIsSchemaValid();
 						}}>
 						Delete invalid links
 					</button>

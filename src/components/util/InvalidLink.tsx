@@ -15,9 +15,8 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import { InvalidLink, selectBox } from '../../helpers/pinConnections';
+import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { BoxEntity } from '../../models/Box';
-import { BoxesStore } from '../../stores/BoxesStore';
 import Box from '../boxes/Box';
 
 const useStyles = createUseStyles({
@@ -46,10 +45,11 @@ const useStyles = createUseStyles({
 	},
 });
 
-function BoxCard(props: { box: BoxEntity | undefined; boxName: string; boxesStore: BoxesStore }) {
+function BoxCard(props: { box: BoxEntity | undefined; boxName: string }) {
 	const classes = useStyles();
+	const { boxesStore } = useSchemaStore();
 	if (props.box !== undefined) {
-		const group = props.boxesStore.groupsConfig.find(group =>
+		const group = boxesStore.groupsConfig.find(group =>
 			group.types.includes((props.box as BoxEntity).spec.type),
 		);
 		return (
@@ -58,7 +58,7 @@ function BoxCard(props: { box: BoxEntity | undefined; boxName: string; boxesStor
 					box={props.box}
 					color={group?.color}
 					onSelect={box => {
-						selectBox(box.name, props.boxesStore);
+						boxesStore.selectBox(null, box.name);
 					}}
 				/>
 			</div>
@@ -68,24 +68,21 @@ function BoxCard(props: { box: BoxEntity | undefined; boxName: string; boxesStor
 	}
 }
 
-export function InvalidLinkItems(props: { invalidLinks: InvalidLink[]; boxesStore: BoxesStore }) {
+export function InvalidLinkItems() {
 	const classes = useStyles();
+	const { invalidLinks, boxesStore } = useSchemaStore();
 	return (
 		<ul className={classes.invalidLinksUl}>
-			{props.invalidLinks.map(link =>
+			{invalidLinks.map(link =>
 				link.lostPins.map(pin => (
 					<li>
 						pin <b>{pin.pin}</b> not found in box{' '}
-						<BoxCard
-							box={props.boxesStore.boxes.find(box => box.name === pin.box)}
-							boxName={pin.box}
-							boxesStore={props.boxesStore}
-						/>{' '}
+						<BoxCard box={boxesStore.boxes.find(box => box.name === pin.box)} boxName={pin.box} />{' '}
 						in link <b>{link.link.name}</b>
 					</li>
 				)),
 			)}
-			{props.invalidLinks.map(link =>
+			{invalidLinks.map(link =>
 				link.lostBoxes.map(box => (
 					<li>
 						box <b>{box.box}</b> not found in link <b>{link.link.name}</b>
