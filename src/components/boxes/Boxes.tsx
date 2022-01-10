@@ -216,7 +216,7 @@ function Boxes() {
 				</Observer>
 			);
 		},
-		[boxesStore, appViewStore, expandGroup, expandedMap, selectedDictionaryStore],
+		[boxesStore, groupedBoxes, appViewStore, selectedDictionaryStore, expandedMap, expandGroup],
 	);
 
 	const classes = useStyles();

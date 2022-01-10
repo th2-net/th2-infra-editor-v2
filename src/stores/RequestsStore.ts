@@ -29,6 +29,7 @@ export class RequestsStore {
 			isSaving: observable,
 			preparedRequests: observable,
 			selectedSchemaName: computed,
+			requestsExist: computed,
 			saveChanges: action,
 			saveEntityChanges: action,
 		});
@@ -40,6 +41,10 @@ export class RequestsStore {
 
 	public get selectedSchemaName(): string | null {
 		return this.schemaStore.selectedSchemaName;
+	}
+
+	public get requestsExist(): boolean {
+		return this.preparedRequests.length > 0
 	}
 
 	saveEntityChanges = (

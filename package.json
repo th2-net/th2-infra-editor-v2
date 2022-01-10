@@ -33,7 +33,7 @@
 	},
 	"scripts": {
 		"start": "react-scripts start",
-		"build": "npm run validate && react-scripts build && npm run initEditor",
+		"build": "npm ci && npm run validate && npm run initEditor && react-scripts build",
 		"postinstall": "npm run initEditor",
 		"initEditor": "node initEditor.js",
 		"test": "react-scripts test",
