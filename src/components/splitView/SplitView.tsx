@@ -59,17 +59,11 @@ const useStyles = createUseStyles({
 	},
 });
 
-type MouseEvents = {
-	onMouseUp: (e: MouseEvent) => void;
-	onMouseMove: (e: MouseEvent) => void;
-};
-
 function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 	const rootRef = React.useRef<HTMLDivElement>(null);
 	const rootRefPreview = React.useRef<HTMLDivElement>(null);
 	const topComponentRef = React.useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = React.useState(false);
-	const [mouseEvents, setMouseEvents] = React.useState<MouseEvents | null>(null);
 
 	const startY = React.useRef(0);
 	const lastTopComponentHeight = React.useRef(0);
@@ -84,63 +78,38 @@ function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 		}
 	};
 
-	const calculateHeight = React.useCallback((e: MouseEvent): string => {
-		if (rootRef.current) {
+	React.useEffect(() => {
+		const calculateHeight = (e: MouseEvent): string => {
+			if (!rootRef.current) return '1fr 15px 1fr';
 			const newHeight = lastTopComponentHeight.current - startY.current + e.pageY;
-
 			const nonNegativeHeight = Math.max(newHeight, 0);
-
 			const maxHeight = rootRef.current.getBoundingClientRect().height - 15;
-
 			return `${Math.min(nonNegativeHeight, maxHeight)}px 15px 1fr`;
-		}
-		return '1fr 15px 1fr';
-	}, []);
+		};
 
-	const onMouseUp = React.useCallback(
-		(e: MouseEvent) => {
+		const onMouseUp = (e: MouseEvent) => {
 			setIsDragging(false);
 			if (rootRef.current) {
 				rootRef.current.style.gridTemplateRows = calculateHeight(e);
 			}
-		},
-		[calculateHeight],
-	);
+		};
 
-	const onMouseMove = React.useCallback(
-		(e: MouseEvent) => {
+		const onMouseMove = (e: MouseEvent) => {
 			if (rootRefPreview.current) {
 				rootRefPreview.current.style.gridTemplateRows = calculateHeight(e);
 			}
-		},
-		[calculateHeight],
-	);
+		};
 
-	const setupEvents = React.useCallback(() => {
-		document.addEventListener('mouseup', onMouseUp);
-		document.addEventListener('mousemove', onMouseMove);
-
-		setMouseEvents({ onMouseUp, onMouseMove });
-	}, [onMouseUp, onMouseMove]);
-
-	const disposeEvents = React.useCallback(() => {
-		if (mouseEvents) {
-			document.removeEventListener('mouseup', mouseEvents.onMouseUp);
-			document.removeEventListener('mousemove', mouseEvents.onMouseMove);
-
-			setMouseEvents(null);
+		if (isDragging) {
+			document.addEventListener('mouseup', onMouseUp);
+			document.addEventListener('mousemove', onMouseMove);
 		}
-	}, [mouseEvents]);
-
-	React.useEffect(() => {
-		if (isDragging && !mouseEvents) setupEvents();
 
 		return () => {
-			if (isDragging && mouseEvents) {
-				disposeEvents();
-			}
+			document.removeEventListener('mouseup', onMouseUp);
+			document.removeEventListener('mousemove', onMouseMove);
 		};
-	});
+	}, [isDragging]);
 
 	React.useEffect(() => {
 		if (isDragging && rootRefPreview.current) {
