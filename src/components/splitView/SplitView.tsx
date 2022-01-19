@@ -16,7 +16,6 @@
 
 import React from 'react';
 import { createUseStyles } from 'react-jss';
-import Splitter from './Splitter';
 
 type SplitViewProps = {
 	topComponent: React.ReactNode;
@@ -34,7 +33,7 @@ const useStyles = createUseStyles<string, StylesProps>({
 		height: '100%',
 		overflow: 'hidden',
 
-		gridTemplateRows: ({ topComponentHeight }) => `${topComponentHeight}px 15px 1fr`,
+		gridTemplateRows: ({ topComponentHeight }) => `${topComponentHeight}px 40px 1fr`,
 	},
 
 	splitter: {
@@ -68,7 +67,7 @@ type MouseEvents = {
 function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 	const rootRef = React.useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = React.useState(false);
-	const [topComponentHeight, setTopComponentHeight] = React.useState(200);
+	const [topComponentHeight, setTopComponentHeight] = React.useState(150);
 	const [mouseEvents, setMouseEvents] = React.useState<MouseEvents | null>(null);
 
 	const startY = React.useRef(0);
@@ -130,9 +129,7 @@ function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 	return (
 		<div className={classes.container} ref={rootRef}>
 			<div className={classes.panel}>{topComponent}</div>
-			<div className={classes.splitter} onMouseDown={splitterMouseDown}>
-				<Splitter />
-			</div>
+			<div className={classes.splitter} onMouseDown={splitterMouseDown}></div>
 			<div className={classes.panel}>{bottomComponent}</div>
 		</div>
 	);

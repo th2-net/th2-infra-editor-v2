@@ -38,30 +38,22 @@ const useStyles = createUseStyles(
 			overflow: 'hidden',
 			display: 'flex',
 			flexDirection: 'column',
-			borderRadius: 6,
+			borderRadius: 24,
+			boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+			backgroundColor: '#FFFFFF',
 		},
 		boxList: {
-			marginTop: '10px',
 			...scrollBar(),
+			marginBottom: '24px',
 		},
 		item: {
 			paddingBottom: '6px',
 		},
 		groupItem: {
-			background: '#fff',
-			padding: '3px',
-			marginBottom: '6px',
-			borderRadius: '6px',
-		},
-		nextGroupItem: {
-			paddingBottom: '6px',
-			marginBottom: '0',
-			WebkitBorderBottomLeftRadius: '0',
-			WebkitBorderBottomRightRadius: '0',
-		},
-		prevGroupItem: {
-			WebkitBorderTopLeftRadius: '0',
-			WebkitBorderTopRightRadius: '0',
+			background: '#5CBEEF',
+			margin: '0 24px 4px 24px',
+			padding: '16px 12px',
+			borderRadius: 4,
 		},
 	},
 	{ name: 'Boxes' },
@@ -162,14 +154,7 @@ function Boxes() {
 					group.types.includes((box as BoxEntity).spec.type),
 				);
 				return (
-					<div
-						className={classNames(classes.groupItem, {
-							[classes.nextGroupItem]:
-								index + 1 < groupedBoxes.length &&
-								getType(groupedBoxes[index + 1]) === getType(box),
-							[classes.prevGroupItem]:
-								index - 1 >= 0 && getType(groupedBoxes[index - 1]) === getType(box),
-						})}>
+					<div className={classes.groupItem}>
 						<Observer>
 							{() => (
 								<Box
@@ -235,60 +220,32 @@ export default observer(Boxes);
 const useExpandGroupStyles = createUseStyles(
 	{
 		expandGroup: {
-			height: '25px',
-			width: '100%',
-			display: 'grid',
-			gridTemplateAreas: `
-				"button name"
-			`,
-			gridTemplateRows: '1fr',
-			gridTemplateColumns: '25px 1fr',
-			gap: '6px',
+			display: 'flex',
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			height: '58px',
+			fontSize: '14px',
+			backgroundColor: '#FFF',
+			borderRadius: 4,
+			boxShadow: '0px 0px 3px rgba(0, 0, 0, 0.16)',
+			margin: '0 24px 4px 24px',
+			padding: '16px',
 			cursor: 'pointer',
-			margin: '10px 0',
+			'&:hover': {
+				backgroundColor: '#EEF2F6',
+			},
 		},
 		expanded: {
-			margin: '10px 0 0 0',
-			background: '#fff',
-			borderRadius: '6px 6px 0 0',
-		},
-		expandButton: {
-			width: '25px',
-			height: '25px',
-			border: 'none',
-			gridArea: 'button',
-			lineHeight: '25px',
-			fontWeight: 'bold',
-			fontSize: '15px',
-			background: '#fff',
-			textAlign: 'center',
-			borderRadius: '50%',
-			transition: '250ms',
-			userSelect: 'none',
+			backgroundColor: '#5CBEEF',
 			'&:hover': {
-				background: 'rgba(255, 255, 255, 0.8)',
+				backgroundColor: '#5CBEEF',
 			},
-			'&:active': {
-				background: 'rgba(255, 255, 255, 0.5)',
-			},
-		},
-		rotateButton: {
-			transform: 'rotate(90deg)',
 		},
 		name: {
-			width: '100%',
 			height: '100%',
-			lineHeight: '25px',
-			gridArea: 'name',
 			background: 'transparent',
-			borderRadius: '7px',
-			padding: '0 15px',
-			'&:hover': {
-				background: 'rgba(0, 0, 0, 0.1)',
-			},
-			'&:active': {
-				background: 'rgba(0, 0, 0, 0.3)',
-			},
+			lineHeight: '26px',
 		},
 	},
 	{ name: 'ExpandGroup' },
@@ -308,13 +265,8 @@ function ExpandGroup(props: ExpandGroupProps) {
 			className={classNames(classes.expandGroup, {
 				[classes.expanded]: props.isExpand && props.group.name !== 'dictionaries',
 			})}>
-			<div
-				className={classNames(classes.expandButton, {
-					[classes.rotateButton]: props.isExpand,
-				})}>
-				&gt;
-			</div>
 			<div className={classes.name}>{props.group.name}</div>
+			{props.isExpand ? <Icon id='arrowUp' stroke='#FFF' /> : <Icon id='arrowDown' stroke='#666' />}
 		</div>
 	);
 }
@@ -323,15 +275,19 @@ const useBoxSearchStyles = createUseStyles(
 	{
 		search: {
 			flexShrink: 0,
-			height: 50,
-			borderBottom: '1px solid',
+			height: 40,
+			fontSize: '14px',
+			margin: '0 24px 16px 24px',
+			borderRadius: 4,
+			boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
 		},
 		searchInput: {
+			backgroundColor: '#F3F3F6',
 			width: '100%',
 			height: '100%',
 			border: 'none',
 			outline: 'none',
-			padding: '0 15px',
+			padding: '12px',
 		},
 	},
 	{ name: 'BoxSearch' },
@@ -359,7 +315,7 @@ function BoxSearch(props: BoxSearchProps) {
 		<div className={classes.search}>
 			<input
 				type='text'
-				placeholder='Box name'
+				placeholder='Search for example "Something"'
 				value={searchValue}
 				className={classes.searchInput}
 				onChange={onSearchValueChange}
@@ -378,19 +334,32 @@ interface BoxFiltersProps {
 const useBoxFiltersStyles = createUseStyles({
 	filters: {
 		display: 'flex',
+		margin: '24px 24px 12px 24px',
+		lineHeight: '16px',
+		height: '32px',
+		fontSize: '12px',
+		color: '#333333',
+		borderRadius: 4,
+		gap: 12,
 	},
 	filtersInput: {
 		...visuallyHidden(),
 		'&:checked': {
 			'&+label': {
-				backgroundColor: '#fff',
+				backgroundColor: '#5CBEEF',
+				color: '#FFF',
+				border: '1px solid #0099E5',
+				boxSizing: 'border-box',
 			},
 		},
 	},
 	filtersLabel: {
 		display: 'inline-flex',
+		backgroundColor: '#F3F3F6',
 		verticalAlign: 'middle',
-		padding: 6,
+		padding: '8px 12px',
+		border: '1px solid #E5E5E5',
+		borderRadius: 4,
 		cursor: 'pointer',
 	},
 });
@@ -410,7 +379,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				checked={filter === 'all'}
 			/>
 			<label htmlFor='all' className={classes.filtersLabel}>
-				all
+				All
 			</label>
 			<input
 				className={classes.filtersInput}
@@ -423,7 +392,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				checked={filter === 'box'}
 			/>
 			<label title='Box' htmlFor='box' className={classes.filtersLabel}>
-				<Icon id='box' stroke='black' />
+				Boxes
 			</label>
 			<input
 				className={classes.filtersInput}
@@ -436,7 +405,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				checked={filter === 'dictionary'}
 			/>
 			<label title='Dictionary' htmlFor='dictionary' className={classes.filtersLabel}>
-				<Icon id='book' stroke='black' />
+				Dictionaries
 			</label>
 		</div>
 	);

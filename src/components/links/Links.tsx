@@ -29,19 +29,34 @@ import { chain } from 'lodash';
 
 const useStyles = createUseStyles({
 	container: {
-		border: '1px solid',
-		borderRadius: '6px',
+		overflow: 'hidden',
+		display: 'grid',
+		gridTemplateRows: '66px 1fr',
+		height: '100%',
+		backgroundColor: '#FFF',
+		padding: 5,
+		borderRadius: 24,
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+		position: 'relative',
+	},
+	header: {
+		display: 'grid',
+		gridTemplateColumns: '1.5fr 1fr 1.5fr',
+		fontSize: '18px',
+		fontWeight: 500,
+		'&>div': {
+			padding: '24px 0 16px 28px',
+		},
+	},
+	content: {
 		overflow: 'hidden',
 		display: 'grid',
 		gridTemplateColumns: '1.5fr 1fr 1.5fr',
-		height: '100%',
-		padding: 5,
 		'&>div': {
 			flex: 1,
 			overflow: 'auto',
 			...scrollBar(),
 		},
-		position: 'relative',
 	},
 	selectedBox: {
 		display: 'grid',
@@ -128,40 +143,53 @@ function Links() {
 
 	return (
 		<div className={classes.container}>
-			{incoming && (
-				<BoxConnections
-					pinConnections={incoming.pins}
-					onBoxSelect={boxesStore.selectBox}
-					direction='to'
-					maxDepth={2}
-					editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
-				/>
-			)}
-			<div className={classes.selectedBox}>
-				{showEditor ? (
-					<ConnectionEditor
-						editableLink={linkToEdit}
-						onSubmit={onSubmit}
-						onDelete={onDelete}
-						onClose={onClose}
-					/>
-				) : (
-					<SelectedBox
-						box={boxesStore.selectedBox}
-						createNewLink={() => openLinkEditor(true, 'from')}
-						color={color}
-					/>
+			<div className={classes.header}>
+				<div>Incoming Connections</div>
+				<div style={{ paddingLeft: 0 }}>Summary information</div>
+				<div>Outgoing connections</div>
+			</div>
+			<div className={classes.content}>
+				{incoming && (
+					<div style={{ direction: 'rtl' }}>
+						<BoxConnections
+							pinConnections={incoming.pins}
+							onBoxSelect={boxesStore.selectBox}
+							direction='to'
+							maxDepth={2}
+							editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
+						/>
+					</div>
+				)}
+				<div>
+					<div className={classes.selectedBox}>
+						{showEditor ? (
+							<ConnectionEditor
+								editableLink={linkToEdit}
+								onSubmit={onSubmit}
+								onDelete={onDelete}
+								onClose={onClose}
+							/>
+						) : (
+							<SelectedBox
+								box={boxesStore.selectedBox}
+								createNewLink={() => openLinkEditor(true, 'from')}
+								color={color}
+							/>
+						)}
+					</div>
+				</div>
+				{outgoing && (
+					<div>
+						<BoxConnections
+							pinConnections={outgoing.pins}
+							onBoxSelect={boxesStore.selectBox}
+							direction='from'
+							maxDepth={2}
+							editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
+						/>
+					</div>
 				)}
 			</div>
-			{outgoing && (
-				<BoxConnections
-					pinConnections={outgoing.pins}
-					onBoxSelect={boxesStore.selectBox}
-					direction='from'
-					maxDepth={2}
-					editLink={(direction, box, pin) => openLinkEditor(false, direction, box, pin)}
-				/>
-			)}
 		</div>
 	);
 }

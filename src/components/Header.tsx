@@ -17,43 +17,45 @@
 import { observer } from 'mobx-react-lite';
 import { createUseStyles, Styles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+import arrowDown from '../assets/icons/arrow-down.svg';
 
 const button: Styles = {
-	height: '30px',
+	height: '32px',
 	width: 'auto',
-	borderRadius: '17px',
+	borderRadius: '4px',
 	color: '#fff',
 	padding: '7px 12px',
 	textTransform: 'capitalize',
 	outline: 'none',
 	border: 'none',
 	margin: '0 25px',
-	boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
-	fontWeight: '600',
-	fontSize: '13px',
+	fontWeight: '700',
+	fontSize: '14px',
 	lineHeight: '16px',
 	position: 'relative',
-	backgroundColor: '#ffa666',
+	cursor: 'pointer',
+	backgroundColor: '#5CBEEF',
 	'&:hover': {
-		backgroundColor: '#ffb37c',
+		backgroundColor: '#EEF2F6',
 	},
 	'&:active': {
-		backgroundColor: '#ffc093',
+		backgroundColor: '#0099E5',
 	},
 	'&:disabled': {
-		backgroundColor: '#979797',
-	}
+		opacity: '0.4',
+	},
 };
 
 const useStyles = createUseStyles({
 	button,
 	container: {
 		gridArea: 'header',
-		backgroundColor: '#7a99b8',
-		height: '60px',
+		backgroundColor: '#333333',
+		height: '80px',
 		boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.25)',
-		padding: '15px 60px',
+		padding: '16px 64px',
 		display: 'flex',
+		justifyContent: 'space-between',
 		alignItems: 'center',
 	},
 	badge: {
@@ -74,21 +76,22 @@ const useStyles = createUseStyles({
 	disableBadge: {
 		display: 'none',
 	},
+	customSelect: {
+		position: 'relative',
+		border: 'none',
+		borderRadius: 4,
+		padding: '5px 12px',
+		width: '169px',
+		height: '32px',
+		appearance: 'none',
+		background: `url(${arrowDown})  no-repeat right #FFF`,
+		backgroundPositionX: '141px',
+	},
 });
 
 function Header() {
-	const {
-		requestsStore,
-		schemas,
-		selectSchema,
-		selectedSchemaName,
-
-	} = useSchemaStore();
-	const {
-		requestsExist,
-		saveChanges,
-		preparedRequests,
-	} = requestsStore;
+	const { requestsStore, schemas, selectSchema, selectedSchemaName } = useSchemaStore();
+	const { requestsExist, saveChanges, preparedRequests } = requestsStore;
 
 	const classes = useStyles();
 
@@ -96,6 +99,7 @@ function Header() {
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
 				<select
+					className={classes.customSelect}
 					onChange={e => selectSchema(e.target.value)}
 					value={selectedSchemaName || undefined}>
 					{schemas.map(schema => (
@@ -105,14 +109,11 @@ function Header() {
 					))}
 				</select>
 			)}
-			<button
-				disabled={!requestsExist}
-				className={classes.button}
-				onClick={saveChanges}>
+			<button disabled={!requestsExist} className={classes.button} onClick={saveChanges}>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
 					{preparedRequests.length}
 				</span>
-				Submit changes
+				Submit Changes
 			</button>
 		</div>
 	);

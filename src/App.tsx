@@ -24,8 +24,8 @@ import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
-import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
-import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff';
+import robotoRegular from './assets/fonts/Roboto-Regular.ttf';
+import robotoBold from './assets/fonts/Roboto-Bold.ttf';
 import { useAppViewStore } from './hooks/useAppViewStore';
 import { useURLParamsStore } from './hooks/useURLParamsStore';
 import EmbeddedLayout from './components/embedded/EmbeddedLayout';
@@ -34,20 +34,20 @@ import loader from '@monaco-editor/loader';
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
 		{
-			fontFamily: 'Open sans',
+			fontFamily: 'Roboto',
 			fontWeight: 'normal',
-			src: `url(${openSansRegular})`,
+			src: `url(${robotoRegular})`,
 		},
 		{
-			fontFamily: 'Open sans',
+			fontFamily: 'Roboto',
 			fontWeight: 'bold',
-			src: `url(${openSansBold})`,
+			src: `url(${robotoBold})`,
 		},
 	] as any,
 	'@global': {
 		'*': {
 			boxSizing: 'border-box',
-			fontFamily: 'Open Sans',
+			fontFamily: 'Roboto',
 		},
 		body: {
 			height: '100vh',
@@ -59,12 +59,12 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 	app: {
 		display: 'grid',
-		gridTemplateRows: '60px 1fr',
+		gridTemplateRows: '80px 1fr',
 		gridTemplateAreas: `
 			"header"
 			"content"
 		`,
-		gap: 10,
+		gap: 40,
 		height: '100%',
 		backgroundColor: theme.appBackgroundColor,
 		overflow: 'hidden',
@@ -72,10 +72,10 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	content: {
 		gridArea: 'content',
 		display: 'grid',
-		gap: 10,
-		gridTemplateColumns: 'minmax(250px, 350px) 1fr',
+		gap: 40,
+		gridTemplateColumns: 'minmax(250px, 380px) 1fr',
 		gridTemplateAreas: '"box-list ."',
-		padding: '0 15px',
+		padding: '0 40px 40px 40px',
 		overflow: 'hidden',
 	},
 	loader: {

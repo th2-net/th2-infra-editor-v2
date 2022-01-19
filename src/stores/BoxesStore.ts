@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, computed, makeObservable, observable} from 'mobx';
+import { action, computed, makeObservable, observable } from 'mobx';
 import { BoxEntity, isBoxEntity } from '../models/Box';
 import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
 import FileBase from '../models/FileBase';
@@ -36,32 +36,32 @@ export class BoxesStore {
 		{
 			title: 'conn',
 			types: ['th2-conn', 'th2-read', 'th2-hand'],
-			color: '#FF9966',
+			color: '#E7F178',
 		},
 		{
 			title: 'codec',
 			types: ['th2-codec'],
-			color: '#66CC91',
+			color: '#78F19A',
 		},
 		{
 			title: 'act',
 			types: ['th2-act'],
-			color: '#666DCC',
+			color: '#7879F1',
 		},
 		{
 			title: 'check',
 			types: ['th2-check1', 'th2-check2-recon'],
-			color: '#C066CC',
+			color: '#EF78F1',
 		},
 		{
 			title: 'script',
 			types: ['th2-script'],
-			color: '#669966',
+			color: '#78BEF1',
 		},
 		{
 			title: 'Th2Resources',
 			types: ['th2-rpt-viewer', 'th2-rpt-provider'],
-			color: '#CACC66',
+			color: '#F1C878',
 		},
 	];
 

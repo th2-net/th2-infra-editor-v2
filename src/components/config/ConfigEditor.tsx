@@ -14,7 +14,17 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import Editor from '@monaco-editor/react';
+import Editor, { useMonaco } from '@monaco-editor/react';
+import { useEffect } from 'react';
+import { createUseStyles } from 'react-jss';
+
+const useStyles = createUseStyles(() => ({
+	textareaWrapper: {
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.08)',
+		borderRadius: 4,
+		marginBottom: 24,
+	},
+}));
 
 interface Props {
 	value: string;
@@ -22,14 +32,31 @@ interface Props {
 }
 
 const ConfigEditor = ({ value, setValue }: Props) => {
+	const monaco = useMonaco();
+
+	const classes = useStyles();
+
+	useEffect(() => {
+		if (monaco)
+			monaco.editor.defineTheme('my-theme', {
+				base: 'vs',
+				inherit: true,
+				rules: [],
+				colors: {
+					'editor.background': '#F3F3F6',
+				},
+			});
+	});
 	return (
-		<div className='textarea-wrapper'>
+		<div className={classes.textareaWrapper}>
 			<Editor
-				height={300}
+				height='250px'
 				width='auto'
 				language={'json'}
+				theme='my-theme'
 				options={{
-					fontSize: 12,
+					fontSize: 14,
+					fontWeight: '400',
 					codeLens: false,
 					lineNumbers: 'off',
 					minimap: {

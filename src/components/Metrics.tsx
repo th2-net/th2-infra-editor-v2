@@ -21,26 +21,34 @@ import { useDebouncedCallback } from 'use-debounce/lib';
 import { useBoxesStore } from '../hooks/useBoxesStore';
 import { useInput } from '../hooks/useInput';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+import { scrollBar, visuallyHidden } from '../styles/mixins';
 import Input from './util/Input';
 
 const useStyles = createUseStyles({
 	container: {
-		border: '1px solid',
-		borderRadius: '6px',
-		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'space-between',
+		overflowY: 'hidden',
+		border: 'none',
+		borderRadius: 24,
+		padding: 24,
+		backgroundColor: '#FFF',
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+		...scrollBar(),
 	},
-	metricsSection: {
-		margin: '0 0 1px 0',
-		height: '33%',
-		borderRadius: '6px',
+	header: {
+		width: '100%',
+		fontWeight: 700,
+		fontSize: '16px',
+		marginBottom: 16,
+	},
+	content: {
+		height: '250px',
+		marginBottom: 24,
 	},
 	metrics: {
 		height: '100%',
 		width: '100%',
 		border: 'none',
-		borderRadius: '6px',
+		borderRadius: '4px',
 	},
 	logs: {
 		height: 'calc(100% - 40px)',
@@ -48,12 +56,18 @@ const useStyles = createUseStyles({
 		border: 'none',
 		borderRadius: '6px',
 	},
+	input: {
+		color: 'rgba(51, 51, 51, 0.6)',
+		marginBottom: 24,
+	},
 });
 
 function Metrics() {
 	const classes = useStyles();
 	const schemaStore = useSchemaStore();
 	const boxesStore = useBoxesStore();
+
+	const [filter, setFilter] = useState<MetricsFilters>('cpuUsage');
 
 	const search = useInput({
 		initialValue: '',
@@ -99,30 +113,125 @@ function Metrics() {
 
 	return (
 		<div className={classes.container}>
-			<section className={classes.metricsSection}>
-				<iframe
-					title={component}
-					className={classes.metrics}
-					src={`/grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=1`}
-				/>
-			</section>
-			<section className={classes.metricsSection}>
-				<iframe
-					title={component}
-					className={classes.metrics}
-					src={`grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=3`}
-				/>
-			</section>
-			<section className={classes.metricsSection}>
-				<Input inputConfig={search} />
-				<iframe
-					title={component}
-					className={classes.logs}
-					src={`grafana/d-solo/logs/logs?${logsOptions}`}
-				/>
-			</section>
+			<div className={classes.header}>Metrics</div>
+			<MetricsFilter filter={filter} setFilter={setFilter} />
+			{filter === 'cpuUsage' ? (
+				<div className={classes.content}>
+					<iframe
+						title={component}
+						className={classes.metrics}
+						src={`/grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=1`}
+					/>
+				</div>
+			) : filter === 'memoryUsage' ? (
+				<div className={classes.content}>
+					<iframe
+						title={component}
+						className={classes.metrics}
+						src={`grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=3`}
+					/>
+				</div>
+			) : (
+				<div className={classes.content}>
+					<div className={classes.input}>
+						<Input inputConfig={search} />
+					</div>
+					<iframe
+						title={component}
+						className={classes.logs}
+						src={`grafana/d-solo/logs/logs?${logsOptions}`}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }
 
 export default observer(Metrics);
+
+type MetricsFilters = 'cpuUsage' | 'memoryUsage' | 'logs';
+
+interface FiltersProps {
+	filter: MetricsFilters;
+	setFilter: (filter: MetricsFilters) => void;
+}
+
+const useMetricsFiltersStyles = createUseStyles({
+	filters: {
+		display: 'flex',
+		marginBottom: 16,
+		lineHeight: '16px',
+		height: '32px',
+		fontSize: '12px',
+		color: '#333333',
+		borderRadius: 4,
+		gap: 12,
+	},
+	filtersInput: {
+		...visuallyHidden(),
+		'&:checked': {
+			'&+label': {
+				backgroundColor: '#5CBEEF',
+				color: '#FFF',
+				border: '1px solid #0099E5',
+				boxSizing: 'border-box',
+			},
+		},
+	},
+	filtersLabel: {
+		display: 'inline-flex',
+		backgroundColor: '#F3F3F6',
+		verticalAlign: 'middle',
+		padding: '8px 12px',
+		border: '1px solid #E5E5E5',
+		borderRadius: 4,
+		cursor: 'pointer',
+	},
+});
+
+function MetricsFilter({ filter, setFilter }: FiltersProps) {
+	const classes = useMetricsFiltersStyles();
+	return (
+		<div className={classes.filters}>
+			<input
+				className={classes.filtersInput}
+				type='radio'
+				name='metricsFilter'
+				onClick={() => {
+					setFilter('cpuUsage');
+				}}
+				id='cpuUsage'
+				checked={filter === 'cpuUsage'}
+			/>
+			<label title='CPU Usage' htmlFor='cpuUsage' className={classes.filtersLabel}>
+				CPU Usage
+			</label>
+			<input
+				className={classes.filtersInput}
+				type='radio'
+				name='metricsFilter'
+				onClick={() => {
+					setFilter('memoryUsage');
+				}}
+				id='memoryUsage'
+				checked={filter === 'memoryUsage'}
+			/>
+			<label title='Memory Usage' htmlFor='memoryUsage' className={classes.filtersLabel}>
+				Memory Usage
+			</label>
+			<input
+				className={classes.filtersInput}
+				type='radio'
+				name='metricsFilter'
+				id='logs'
+				onClick={() => {
+					setFilter('logs');
+				}}
+				checked={filter === 'logs'}
+			/>
+			<label title='Logs' htmlFor='logs' className={classes.filtersLabel}>
+				Logs
+			</label>
+		</div>
+	);
+}

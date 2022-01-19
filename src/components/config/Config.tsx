@@ -20,36 +20,57 @@ import { createUseStyles } from 'react-jss';
 import { isValidJSONArray, isValidJSONObject } from '../../helpers/files';
 import { useInput } from '../../hooks/useInput';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
-import { scrollBar } from '../../styles/mixins';
+import { scrollBar, visuallyHidden } from '../../styles/mixins';
 import { Theme } from '../../styles/theme';
 import ConfigEditor from './ConfigEditor';
 import Input from '../util/Input';
 import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { useState } from 'react';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
-		border: '1px solid',
-		borderRadius: 6,
-		padding: '15px 10px',
+		overflowY: 'hidden',
+		backgroundColor: '#FFF',
+		border: 'none',
+		borderRadius: 24,
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+		padding: 24,
 		...scrollBar(),
+	},
+
+	header: {
+		width: '100%',
+		fontWeight: 700,
+		fontSize: '16px',
+		marginBottom: 16,
 	},
 
 	inputGroup: {
 		display: 'grid',
-		gridTemplateColumns: 'repeat(2, 1fr)',
+		color: 'rgba(51, 51, 51, 0.6)',
+		gridTemplateColumns: '1fr 1fr 1fr 1fr',
 		gap: '10px',
-		marginBottom: 10,
+		marginBottom: 24,
 	},
-	codeEditorLabel: {
-		fontSize: 12,
-		margin: '6px 0',
-		fontWeight: 'normal',
+
+	saveButton: {
+		width: '63px',
+		height: '32px',
+		border: 'none',
+		padding: '8px 16px',
+		backgroundColor: '#0099E5',
+		borderRadius: 4,
+		color: '#FFF',
+		fontSize: '14px',
+		fontWeight: 500,
+		cursor: 'poiner',
 	},
 }));
 
 function Config() {
+	const [filter, setFilter] = useState<ConfigFilters>('customConfig');
 	const classes = useStyles();
 
 	const { selectedBox } = useBoxesStore();
@@ -131,19 +152,24 @@ function Config() {
 
 	return (
 		<div className={classes.container}>
+			<div className={classes.header}>Box configuration</div>
 			<div className={classes.inputGroup}>
 				<Input inputConfig={imageName} />
 				<Input inputConfig={imageVersion} />
 				<Input inputConfig={name} />
 				<Input inputConfig={type} />
 			</div>
-			<h5 className={classes.codeEditorLabel}>Custom Config</h5>
-			<ConfigEditor value={customConfig.value} setValue={customConfig.setValue} />
-			<h5 className={classes.codeEditorLabel}>Pins</h5>
-			<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} />
-			<h5 className={classes.codeEditorLabel}>Extended settings</h5>
-			<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
-			<button onClick={saveChanges}>Save</button>
+			<ConfigFilter filter={filter} setFilter={setFilter} />
+			{filter === 'customConfig' ? (
+				<ConfigEditor value={customConfig.value} setValue={customConfig.setValue} />
+			) : filter === 'pins' ? (
+				<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} />
+			) : (
+				<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
+			)}
+			<button className={classes.saveButton} onClick={saveChanges}>
+				Save
+			</button>
 		</div>
 	);
 }
@@ -174,4 +200,91 @@ function applyBoxChanges(box: BoxEntity, { kind, name, spec }: ConfigurableBoxOp
 			...spec,
 		},
 	};
+}
+
+type ConfigFilters = 'customConfig' | 'pins' | 'extendedSettings';
+
+interface FiltersProps {
+	filter: ConfigFilters;
+	setFilter: (filter: ConfigFilters) => void;
+}
+
+const useConfigFiltersStyles = createUseStyles({
+	filters: {
+		display: 'flex',
+		marginBottom: 16,
+		lineHeight: '16px',
+		height: '32px',
+		fontSize: '12px',
+		color: '#333333',
+		borderRadius: 4,
+		gap: 12,
+	},
+	filtersInput: {
+		...visuallyHidden(),
+		'&:checked': {
+			'&+label': {
+				backgroundColor: '#5CBEEF',
+				color: '#FFF',
+				border: '1px solid #0099E5',
+				boxSizing: 'border-box',
+			},
+		},
+	},
+	filtersLabel: {
+		display: 'inline-flex',
+		backgroundColor: '#F3F3F6',
+		verticalAlign: 'middle',
+		padding: '8px 12px',
+		border: '1px solid #E5E5E5',
+		borderRadius: 4,
+		cursor: 'pointer',
+	},
+});
+
+function ConfigFilter({ filter, setFilter }: FiltersProps) {
+	const classes = useConfigFiltersStyles();
+	return (
+		<div className={classes.filters}>
+			<input
+				className={classes.filtersInput}
+				type='radio'
+				name='configFilter'
+				onClick={() => {
+					setFilter('customConfig');
+				}}
+				id='customConfig'
+				checked={filter === 'customConfig'}
+			/>
+			<label title='Custom Config' htmlFor='customConfig' className={classes.filtersLabel}>
+				Custom Config
+			</label>
+			<input
+				className={classes.filtersInput}
+				type='radio'
+				name='configFilter'
+				id='pins'
+				onClick={() => {
+					setFilter('pins');
+				}}
+				checked={filter === 'pins'}
+			/>
+			<label title='Pins' htmlFor='pins' className={classes.filtersLabel}>
+				Pins
+			</label>
+			<input
+				className={classes.filtersInput}
+				type='radio'
+				name='configFilter'
+				id='extendedSettings'
+				onClick={() => {
+					setFilter('extendedSettings');
+				}}
+				checked={filter === 'extendedSettings'}
+			/>
+			<label title='Extended Settings' htmlFor='extendedSettings' className={classes.filtersLabel}>
+				Extended Settings
+			</label>
+		</div>
+	);
 }

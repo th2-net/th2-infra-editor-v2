@@ -16,8 +16,7 @@
 
 export const theme = {
 	colorPrimary: '#4d4d4d',
-	appBackgroundColor: '#bdccdb',
+	appBackgroundColor: '#E5E5E5',
 } as const;
 
 export type Theme = typeof theme;
- 
