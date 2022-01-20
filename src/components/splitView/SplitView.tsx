@@ -67,7 +67,7 @@ type MouseEvents = {
 function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 	const rootRef = React.useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = React.useState(false);
-	const [topComponentHeight, setTopComponentHeight] = React.useState(150);
+	const [topComponentHeight, setTopComponentHeight] = React.useState(280);
 	const [mouseEvents, setMouseEvents] = React.useState<MouseEvents | null>(null);
 
 	const startY = React.useRef(0);

@@ -26,12 +26,14 @@ import { button, scrollBar } from '../../styles/mixins';
 import ConnectionConfig from './ConnectionConfig';
 import { chain } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import closeIcon from '../../assets/icons/close-icon.svg';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	editor: {
-		borderRadius: '10px',
+		borderRadius: 4,
 		background: '#fff',
-		border: '1px solid #eee',
+		border: 'none',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
 		direction: 'ltr',
 		boxSizing: 'border-box',
 		height: '100%',
@@ -42,46 +44,31 @@ const useStyles = createUseStyles((t: Theme) => ({
 		gridTemplateRows: '36px 1fr 36px',
 	},
 	header: {
-		display: 'grid',
-		gridTemplateAreas: '"title linkName close"',
-		gridTemplateColumns: 'minmax(30px, max-content) 1fr 25px',
-		gap: '10px',
-		padding: '7px 15px',
-		borderRadius: '10px 10px 0 0',
-		background: 'rgba(0, 0, 0, 0.05)',
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		padding: '16px 8px',
+		backgroundColor: '#E5E5E5',
 	},
 	title: {
 		cursor: 'default',
-		gridArea: 'title',
-	},
-	linkName: {
-		color: 'rgba(0, 0, 0, 0.55)',
-		gridArea: 'linkName',
-		overflow: 'hidden',
-		whiteSpace: 'nowrap',
-		textOverflow: 'ellipsis',
-		justifySelf: 'center',
 	},
 	closeButton: {
-		gridArea: 'close',
-		borderRadius: '50%',
 		cursor: 'pointer',
-		height: '25px',
-		width: '25px',
-		display: 'inline-block',
-		lineHeight: '25px',
-		textAlign: 'center',
+		height: '12px',
+		width: '12px',
 		userSelect: 'none',
+		backgroundImage: `url(${closeIcon})`,
 		'&:hover': {
-			background: 'rgba(0, 0, 0, 0.05)',
+			backgroundColor: 'rgba(0, 0, 0, 0.05)',
 		},
 		'&:active': {
-			background: 'rgba(0, 0, 0, 0.1)',
+			backgroundColor: 'rgba(0, 0, 0, 0.1)',
 		},
 	},
 	content: {
 		...scrollBar(),
-		padding: '7px',
+		padding: '8px',
 		display: 'flex',
 		flexDirection: 'column',
 		height: 'auto',
@@ -286,12 +273,8 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 		<div className={classes.editor}>
 			<div className={classes.header}>
 				<span className={classes.title}>Link Config</span>
-				<span title={link?.name} className={classes.linkName}>{`(${linkName})`}</span>
-				<span className={classes.closeButton} onClick={() => onClose()}>
-					&#10006;
-				</span>
+				<span className={classes.closeButton} onClick={() => onClose()}></span>
 			</div>
-
 			<div className={classes.content}>
 				<ConnectionConfig
 					label='from'
@@ -301,11 +284,8 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 					autocomplete={boxesStore.boxes.map(box => box.name)}
 					disabled={direction === 'from' && editableLink !== undefined}
 					isBoxFieldDisabled={direction === 'from' && editableLink === undefined}
-					isSelected={direction === 'from'}
 				/>
-				<span className={classes.swapButton} onClick={swap}>
-					&#8645;
-				</span>
+				<span className={classes.swapButton} onClick={swap}></span>
 				<ConnectionConfig
 					label='to'
 					id='boxTo'
@@ -314,7 +294,6 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 					autocomplete={getAutocompleteByOwner(link.from)}
 					disabled={direction === 'to' && editableLink !== undefined}
 					isBoxFieldDisabled={direction === 'to' && editableLink === undefined}
-					isSelected={direction === 'to'}
 				/>
 			</div>
 

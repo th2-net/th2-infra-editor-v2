@@ -61,6 +61,8 @@ const useStyles = createUseStyles({
 	selectedBox: {
 		display: 'grid',
 		placeItems: 'center',
+		padding: '8px',
+		height: '100%',
 		'&>div': {
 			height: '100%',
 		},

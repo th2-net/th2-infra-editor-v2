@@ -18,14 +18,19 @@ import classNames from 'classnames';
 import { createUseStyles } from 'react-jss';
 import { InputConfig } from '../../hooks/useInput';
 
-const useStyles = createUseStyles(
+type StylesProps = {
+	width: number | undefined;
+};
+
+const useStyles = createUseStyles<string, StylesProps>(
 	{
 		container: {
+			width: '100%',
+			minWidth: ({ width }) => (width ? `${width}px` : '100px'),
 			display: 'flex',
 			flexDirection: 'column',
 		},
 		input: {
-			width: '200px',
 			height: 32,
 			backgroundColor: '#fff',
 			color: 'rgba(51, 51, 51, 0.6)',
@@ -53,10 +58,11 @@ const useStyles = createUseStyles(
 
 interface InputProps {
 	inputConfig: InputConfig;
+	width?: number;
 }
 
-const Input = ({ inputConfig }: InputProps) => {
-	const classes = useStyles();
+const Input = ({ inputConfig, width }: InputProps) => {
+	const classes = useStyles({ width });
 
 	return (
 		<div className={classes.container}>

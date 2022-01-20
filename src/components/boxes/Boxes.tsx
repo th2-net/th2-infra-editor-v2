@@ -242,6 +242,10 @@ const useExpandGroupStyles = createUseStyles(
 				backgroundColor: '#5CBEEF',
 			},
 		},
+		dictionaries: {
+			gap: '18px',
+			justifyContent: 'flex-start',
+		},
 		name: {
 			height: '100%',
 			background: 'transparent',
@@ -263,10 +267,18 @@ function ExpandGroup(props: ExpandGroupProps) {
 		<div
 			onClick={() => props.onClick()}
 			className={classNames(classes.expandGroup, {
-				[classes.expanded]: props.isExpand && props.group.name !== 'dictionaries',
+				[classes.expanded]: props.isExpand,
+				[classes.dictionaries]: props.group.name === 'dictionaries',
 			})}>
+			{props.group.name === 'dictionaries' ? <Icon id='dictionary' stroke='#333' /> : null}
 			<div className={classes.name}>{props.group.name}</div>
-			{props.isExpand ? <Icon id='arrowUp' stroke='#FFF' /> : <Icon id='arrowDown' stroke='#666' />}
+			{props.group.name !== 'dictionaries' ? (
+				props.isExpand ? (
+					<Icon id='arrowUp' stroke='#FFF' />
+				) : (
+					<Icon id='arrowDown' stroke='#666' />
+				)
+			) : null}
 		</div>
 	);
 }
@@ -336,7 +348,6 @@ const useBoxFiltersStyles = createUseStyles({
 		display: 'flex',
 		margin: '24px 24px 12px 24px',
 		lineHeight: '16px',
-		height: '32px',
 		fontSize: '12px',
 		color: '#333333',
 		borderRadius: 4,

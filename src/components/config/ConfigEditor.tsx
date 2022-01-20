@@ -22,7 +22,7 @@ const useStyles = createUseStyles(() => ({
 	textareaWrapper: {
 		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.08)',
 		borderRadius: 4,
-		marginBottom: 24,
+		marginBottom: 8,
 	},
 }));
 
@@ -50,7 +50,7 @@ const ConfigEditor = ({ value, setValue }: Props) => {
 	return (
 		<div className={classes.textareaWrapper}>
 			<Editor
-				height='250px'
+				height='auto'
 				width='auto'
 				language={'json'}
 				theme='my-theme'

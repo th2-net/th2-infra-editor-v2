@@ -31,6 +31,9 @@ import { useState } from 'react';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
+		display: 'grid',
+		gridTemplateRows: 'auto auto auto 1fr auto',
+		gap: '16px',
 		overflowY: 'hidden',
 		backgroundColor: '#FFF',
 		border: 'none',
@@ -44,20 +47,18 @@ const useStyles = createUseStyles((t: Theme) => ({
 		width: '100%',
 		fontWeight: 700,
 		fontSize: '16px',
-		marginBottom: 16,
 	},
 
 	inputGroup: {
 		display: 'grid',
 		color: 'rgba(51, 51, 51, 0.6)',
-		gridTemplateColumns: '1fr 1fr 1fr 1fr',
+		gridTemplateColumns: 'repeat(4, 1fr)',
 		gap: '10px',
-		marginBottom: 24,
+		marginBottom: 8,
 	},
 
 	saveButton: {
-		width: '63px',
-		height: '32px',
+		width: 'fit-content',
 		border: 'none',
 		padding: '8px 16px',
 		backgroundColor: '#0099E5',
@@ -65,7 +66,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 		color: '#FFF',
 		fontSize: '14px',
 		fontWeight: 500,
-		cursor: 'poiner',
+		cursor: 'pointer',
 	},
 }));
 
@@ -212,9 +213,7 @@ interface FiltersProps {
 const useConfigFiltersStyles = createUseStyles({
 	filters: {
 		display: 'flex',
-		marginBottom: 16,
 		lineHeight: '16px',
-		height: '32px',
 		fontSize: '12px',
 		color: '#333333',
 		borderRadius: 4,

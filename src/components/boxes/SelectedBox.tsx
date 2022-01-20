@@ -32,7 +32,6 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		container: {
 			width: '100%',
 			backgroundColor: '#fff',
-			margin: 8,
 			minHeight: 70,
 			borderRadius: 4,
 			boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',

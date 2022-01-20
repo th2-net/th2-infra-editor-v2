@@ -26,6 +26,8 @@ import Input from './util/Input';
 
 const useStyles = createUseStyles({
 	container: {
+		display: 'grid',
+		gridTemplateRows: 'auto 1fr',
 		overflowY: 'hidden',
 		border: 'none',
 		borderRadius: 24,
@@ -34,15 +36,8 @@ const useStyles = createUseStyles({
 		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
 		...scrollBar(),
 	},
-	header: {
-		width: '100%',
-		fontWeight: 700,
-		fontSize: '16px',
-		marginBottom: 16,
-	},
 	content: {
-		height: '250px',
-		marginBottom: 24,
+		minHeight: '150px',
 	},
 	metrics: {
 		height: '100%',
@@ -113,7 +108,6 @@ function Metrics() {
 
 	return (
 		<div className={classes.container}>
-			<div className={classes.header}>Metrics</div>
 			<MetricsFilter filter={filter} setFilter={setFilter} />
 			{filter === 'cpuUsage' ? (
 				<div className={classes.content}>
@@ -161,7 +155,6 @@ const useMetricsFiltersStyles = createUseStyles({
 		display: 'flex',
 		marginBottom: 16,
 		lineHeight: '16px',
-		height: '32px',
 		fontSize: '12px',
 		color: '#333333',
 		borderRadius: 4,

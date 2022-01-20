@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import ConnectedBox from './ConnectedBox';
 import { BoxEntity, Pin } from '../../models/Box';
@@ -23,7 +23,6 @@ import classNames from 'classnames';
 import directionIcon from '../../assets/icons/direction-icon.svg';
 import { ConnectionDirection } from '../../models/LinksDefinition';
 import useSubscriptionStore from '../../hooks/useSubscriptionStore';
-import { getHashCode } from '../../helpers/string';
 
 export interface IBoxConnections {
 	box: BoxEntity;
@@ -167,8 +166,9 @@ const usePinConnectionsClasses = createUseStyles({
 		backgroundImage: `url(${directionIcon})`,
 		backgroundSize: '100%',
 		placeSelf: 'center',
-		width: 25,
-		height: 25,
+		width: 14,
+		height: 9,
+		marginBottom: 4,
 		backgroundRepeat: 'no-repeat',
 		order: 1,
 		flexShrink: 0,
@@ -196,13 +196,6 @@ function PinConnections({
 	const subscriptionStore = useSubscriptionStore();
 
 	const classes = usePinConnectionsClasses();
-
-	const hueValue = useMemo(() => {
-		const hashCode = getHashCode(connections.pin.name);
-		const HUE_SEGMENTS_COUNT = 120;
-
-		return (hashCode % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
-	}, [connections.pin.name]);
 
 	return (
 		<div className={classes.boxList}>
@@ -237,9 +230,6 @@ function PinConnections({
 									className={classNames(classes.arrowIcon, {
 										[classes.editable]: currentDepth === 0,
 									})}
-									style={{
-										filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)`,
-									}}
 								/>
 							</div>
 							<ConnectedBox

@@ -21,42 +21,33 @@ import { useInput } from '../../hooks/useInput';
 import Input from '../util/Input';
 import { observer } from 'mobx-react-lite';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
-import classNames from 'classnames';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
-		height: 'auto',
+		display: 'grid',
+		gridTemplateRows: '32px 1fr',
 		width: '100%',
-		position: 'relative',
-		border: '1px solid rgba(0, 0, 0, 0.2)',
-		borderRadius: '7px',
-		padding: '5px',
-		paddingTop: '12px',
 	},
 	label: {
-		position: 'absolute',
-		height: '24px',
 		lineHeight: '18px',
 		fontSize: '16px',
-		background: '#fff',
-		border: '1px solid rgba(0, 0, 0, 0.2)',
-		borderRadius: '7px',
-		padding: '3px 10px',
+		width: 'fit-content',
+		borderRadius: '8px 8px 0 0',
+		backgroundColor: '#F3F3F6',
+		padding: '8px 24px',
 		userSelect: 'none',
-		top: '-12px',
-		left: '5px',
-	},
-	selected: {
-		borderColor: '#5cad59',
 	},
 	inputGroup: {
+		color: 'rgba(51, 51, 51, 0.6)',
+		backgroundColor: '#F3F3F6',
+		borderRadius: '0 8px 8px 8px',
+		padding: '8px',
 		display: 'grid',
 		gridTemplateColumns: 'repeat(2, 1fr)',
-		gap: '4px',
-		marginBottom: 5,
-		height: 'auto',
+		gap: 4,
+		marginBottom: 4,
 		width: '100%',
 	},
 }));
@@ -69,20 +60,10 @@ interface ConnectionConfigProps {
 	autocomplete?: string[];
 	disabled: boolean;
 	isBoxFieldDisabled: boolean;
-	isSelected?: boolean;
 }
 
 function ConnectionConfig(props: ConnectionConfigProps) {
-	const {
-		label,
-		id,
-		owner,
-		setOwner,
-		autocomplete = [],
-		disabled,
-		isBoxFieldDisabled,
-		isSelected = false,
-	} = props;
+	const { label, id, owner, setOwner, autocomplete = [], disabled, isBoxFieldDisabled } = props;
 
 	const classes = useStyles();
 
@@ -198,22 +179,14 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 		updateOwner,
 	]);
 
-	const containerClassName = classNames(classes.container, {
-		[classes.selected]: isSelected,
-	});
-
-	const labelClassName = classNames(classes.label, {
-		[classes.selected]: isSelected,
-	});
-
 	return (
-		<div className={containerClassName}>
-			<div className={labelClassName}>{label}</div>
+		<div className={classes.container}>
+			<div className={classes.label}>{label}</div>
 			<div className={classes.inputGroup}>
-				<Input inputConfig={boxInput} />
-				<Input inputConfig={pinInput} />
-				<Input inputConfig={strategyInput} />
-				<Input inputConfig={serviceClassInput} />
+				<Input inputConfig={boxInput} width={150} />
+				<Input inputConfig={pinInput} width={150} />
+				<Input inputConfig={strategyInput} width={150} />
+				<Input inputConfig={serviceClassInput} width={150} />
 			</div>
 		</div>
 	);

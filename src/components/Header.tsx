@@ -37,6 +37,7 @@ const button: Styles = {
 	backgroundColor: '#5CBEEF',
 	'&:hover': {
 		backgroundColor: '#EEF2F6',
+		color: 'rgba(51, 51, 51, 0.8)',
 	},
 	'&:active': {
 		backgroundColor: '#0099E5',
