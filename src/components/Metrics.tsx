@@ -190,7 +190,7 @@ function MetricsFilter({ filter, setFilter }: FiltersProps) {
 				className={classes.filtersInput}
 				type='radio'
 				name='metricsFilter'
-				onClick={() => {
+				onChange={() => {
 					setFilter('cpuUsage');
 				}}
 				id='cpuUsage'
@@ -203,7 +203,7 @@ function MetricsFilter({ filter, setFilter }: FiltersProps) {
 				className={classes.filtersInput}
 				type='radio'
 				name='metricsFilter'
-				onClick={() => {
+				onChange={() => {
 					setFilter('memoryUsage');
 				}}
 				id='memoryUsage'
@@ -217,7 +217,7 @@ function MetricsFilter({ filter, setFilter }: FiltersProps) {
 				type='radio'
 				name='metricsFilter'
 				id='logs'
-				onClick={() => {
+				onChange={() => {
 					setFilter('logs');
 				}}
 				checked={filter === 'logs'}

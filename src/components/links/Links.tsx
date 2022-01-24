@@ -24,6 +24,7 @@ import { useEffect, useMemo, useState } from 'react';
 import ConnectionEditor from '../editors/ConnectionEditor';
 import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
 import SelectedBox from '../boxes/SelectedBox';
+import { ModalPortal } from '../util/Portal';
 import { ConnectionDirection, Link } from '../../models/LinksDefinition';
 import { chain } from 'lodash';
 
@@ -165,19 +166,20 @@ function Links() {
 				<div>
 					<div className={classes.selectedBox}>
 						{showEditor ? (
-							<ConnectionEditor
-								editableLink={linkToEdit}
-								onSubmit={onSubmit}
-								onDelete={onDelete}
-								onClose={onClose}
-							/>
-						) : (
-							<SelectedBox
-								box={boxesStore.selectedBox}
-								createNewLink={() => openLinkEditor(true, 'from')}
-								color={color}
-							/>
-						)}
+							<ModalPortal isOpen={showEditor}>
+								<ConnectionEditor
+									editableLink={linkToEdit}
+									onSubmit={onSubmit}
+									onDelete={onDelete}
+									onClose={onClose}
+								/>
+							</ModalPortal>
+						) : null}
+						<SelectedBox
+							box={boxesStore.selectedBox}
+							createNewLink={() => openLinkEditor(true, 'from')}
+							color={color}
+						/>
 					</div>
 				</div>
 				{outgoing && (

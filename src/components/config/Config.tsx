@@ -249,7 +249,7 @@ function ConfigFilter({ filter, setFilter }: FiltersProps) {
 				className={classes.filtersInput}
 				type='radio'
 				name='configFilter'
-				onClick={() => {
+				onChange={() => {
 					setFilter('customConfig');
 				}}
 				id='customConfig'
@@ -263,7 +263,7 @@ function ConfigFilter({ filter, setFilter }: FiltersProps) {
 				type='radio'
 				name='configFilter'
 				id='pins'
-				onClick={() => {
+				onChange={() => {
 					setFilter('pins');
 				}}
 				checked={filter === 'pins'}
@@ -276,7 +276,7 @@ function ConfigFilter({ filter, setFilter }: FiltersProps) {
 				type='radio'
 				name='configFilter'
 				id='extendedSettings'
-				onClick={() => {
+				onChange={() => {
 					setFilter('extendedSettings');
 				}}
 				checked={filter === 'extendedSettings'}

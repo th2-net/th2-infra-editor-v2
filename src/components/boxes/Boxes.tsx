@@ -34,6 +34,8 @@ import { useAppViewStore } from '../../hooks/useAppViewStore';
 const useStyles = createUseStyles(
 	{
 		container: {
+			height: 'calc(100% + 6px)',
+			margin: '3px',
 			gridArea: 'box-list',
 			overflow: 'hidden',
 			display: 'flex',
@@ -69,6 +71,7 @@ function Boxes() {
 	const boxesStore = useBoxesStore();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
 	const appViewStore = useAppViewStore();
+	const classes = useStyles();
 
 	const [searchValue, setSearchValue] = useState('');
 	const [filter, setFilter] = useState<BoxFilters>('all');
@@ -195,17 +198,23 @@ function Boxes() {
 						<ExpandGroup
 							group={box}
 							isExpand={expandedMap.get(box.name) || false}
+							entitiesCount={boxes.filter(item => getType(item as BoxEntity) === box.name).length}
 							onClick={() => expandGroup(box.name)}
 						/>
 					)}
 				</Observer>
 			);
 		},
-		[boxesStore, groupedBoxes, appViewStore, selectedDictionaryStore, expandedMap, expandGroup],
+		[
+			boxesStore,
+			appViewStore,
+			selectedDictionaryStore,
+			expandedMap,
+			expandGroup,
+			classes.groupItem,
+			classes.item,
+		],
 	);
-
-	const classes = useStyles();
-
 	return (
 		<div className={classes.container}>
 			<BoxFilter filter={filter} setFilter={setFilter} />
@@ -250,6 +259,14 @@ const useExpandGroupStyles = createUseStyles(
 			height: '100%',
 			background: 'transparent',
 			lineHeight: '26px',
+			width: 'fit-content',
+		},
+		entitiesCount: {
+			color: '#fff',
+			backgroundColor: '#5CBEEF',
+			borderRadius: 12,
+			padding: 6,
+			height: 'fit-content',
 		},
 	},
 	{ name: 'ExpandGroup' },
@@ -258,6 +275,7 @@ interface ExpandGroupProps {
 	group: GroupEntity;
 	isExpand: boolean;
 	onClick: () => void;
+	entitiesCount: number;
 }
 
 function ExpandGroup(props: ExpandGroupProps) {
@@ -271,7 +289,10 @@ function ExpandGroup(props: ExpandGroupProps) {
 				[classes.dictionaries]: props.group.name === 'dictionaries',
 			})}>
 			{props.group.name === 'dictionaries' ? <Icon id='dictionary' stroke='#333' /> : null}
-			<div className={classes.name}>{props.group.name}</div>
+			<div style={{ gap: '16px', display: 'flex', alignItems: 'center' }}>
+				<div className={classes.name}>{props.group.name}</div>
+				<div className={classes.entitiesCount}>{props.entitiesCount}</div>
+			</div>
 			{props.group.name !== 'dictionaries' ? (
 				props.isExpand ? (
 					<Icon id='arrowUp' stroke='#FFF' />
@@ -383,7 +404,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				className={classes.filtersInput}
 				type='radio'
 				name='filter'
-				onClick={() => {
+				onChange={() => {
 					setFilter('all');
 				}}
 				id='all'
@@ -397,7 +418,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				type='radio'
 				name='filter'
 				id='box'
-				onClick={() => {
+				onChange={() => {
 					setFilter('box');
 				}}
 				checked={filter === 'box'}
@@ -410,7 +431,7 @@ function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
 				type='radio'
 				name='filter'
 				id='dictionary'
-				onClick={() => {
+				onChange={() => {
 					setFilter('dictionary');
 				}}
 				checked={filter === 'dictionary'}

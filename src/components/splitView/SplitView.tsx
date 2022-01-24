@@ -43,7 +43,7 @@ const useStyles = createUseStyles<string, StylesProps>({
 	panel: {
 		position: 'relative',
 		overflow: 'hidden',
-		borderRadius: '6px',
+		padding: '3px',
 
 		'&:after': {
 			content: "''",
