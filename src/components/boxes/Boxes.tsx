@@ -291,7 +291,9 @@ function ExpandGroup(props: ExpandGroupProps) {
 			{props.group.name === 'dictionaries' ? <Icon id='dictionary' stroke='#333' /> : null}
 			<div style={{ gap: '16px', display: 'flex', alignItems: 'center' }}>
 				<div className={classes.name}>{props.group.name}</div>
-				<div className={classes.entitiesCount}>{props.entitiesCount}</div>
+				{props.group.name !== 'dictionaries' ? (
+					<div className={classes.entitiesCount}>{props.entitiesCount}</div>
+				) : null}
 			</div>
 			{props.group.name !== 'dictionaries' ? (
 				props.isExpand ? (

@@ -27,6 +27,7 @@ import ConnectionConfig from './ConnectionConfig';
 import { chain } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import closeIcon from '../../assets/icons/close-icon.svg';
+import swapButton from '../../assets/icons/swap-button.svg';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	editor: {
@@ -36,12 +37,12 @@ const useStyles = createUseStyles((t: Theme) => ({
 		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
 		direction: 'ltr',
 		boxSizing: 'border-box',
-		height: '616px',
+		height: 'fit-content',
 		width: '496px',
 		position: 'absolute',
 		overflow: 'hidden',
 		display: 'grid',
-		gridTemplateRows: '36px 1fr 36px',
+		gridTemplateRows: '40px 1fr',
 	},
 	header: {
 		display: 'flex',
@@ -68,17 +69,16 @@ const useStyles = createUseStyles((t: Theme) => ({
 	},
 	content: {
 		...scrollBar(),
-		padding: '8px',
+		padding: 24,
 		display: 'flex',
 		flexDirection: 'column',
-		height: 'auto',
+		alignItems: 'center',
+
 		width: '100%',
-		overflow: 'auto',
-		paddingTop: '15px',
 	},
 	actions: {
-		width: '100%',
-		height: '100%',
+		marginTop: 16,
+		gap: 12,
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -88,43 +88,39 @@ const useStyles = createUseStyles((t: Theme) => ({
 		...button(),
 	},
 	submit: {
-		background: '#ffa666',
+		background: '#5CBEEF',
 		'&:hover': {
-			background: '#ffb37c',
+			background: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
 		},
 		'&:active': {
-			background: '#ffc093',
+			background: '#0099E5',
+			color: '#FFF',
 		},
 	},
 	deleteButton: {
-		background: '#ff6666',
+		background: '#4E4E4E',
 		'&:hover': {
-			background: '#ff7c7c',
+			background: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
 		},
 		'&:active': {
-			background: '#ff9393',
+			background: '#0099E5',
+			color: '#FFF',
 		},
 	},
 	disabled: {
-		background: '#7c7c7c',
+		background: '#5CBEEF',
+		opacity: 0.4,
 		cursor: 'not-allowed',
 	},
 	swapButton: {
 		display: 'block',
-		height: '25px',
-		lineHeight: '20px',
-		width: '25px',
-		fontSize: '18px',
-		textAlign: 'center',
-		boxSizing: 'border-box',
-		color: 'rgba(0, 0, 0, 0.6)',
-		border: '1px solid rgba(0, 0, 0, 0.25)',
-		borderRadius: '50%',
-		padding: '2px',
-		margin: '3px auto',
+		height: '24px',
+		width: '24px',
+		margin: 16,
 		cursor: 'pointer',
-		boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-		backgroundColor: '#fff',
+		backgroundImage: `url(${swapButton})`,
 		transition: '250ms',
 		userSelect: 'none',
 		'&:hover': {
@@ -295,17 +291,16 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 					disabled={direction === 'to' && editableLink !== undefined}
 					isBoxFieldDisabled={direction === 'to' && editableLink === undefined}
 				/>
-			</div>
-
-			<div className={classes.actions}>
-				<button
-					onClick={cancelOrDelete}
-					className={classNames(classes.button, classes.deleteButton)}>
-					{editableLink ? 'Delete' : 'Cancel'}
-				</button>
-				<button onClick={submit} className={submitButtonClassName}>
-					Submit
-				</button>
+				<div className={classes.actions}>
+					<button
+						onClick={cancelOrDelete}
+						className={classNames(classes.button, classes.deleteButton)}>
+						{editableLink ? 'Delete' : 'Cancel'}
+					</button>
+					<button onClick={submit} className={submitButtonClassName}>
+						Submit
+					</button>
+				</div>
 			</div>
 		</div>
 	);

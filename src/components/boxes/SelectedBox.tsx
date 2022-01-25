@@ -56,12 +56,16 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 			...scrollBar(),
 			height: '100%',
 			padding: '20px',
-			overflow: 'auto',
 		},
-		row: {
+		info: {
 			width: '100%',
 			display: 'flex',
 			justifyContent: 'space-between',
+		},
+		actions: {
+			display: 'flex',
+			gap: 24,
+			justifyContent: 'center',
 		},
 		bodyValue: {
 			fontSize: '12px',
@@ -84,17 +88,28 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		selected: {
 			border: '2px solid',
 		},
-		addButton: {
+		addLink: {
 			...button(),
-			margin: '10px',
-			marginLeft: 'calc(100% - 100px)',
-
-			backgroundColor: '#ffba66',
+			backgroundColor: '#5CBEEF',
 			'&:hover': {
-				backgroundColor: '#ffc47d',
+				backgroundColor: '#EEF2F6',
+				color: 'rgba(51, 51, 51, 0.8)',
 			},
 			'&:active': {
-				backgroundColor: '#ffcf94',
+				backgroundColor: '#0099E5',
+				color: '#FFF',
+			},
+		},
+		addDictionary: {
+			...button(),
+			backgroundColor: '#4E4E4E',
+			'&:hover': {
+				backgroundColor: '#EEF2F6',
+				color: 'rgba(51, 51, 51, 0.8)',
+			},
+			'&:active': {
+				backgroundColor: '#0099E5',
+				color: '#FFF',
 			},
 		},
 	}),
@@ -123,14 +138,17 @@ function SelectedBox(props: Props) {
 				<h5 className={classes.name}>{box.name}</h5>
 			</div>
 			<div className={classes.body}>
-				<div className={classes.row}>
+				<div className={classes.info}>
 					<span className={classNames(classes.bodyValue, classes.type)}>{getBoxType(box)}</span>
 					<span className={classes.bodyValue}>{slicedImageName}</span>
 				</div>
 				<DictionaryLinksEditor />
-				<div className={classes.row}>
-					<button className={classes.addButton} onClick={createNewLink}>
+				<div className={classes.actions}>
+					<button className={classes.addLink} onClick={createNewLink}>
 						Add link
+					</button>
+					<button className={classes.addDictionary} onClick={createNewLink}>
+						Add Dictionary
 					</button>
 				</div>
 			</div>
