@@ -16,7 +16,7 @@
 
 import { useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
-import { getBoxType, Status } from '../boxes/Box';
+import { getBoxType, Status } from '../resources/Box';
 import { BoxEntity, BoxStatus, Pin } from '../../models/Box';
 import { getHashCode } from '../../helpers/string';
 import { ellipsis } from '../../styles/mixins';

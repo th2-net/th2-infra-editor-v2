@@ -20,6 +20,7 @@ import BoxLinksEditor from '../editors/BoxLinksEditor';
 import DictionaryEditor from '../editors/DictionaryEditor';
 import { useAppViewStore } from '../../hooks/useAppViewStore';
 import { observer } from 'mobx-react-lite';
+import AppViewType from '../../util/AppViewType';
 
 const useStyles = createUseStyles({
 	dictionaryLayout: {
@@ -39,7 +40,7 @@ function DictionaryLayout() {
 	return (
 		dictionary && (
 			<div className={classes.dictionaryLayout}>
-				<button onClick={() => setViewType('box')}>back</button>
+				<button onClick={() => setViewType(AppViewType.BoxView)}>back</button>
 				<DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />
 				<BoxLinksEditor />
 			</div>

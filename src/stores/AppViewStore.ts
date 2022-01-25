@@ -18,7 +18,7 @@ import { action, makeObservable, observable } from 'mobx';
 import AppViewType from '../util/AppViewType';
 
 class AppViewStore {
-	public viewType: AppViewType = 'box';
+	public viewType: AppViewType = AppViewType.BoxView;
 
 	constructor() {
 		makeObservable(this, { viewType: observable, setViewType: action });

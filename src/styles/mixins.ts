@@ -74,12 +74,12 @@ export function button(): Styles {
 		height: '30px',
 		width: 'auto',
 		borderRadius: '17px',
+		backgroundColor: '#ffc093',
 		color: '#fff',
 		padding: '7px 12px',
 		textTransform: 'capitalize',
 		outline: 'none',
 		border: 'none',
-		margin: '0 15px',
 		boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
 		fontWeight: '600',
 		fontSize: '13px',
@@ -87,7 +87,15 @@ export function button(): Styles {
 		position: 'relative',
 		transition: '250ms',
 		userSelect: 'none',
-	};
+
+		'&:hover': {
+			backgroundColor: '#ffb37c',
+		},
+
+		'&:disabled': {
+			backgroundColor: '#979797',
+		}
+	}
 }
 
 export function modalWindow(): Styles {
@@ -104,3 +112,13 @@ export function modalWindow(): Styles {
 		backgroundColor: 'white',
 	};
 }
+
+export const clickable = (): Styles => (
+	{
+	cursor: 'pointer',
+	borderRadius: '2px',
+
+	'&:hover': {
+		backgroundColor: 'rgba(102, 102, 102, 0.15)',
+	}
+});
