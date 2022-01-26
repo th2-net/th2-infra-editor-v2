@@ -32,7 +32,8 @@ const useStyles = createUseStyles({
 	container: {
 		overflow: 'hidden',
 		display: 'grid',
-		gridTemplateRows: '66px 1fr',
+		gridTemplateRows: '66px 1fr 10px',
+		justifyItems: 'center',
 		height: '100%',
 		backgroundColor: '#FFF',
 		padding: 5,
@@ -62,7 +63,7 @@ const useStyles = createUseStyles({
 	selectedBox: {
 		display: 'grid',
 		placeItems: 'center',
-		padding: '8px',
+		padding: '0 8px 24px 8px',
 		height: '100%',
 		'&>div': {
 			height: '100%',
@@ -194,6 +195,8 @@ function Links() {
 					</div>
 				)}
 			</div>
+			<div
+				style={{ width: '80px', height: '8px', backgroundColor: '#E5E5E5', borderRadius: 4 }}></div>
 		</div>
 	);
 }

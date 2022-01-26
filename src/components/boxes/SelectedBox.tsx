@@ -57,11 +57,14 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 			...scrollBar(),
 			height: '100%',
 			padding: '20px',
+			display: 'grid',
+			gridTemplateRows: 'auto 1fr auto',
 		},
 		info: {
 			width: '100%',
 			display: 'flex',
 			justifyContent: 'space-between',
+			height: 'fit-content',
 		},
 		actions: {
 			display: 'flex',
@@ -70,10 +73,10 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		},
 		bodyValue: {
 			fontSize: '12px',
-			lineHeight: '15px',
 			fontWeight: 'bold',
 			borderRadius: 9,
-			padding: '0 4px 2px',
+			padding: '4px 8px',
+			height: 'fit-content',
 		},
 		type: {
 			color: '#fff',

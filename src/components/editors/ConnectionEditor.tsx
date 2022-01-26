@@ -38,7 +38,7 @@ const useStyles = createUseStyles((t: Theme) => ({
 		direction: 'ltr',
 		boxSizing: 'border-box',
 		height: 'fit-content',
-		width: '496px',
+		width: 'minmax(100px, 496px)',
 		position: 'absolute',
 		overflow: 'hidden',
 		display: 'grid',
@@ -48,11 +48,13 @@ const useStyles = createUseStyles((t: Theme) => ({
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		padding: '16px 8px',
+		padding: '8px 16px',
 		backgroundColor: '#E5E5E5',
 	},
 	title: {
 		cursor: 'default',
+		height: '100%',
+		lineHeight: '24px',
 	},
 	closeButton: {
 		cursor: 'pointer',
@@ -292,13 +294,13 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 					isBoxFieldDisabled={direction === 'to' && editableLink === undefined}
 				/>
 				<div className={classes.actions}>
+					<button onClick={submit} className={submitButtonClassName}>
+						Submit
+					</button>
 					<button
 						onClick={cancelOrDelete}
 						className={classNames(classes.button, classes.deleteButton)}>
 						{editableLink ? 'Delete' : 'Cancel'}
-					</button>
-					<button onClick={submit} className={submitButtonClassName}>
-						Submit
 					</button>
 				</div>
 			</div>

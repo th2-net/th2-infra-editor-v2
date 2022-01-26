@@ -18,8 +18,6 @@ import { useRef } from 'react';
 import { createUseStyles } from 'react-jss';
 import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
-import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
-import { computed } from 'mobx';
 import useSubscriptionStore from '../../hooks/useSubscriptionStore';
 
 export function getBoxType(box: BoxEntity) {

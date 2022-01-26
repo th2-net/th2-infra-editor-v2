@@ -14,8 +14,8 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { createUseStyles } from "react-jss";
-
+import { createUseStyles } from 'react-jss';
+import arrowDown from '../assets/icons/arrow-down.svg';
 
 interface Props<T> {
 	options: Array<T>;
@@ -26,17 +26,26 @@ interface Props<T> {
 }
 
 const useStyles = createUseStyles({
-	options_select: {
-		borderRadius: 3,
-		border: 'none',
-		fontWeight: 'bold',
-		color: '#4d4d4d',
-		'&>option': {
-			fontWeight: 'bold',
-			height: 30
-		}
-	}
-})
+	select: {
+		position: 'relative',
+		border: '1px solid #5CBEEF',
+		outline: 'none',
+		cursor: 'pointer',
+		borderRadius: 4,
+		padding: '5px 12px',
+		width: '169px',
+		height: '32px',
+		appearance: 'none',
+		background: `url(${arrowDown})  no-repeat right #FFF`,
+		backgroundPositionX: '141px',
+		'&::-webkit-scrollbar': {
+			display: 'none',
+		},
+		'&::active': {
+			backgroundColor: 'red',
+		},
+	},
+});
 
 export default function Select<T extends string>({
 	options,
@@ -45,14 +54,14 @@ export default function Select<T extends string>({
 	onSelect,
 }: Props<T>) {
 	const classes = useStyles();
-	
+
 	return (
 		<select
-		className={classes.options_select}
-		value={selected}
-		onChange={e => {
-			onChange(e.target.value as T);
-			if (onSelect) {
+			className={classes.select}
+			value={selected}
+			onChange={e => {
+				onChange(e.target.value as T);
+				if (onSelect) {
 					onSelect();
 				}
 			}}>

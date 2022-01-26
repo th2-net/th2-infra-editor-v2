@@ -62,7 +62,7 @@ export const ModalPortal = React.forwardRef<HTMLDivElement, ModalPortalProps>(
 			if (closeTimeout.current) {
 				window.clearTimeout(closeTimeout.current);
 			}
-		}, [isOpen]);
+		}, [isOpen, closeDelay]);
 
 		return createPortal(
 			<div ref={ref} className={classes.modalBackground}>
