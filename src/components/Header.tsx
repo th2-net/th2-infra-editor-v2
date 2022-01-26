@@ -160,6 +160,7 @@ function Header() {
 			{schemas.length !== 0 && (
 				<CustomizedTooltip title='submit pending changes first' disableCondition={!requestsExist}>
 					<select
+						className={classes.customSelect}
 						disabled={requestsExist}
 						onChange={e => selectSchema(e.target.value)}
 						value={selectedSchemaName || undefined}>

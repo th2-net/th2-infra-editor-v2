@@ -45,6 +45,7 @@ const useStyles = createUseStyles({
 		display: 'grid',
 		gridTemplateColumns: '1.5fr 1fr 1.5fr',
 		fontSize: '18px',
+		width: '100%',
 		fontWeight: 500,
 		'&>div': {
 			padding: '24px 0 16px 28px',
