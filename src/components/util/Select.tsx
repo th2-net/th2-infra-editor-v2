@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import arrowDown from '../assets/icons/arrow-down.svg';
+import arrowDown from '../../assets/icons/arrow-down.svg';
 
 interface Props<T> {
 	options: Array<T>;
