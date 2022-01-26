@@ -61,7 +61,7 @@ const classes = useStyles();
 return (
     <div className={classes.container} onClick={onClick}>
         <div className={classes.header} style={{ backgroundColor: color }}>
-            <Icon id='book'/>
+            <Icon id='dictionary'/>
             <h5 className={classes.name}>{dictionary.name}</h5>
         </div>
     </div>

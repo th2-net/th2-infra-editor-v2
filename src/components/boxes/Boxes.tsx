@@ -18,7 +18,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
-import { toLower } from 'lodash';
+import { capitalize, toLower } from 'lodash';
 import { BoxEntity, isBoxEntity } from '../../models/Box';
 import { scrollBar, visuallyHidden } from '../../styles/mixins';
 import Box, { getBoxType } from './Box';
@@ -395,49 +395,31 @@ const useBoxFiltersStyles = createUseStyles({
 	},
 });
 
-function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
+const filterOptions: BoxFilters[] = ['all', 'box', 'dictionary'];
+
+function BoxFilter(props: BoxFiltersProps) {
+	const { filter: selectedFilter, setFilter } = props;
+
 	const classes = useBoxFiltersStyles();
+
 	return (
 		<div className={classes.filters}>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				onClick={() => {
-					setFilter('all');
-				}}
-				id='all'
-				checked={filter === 'all'}
-			/>
-			<label htmlFor='all' className={classes.filtersLabel}>
-				all
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='box'
-				onClick={() => {
-					setFilter('box');
-				}}
-				checked={filter === 'box'}
-			/>
-			<label title='Box' htmlFor='box' className={classes.filtersLabel}>
-				<Icon id='box' stroke='black' />
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='dictionary'
-				onClick={() => {
-					setFilter('dictionary');
-				}}
-				checked={filter === 'dictionary'}
-			/>
-			<label title='Dictionary' htmlFor='dictionary' className={classes.filtersLabel}>
-				<Icon id='book' stroke='black' />
-			</label>
+			{filterOptions.map(filter => (
+				<React.Fragment key={filter}>
+					<input
+						className={classes.filtersInput}
+						type='radio'
+						name={filter}
+						id={filter}
+						value={filter}
+						onChange={e => setFilter(e.target.value as BoxFilters)}
+						checked={selectedFilter === filter}
+					/>
+					<label title={capitalize(filter)} htmlFor={filter} className={classes.filtersLabel}>
+						{filter === 'all' ? filter : <Icon id={filter} stroke='black' />}
+					</label>
+				</React.Fragment>
+			))}
 		</div>
 	);
 }
