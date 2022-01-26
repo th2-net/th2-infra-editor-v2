@@ -32,6 +32,7 @@ export class RequestsStore {
 			requestsExist: computed,
 			saveChanges: action,
 			saveEntityChanges: action,
+			discardChanges: action,
 		});
 	}
 
@@ -44,7 +45,7 @@ export class RequestsStore {
 	}
 
 	public get requestsExist(): boolean {
-		return this.preparedRequests.length > 0
+		return this.preparedRequests.length > 0;
 	}
 
 	saveEntityChanges = (
@@ -77,5 +78,12 @@ export class RequestsStore {
 		} finally {
 			this.isSaving = false;
 		}
+	};
+
+	discardChanges = () => {
+		this.preparedRequests = [];
+		this.schemaStore.backupInvalidLinks.forEach(link =>
+			this.schemaStore.boxUpdater.addLink(link.link, false),
+		);
 	};
 }

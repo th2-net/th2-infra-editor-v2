@@ -14,8 +14,16 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import Editor from '@monaco-editor/react';
+import Editor, { Monaco, OnMount } from '@monaco-editor/react';
+import React, { useEffect } from 'react';
 import { createUseStyles } from 'react-jss';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { extenedSchema, pinSchema, schemaTemplate } from '../../models/Schemas';
+import * as monacoEditor from 'monaco-editor';
+import { theme } from '../../styles/theme';
+import { getCountPinsConnections, PinsPositions } from '../../helpers/pinConnections';
+import { IRange } from 'monaco-editor';
 
 const useStyles = createUseStyles(() => ({
 	textareaWrapper: {
@@ -23,26 +31,169 @@ const useStyles = createUseStyles(() => ({
 		borderRadius: 4,
 		marginBottom: 8,
 	},
+	grayText: {
+		color: `${theme.colorPrimary} !important`,
+	},
 }));
 
 interface Props {
 	value: string;
 	setValue: (v: string) => void;
+	schema?: schemaTemplate;
+	pinsConnectionsLenses?: boolean;
 }
 
-const ConfigEditor = ({ value, setValue }: Props) => {
+const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }: Props) => {
 	const classes = useStyles();
+	const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor>();
+	const monacoRef = React.useRef<Monaco>();
+	const boxesStore = useBoxesStore();
+	const boxUpdater = useBoxUpdater();
+	const [lensesDisposer, setLensesDisposer] = React.useState<monacoEditor.IDisposable>();
+	const setLens = () => {
+		const lenses: monacoEditor.languages.CodeLens[] = [];
+		const pinsConnections = getCountPinsConnections(
+			boxesStore.selectedBox?.spec.pins,
+			boxUpdater.selectedBoxConnections,
+		);
+		const pinsPositions: PinsPositions[] = [];
+		if (pinsConnections) {
+			const model = editorRef.current?.getModel();
 
+			if (!model) throw new Error(`Couldn't get editor model`);
+
+			pinsConnections.forEach((connection, index) => {
+				const matches = model.findMatches(
+					`"name": "${connection.name}"`,
+					false,
+					false,
+					false,
+					null,
+					false,
+				);
+				matches.forEach(match => {
+					const range = match.range;
+					pinsPositions.push({
+						connections: connection.numOfConnections,
+						position: {
+							lineNumber: range.startLineNumber,
+							column: range.startColumn,
+						},
+					});
+
+					lenses.push({
+						range: range.setStartPosition(range.getStartPosition().lineNumber - 1, 1),
+						command: { id: '', title: `connections: ${connection.numOfConnections}` },
+					});
+				});
+			});
+			const ranges = rangesOfUnusedPin(pinsPositions, model);
+			selectZeroConnectionsPins(ranges);
+		}
+		return lenses;
+	};
+
+	const selectZeroConnectionsPins = (ranges: IRange[]) => {
+		ranges.forEach(r => {
+			editorRef.current?.deltaDecorations(
+				[],
+				[
+					{
+						range: r,
+						options: {
+							inlineClassName: classes.grayText,
+						},
+					},
+				],
+			);
+		});
+	};
+
+	const rangesOfUnusedPin = (
+		pinsPositions: PinsPositions[],
+		model: monacoEditor.editor.ITextModel,
+	) => {
+		const ranges: IRange[] = [];
+		pinsPositions.forEach((position, index) => {
+			if (position.connections === 0) {
+				ranges.push({
+					startLineNumber: pinsPositions[index].position.lineNumber - 2,
+					startColumn: pinsPositions[index].position.column,
+					endLineNumber:
+						pinsPositions.length === 1 || index === pinsPositions.length - 1
+							? model.getFullModelRange().endLineNumber - 1
+							: pinsPositions[index + 1].position.lineNumber - 2,
+					endColumn:
+						pinsPositions.length === 1 || index === pinsPositions.length - 1
+							? model.getFullModelRange().endColumn + 1
+							: pinsPositions[index + 1].position.column,
+				});
+			}
+		});
+
+		return ranges;
+	};
+
+	useEffect(() => {
+		if (pinsConnectionsLenses) {
+			lensesDisposer?.dispose();
+			lensRegistrator();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [boxesStore.selectedBox]);
+
+	const provideCodeLenses = () => {
+		return { lenses: setLens(), dispose: () => null };
+	};
+
+	const validate = (markers: monacoEditor.editor.IMarker[]) => {
+		boxesStore.setIsSelectedBoxValid(!(markers.length > 0));
+	};
+
+	const lensRegistrator = () => {
+		setLensesDisposer(
+			monacoRef.current?.languages.registerCodeLensProvider('json', { provideCodeLenses }),
+		);
+	};
+
+	const handleEditorDidMount: OnMount = (editor, monaco) => {
+		editorRef.current = editor;
+		monacoRef.current = monaco;
+		monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+			schemaValidation: 'error',
+			enableSchemaRequest: true,
+			validate: true,
+			schemas: [
+				{
+					uri: pinSchema.uri,
+					fileMatch: [pinSchema.path],
+					schema: pinSchema.schema,
+				},
+				{
+					uri: extenedSchema.uri,
+					fileMatch: [extenedSchema.path],
+					schema: extenedSchema.schema,
+				},
+			],
+		});
+		monacoRef.current.editor.onDidChangeMarkers(e => {
+			validate(monaco.editor.getModelMarkers({}));
+		});
+		if (pinsConnectionsLenses) {
+			lensRegistrator();
+		}
+	};
 	return (
 		<div className={classes.textareaWrapper}>
 			<Editor
 				width='auto'
+				path={schema?.path}
 				language={'json'}
 				theme={'my-theme'}
 				options={{
 					fontSize: 14,
 					fontWeight: '400',
-					codeLens: false,
+					codeLens: pinsConnectionsLenses,
 					lineNumbers: 'off',
 					minimap: {
 						enabled: false,
@@ -57,6 +208,7 @@ const ConfigEditor = ({ value, setValue }: Props) => {
 				}}
 				value={value}
 				onChange={v => setValue(v || '')}
+				onMount={handleEditorDidMount}
 			/>
 		</div>
 	);

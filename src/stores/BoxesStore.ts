@@ -29,6 +29,8 @@ export class BoxesStore {
 			allEntities: computed,
 			setBoxes: action,
 			setDictionaries: action,
+			isSelectedBoxValid: observable,
+			setIsSelectedBoxValid: action,
 		});
 	}
 
@@ -65,10 +67,20 @@ export class BoxesStore {
 		},
 	];
 
+	isSelectedBoxValid: boolean = true;
+
 	selectedBox: BoxEntity | null = null;
 
-	selectBox = (box: BoxEntity | null) => {
+	selectBox = (box: BoxEntity | null, boxName?: string) => {
+		if (boxName) {
+			const boxEntity = this.boxes.find(box => box.name === boxName);
+			boxEntity && (box = boxEntity);
+		}
 		this.selectedBox = box;
+	};
+
+	setIsSelectedBoxValid = (value: boolean) => {
+		this.isSelectedBoxValid = value;
 	};
 
 	boxes: BoxEntity[] = [];

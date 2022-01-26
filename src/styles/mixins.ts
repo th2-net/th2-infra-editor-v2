@@ -83,3 +83,18 @@ export function button(): Styles {
 		userSelect: 'none',
 	};
 }
+
+export function modalWindow(): Styles {
+	return {
+		position: 'relative',
+		borderRadius: '6px',
+		boxShadow:
+			'0 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)',
+		padding: '20px 30px',
+		overflow: 'auto',
+		top: '50px',
+		marginRight: 'auto',
+		marginLeft: 'auto',
+		backgroundColor: 'white',
+	};
+}

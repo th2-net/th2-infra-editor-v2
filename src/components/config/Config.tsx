@@ -28,6 +28,7 @@ import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useState } from 'react';
+import { extenedSchema, pinSchema } from '../../models/Schemas';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
@@ -74,7 +75,7 @@ function Config() {
 	const [filter, setFilter] = useState<ConfigFilters>('customConfig');
 	const classes = useStyles();
 
-	const { selectedBox } = useBoxesStore();
+	const { selectedBox, isSelectedBoxValid } = useBoxesStore();
 	const boxUpdater = useBoxUpdater();
 
 	const customConfig = useInput({
@@ -164,11 +165,20 @@ function Config() {
 			{filter === 'customConfig' ? (
 				<ConfigEditor value={customConfig.value} setValue={customConfig.setValue} />
 			) : filter === 'pins' ? (
-				<ConfigEditor value={pinsConfig.value} setValue={pinsConfig.setValue} />
+				<ConfigEditor
+					value={pinsConfig.value}
+					setValue={pinsConfig.setValue}
+					schema={pinSchema}
+					pinsConnectionsLenses
+				/>
 			) : (
-				<ConfigEditor value={extendedSettings.value} setValue={extendedSettings.setValue} />
+				<ConfigEditor
+					value={extendedSettings.value}
+					setValue={extendedSettings.setValue}
+					schema={extenedSchema}
+				/>
 			)}
-			<button className={classes.saveButton} onClick={saveChanges}>
+			<button className={classes.saveButton} disabled={!isSelectedBoxValid} onClick={saveChanges}>
 				Save
 			</button>
 		</div>

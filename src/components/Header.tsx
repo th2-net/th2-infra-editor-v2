@@ -17,6 +17,11 @@
 import { observer } from 'mobx-react-lite';
 import { createUseStyles, Styles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+import { useEffect, useState } from 'react';
+import warningIcon from '../assets/icons/attention-error.svg';
+import CustomizedTooltip from './util/CustomizedTooltip';
+import ModalConfirmation from './util/ModalConfirmation';
+import InvalidLinksList from './util/InvalidLinksList';
 import arrowDown from '../assets/icons/arrow-down.svg';
 
 const button: Styles = {
@@ -98,34 +103,106 @@ const useStyles = createUseStyles({
 		width: '169px',
 		padding: '8px 12px',
 	},
+	invalidSchemaIndicator: {
+		display: 'grid',
+		gridTemplateColumns: '20px auto',
+		gridColumnGap: 3,
+		backgroundColor: 'orange',
+		borderRadius: 4,
+		color: 'white',
+		padding: 3,
+		cursor: 'pointer',
+	},
+	warningIcon: {
+		width: 20,
+		height: 20,
+		backgroundImage: `url(${warningIcon})`,
+		backgroundSize: '100%',
+		placeSelf: 'center',
+		backgroundRepeat: 'no-repeat',
+	},
 });
 
 function Header() {
-	const { requestsStore, schemas, selectSchema, selectedSchemaName } = useSchemaStore();
-	const { requestsExist, saveChanges, preparedRequests } = requestsStore;
+	const { requestsStore, schemas, selectSchema, selectedSchemaName, isSchemaValid, boxesStore } =
+		useSchemaStore();
+	const { requestsExist, saveChanges, preparedRequests, discardChanges } = requestsStore;
 
 	const classes = useStyles();
+
+	const [openModal, setOpenModal] = useState(false);
+
+	const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
+
+	const [confirmationModalType, setConfirmationModalType] = useState<'save' | 'discard' | null>(
+		null,
+	);
+
+	const confirmationModalConfig = {
+		save: {
+			setOpen: setOpenConfirmationModal,
+			message: 'Do you want to submit pending changes?',
+			action: saveChanges,
+		},
+		discard: {
+			setOpen: setOpenConfirmationModal,
+			message: 'Do you want to discard pending changes?',
+			action: discardChanges,
+		},
+	};
+
+	useEffect(() => {
+		setOpenModal(false);
+	}, [boxesStore.selectedBox]);
 
 	return (
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
-				<select
-					className={classes.customSelect}
-					onChange={e => selectSchema(e.target.value)}
-					value={selectedSchemaName || undefined}>
-					{schemas.map(schema => (
-						<option className={classes.customOption} key={schema} value={schema}>
-							{schema}
-						</option>
-					))}
-				</select>
+				<CustomizedTooltip title='submit pending changes first' disableCondition={!requestsExist}>
+					<select
+						disabled={requestsExist}
+						onChange={e => selectSchema(e.target.value)}
+						value={selectedSchemaName || undefined}>
+						{schemas.map(schema => (
+							<option key={schema} value={schema}>
+								{schema}
+							</option>
+						))}
+					</select>
+				</CustomizedTooltip>
 			)}
-			<button disabled={!requestsExist} className={classes.button} onClick={saveChanges}>
+			<button
+				disabled={!requestsExist}
+				className={classes.button}
+				onClick={() => {
+					setOpenConfirmationModal(true);
+					setConfirmationModalType('save');
+				}}>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
 					{preparedRequests.length}
 				</span>
 				Submit Changes
 			</button>
+			{requestsExist && (
+				<button
+					className={classes.button}
+					onClick={() => {
+						setOpenConfirmationModal(true);
+						setConfirmationModalType('discard');
+					}}>
+					Discard changes
+				</button>
+			)}
+			{openConfirmationModal && confirmationModalType && (
+				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} />
+			)}
+			{openModal && <InvalidLinksList setOpen={setOpenModal} />}
+			{!isSchemaValid && (
+				<div className={classes.invalidSchemaIndicator} onClick={() => setOpenModal(true)}>
+					<div className={classes.warningIcon}></div>
+					<div>schema is not valid</div>
+				</div>
+			)}
 		</div>
 	);
 }
