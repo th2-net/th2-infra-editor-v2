@@ -31,11 +31,7 @@ export function getImageNameWithoutDomain(imageName: string): string {
 	return splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
 }
 
-interface StylesProps {
-	boxBodySpacing: number;
-}
-
-const useStyles = createUseStyles<string, StylesProps>(
+const useStyles = createUseStyles(
 	{
 		container: {
 			width: '100%',
@@ -78,10 +74,6 @@ const useStyles = createUseStyles<string, StylesProps>(
 			textOverflow: 'ellipsis',
 			gridArea: 'name',
 		},
-		body: {
-			height: '100%',
-			padding: props => `${props.boxBodySpacing}px`,
-		},
 		bodyValue: {
 			lineHeight: '24px',
 			fontWeight: 'bold',
@@ -122,20 +114,15 @@ const useStyles = createUseStyles<string, StylesProps>(
 
 interface Props {
 	box: BoxEntity;
-	editableDictionaryRelations?: boolean;
 	color?: string;
 	onSelect?: (box: BoxEntity) => void;
 	isSelected?: boolean;
 }
 
 function Box(props: Props) {
-	const { box, color, onSelect, editableDictionaryRelations, isSelected = false } = props;
+	const { box, color, onSelect, isSelected = false } = props;
 
-	const stylesProps = computed(() => {
-		return { boxBodySpacing: editableDictionaryRelations ? 20 : 0 };
-	}).get();
-
-	const classes = useStyles(stylesProps);
+	const classes = useStyles();
 
 	const subscriptionStore = useSubscriptionStore();
 	const status = useRef(subscriptionStore.boxStates.get(box.name) || BoxStatus.PENDING);
@@ -164,7 +151,6 @@ function Box(props: Props) {
 					{slicedImageName}
 				</span>
 			</div>
-			<div className={classes.body}>{editableDictionaryRelations && <DictionaryLinksEditor />}</div>
 		</div>
 	);
 }

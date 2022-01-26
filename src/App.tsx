@@ -30,6 +30,7 @@ import { useAppViewStore } from './hooks/useAppViewStore';
 import { useURLParamsStore } from './hooks/useURLParamsStore';
 import EmbeddedLayout from './components/embedded/EmbeddedLayout';
 import loader from '@monaco-editor/loader';
+import { useMonaco } from '@monaco-editor/react';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -89,11 +90,23 @@ function App() {
 	const classes = useStyles();
 	const { viewType } = useAppViewStore();
 	const { embedded } = useURLParamsStore();
+	const monaco = useMonaco();
 
 	useEffect(() => {
 		rootStore.init();
 		loader.config({ paths: { vs: 'vs' } });
 	}, [rootStore]);
+
+	useEffect(() => {
+		monaco?.editor.defineTheme('my-theme', {
+			base: 'vs',
+			inherit: true,
+			rules: [],
+			colors: {
+				'editor.background': '#F3F3F6',
+			},
+		});
+	}, [monaco]);
 
 	if (embedded) {
 		return <EmbeddedLayout />;

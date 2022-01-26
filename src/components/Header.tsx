@@ -80,6 +80,8 @@ const useStyles = createUseStyles({
 	customSelect: {
 		position: 'relative',
 		border: 'none',
+		outline: 'none',
+		cursor: 'pointer',
 		borderRadius: 4,
 		padding: '5px 12px',
 		width: '169px',
@@ -87,6 +89,14 @@ const useStyles = createUseStyles({
 		appearance: 'none',
 		background: `url(${arrowDown})  no-repeat right #FFF`,
 		backgroundPositionX: '141px',
+		'&::-webkit-scrollbar': {
+			display: 'none',
+		},
+	},
+	customOption: {
+		appearance: 'none',
+		width: '169px',
+		padding: '8px 12px',
 	},
 });
 
@@ -104,7 +114,7 @@ function Header() {
 					onChange={e => selectSchema(e.target.value)}
 					value={selectedSchemaName || undefined}>
 					{schemas.map(schema => (
-						<option key={schema} value={schema}>
+						<option className={classes.customOption} key={schema} value={schema}>
 							{schema}
 						</option>
 					))}

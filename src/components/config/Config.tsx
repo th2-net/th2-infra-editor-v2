@@ -32,7 +32,7 @@ import { useState } from 'react';
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
 		display: 'grid',
-		gridTemplateRows: 'auto auto auto 1fr auto',
+		gridTemplateRows: 'auto auto auto minmax(50px,500px) auto',
 		gap: '16px',
 		overflowY: 'hidden',
 		backgroundColor: '#FFF',

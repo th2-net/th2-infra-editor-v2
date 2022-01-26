@@ -22,6 +22,7 @@ import { Theme } from '../../styles/theme';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 import { getBoxType, getImageNameWithoutDomain, Status } from './Box';
 import { button, scrollBar } from '../../styles/mixins';
+import { useState } from 'react';
 
 interface StylesProps {
 	headerBgColor?: string;
@@ -126,6 +127,8 @@ function SelectedBox(props: Props) {
 	const { box, createNewLink, color } = props;
 	const classes = useStyles({ headerBgColor: color });
 
+	const [showAddDictionary, setShowAddDictionary] = useState(false);
+
 	// TODO: fix status
 	const status = useMemo(() => Object.values(BoxStatus)[box.name.length % 2], [box.name.length]);
 
@@ -142,12 +145,15 @@ function SelectedBox(props: Props) {
 					<span className={classNames(classes.bodyValue, classes.type)}>{getBoxType(box)}</span>
 					<span className={classes.bodyValue}>{slicedImageName}</span>
 				</div>
-				<DictionaryLinksEditor />
+				<DictionaryLinksEditor
+					showAddDictionary={showAddDictionary}
+					setShowAddDictionary={setShowAddDictionary}
+				/>
 				<div className={classes.actions}>
 					<button className={classes.addLink} onClick={createNewLink}>
 						Add link
 					</button>
-					<button className={classes.addDictionary} onClick={createNewLink}>
+					<button className={classes.addDictionary} onClick={() => setShowAddDictionary(true)}>
 						Add Dictionary
 					</button>
 				</div>
