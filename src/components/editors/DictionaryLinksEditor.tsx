@@ -21,7 +21,6 @@ import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
 import { DictionaryRelation } from '../../models/Dictionary';
 import Icon from '../Icon';
-import Select from '../util/Select';
 import { ModalPortal } from '../util/Portal';
 import closeIcon from '../../assets/icons/close-icon.svg';
 import { button, scrollBar } from '../../styles/mixins';
@@ -98,14 +97,16 @@ export const useLinksStyles = createUseStyles({
 		},
 	},
 	editor: {
+		display: 'grid',
+		gridTemplateRows: 'auto 1fr auto',
 		borderRadius: 4,
 		background: '#fff',
 		border: 'none',
 		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
 		direction: 'ltr',
 		boxSizing: 'border-box',
-		height: 'fit-content',
-		width: '306px',
+		height: '306px',
+		width: '496px',
 		position: 'absolute',
 		overflow: 'hidden',
 	},
@@ -144,7 +145,7 @@ export const useLinksStyles = createUseStyles({
 		width: '100%',
 	},
 	actions: {
-		marginTop: 16,
+		paddingBottom: 24,
 		gap: 12,
 		display: 'flex',
 		justifyContent: 'center',
@@ -176,10 +177,42 @@ export const useLinksStyles = createUseStyles({
 			color: '#FFF',
 		},
 	},
-	disabled: {
-		background: '#5CBEEF',
-		opacity: 0.4,
-		cursor: 'not-allowed',
+	selectWrapper: { border: 'none', outline: 'none', width: '368px' },
+	customSelect: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		cursor: 'pointer',
+		borderRadius: 4,
+		padding: '5px 12px',
+		width: '100%',
+		margin: 2,
+		backgroundColor: '#FFF',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
+	},
+	openSelect: {
+		border: '1px solid #5CBEEF',
+	},
+	optionsWrapper: {
+		position: 'absolute',
+		height: '134px',
+		width: '368px',
+		overflowY: 'scroll',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
+		borderRadius: 4,
+		margin: 2,
+		'&::-webkit-scrollbar': {
+			display: 'none',
+		},
+	},
+	customOption: {
+		width: '100%',
+		cursor: 'pointer',
+		backgroundColor: '#FFF',
+		border: 'none',
+		padding: '8px 12px',
+	},
+	disable: {
+		display: 'none',
 	},
 });
 
@@ -209,6 +242,8 @@ const DictionaryLinksEditor = ({
 
 	const [newLinkedDictionaryName, setNewLinkedDictionaryName] = useState(options[0]);
 
+	const [openSelect, setOpenSelect] = useState(false);
+
 	const applyNewLink = () => {
 		setShowAddDictionary(false);
 		if (boxesStore.selectedBox && newLinkedDictionaryName) {
@@ -222,6 +257,11 @@ const DictionaryLinksEditor = ({
 			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
+	};
+
+	const changeDictionary = (option: string) => {
+		setNewLinkedDictionaryName(option);
+		setOpenSelect(false);
 	};
 
 	return (
@@ -246,23 +286,46 @@ const DictionaryLinksEditor = ({
 								onClick={() => setShowAddDictionary(false)}></span>
 						</div>
 						<div className={classes.content}>
-							<Select
-								options={options}
-								selected={newLinkedDictionaryName}
-								onChange={setNewLinkedDictionaryName}
-							/>
-							<div className={classes.actions}>
-								<button
-									onClick={applyNewLink}
-									className={classNames(classes.button, classes.submit)}>
-									Submit
-								</button>
-								<button
-									onClick={() => setShowAddDictionary(false)}
-									className={classNames(classes.button, classes.deleteButton)}>
-									Cancel
-								</button>
+							<div className={classes.selectWrapper}>
+								<div
+									className={classNames(
+										classes.customSelect,
+										openSelect ? classes.openSelect : null,
+									)}
+									onClick={() => setOpenSelect(!openSelect)}>
+									{newLinkedDictionaryName}
+									{openSelect ? (
+										<Icon id='arrowUp' stroke='#5CBEEF' />
+									) : (
+										<Icon id='arrowDown' stroke='#808080' />
+									)}
+								</div>
+								<div
+									className={classNames(
+										classes.optionsWrapper,
+										!openSelect ? classes.disable : classes.openSelect,
+									)}>
+									{openSelect &&
+										options.map(option => (
+											<div
+												key={option}
+												className={classes.customOption}
+												onClick={() => changeDictionary(option)}>
+												{option}
+											</div>
+										))}
+								</div>
 							</div>
+						</div>
+						<div className={classes.actions}>
+							<button onClick={applyNewLink} className={classNames(classes.button, classes.submit)}>
+								Submit
+							</button>
+							<button
+								onClick={() => setShowAddDictionary(false)}
+								className={classNames(classes.button, classes.deleteButton)}>
+								Cancel
+							</button>
 						</div>
 					</div>
 				</ModalPortal>

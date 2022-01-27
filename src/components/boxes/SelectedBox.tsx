@@ -55,6 +55,7 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		},
 		body: {
 			...scrollBar(),
+			overflow: 'scroll',
 			height: '100%',
 			padding: '20px',
 			display: 'grid',

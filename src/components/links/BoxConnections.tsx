@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import directionIcon from '../../assets/icons/direction-icon.svg';
 import { ConnectionDirection } from '../../models/LinksDefinition';
 import useSubscriptionStore from '../../hooks/useSubscriptionStore';
+import Icon from '../Icon';
 
 export interface IBoxConnections {
 	box: BoxEntity;
@@ -153,13 +154,13 @@ const usePinConnectionsClasses = createUseStyles({
 		direction: 'ltr',
 	},
 	expandButton: {
+		paddingLeft: 2,
 		cursor: 'pointer',
 		border: 'none',
 		borderRadius: '50%',
 		width: 20,
 		height: 20,
 		textAlign: 'center',
-		padding: 0,
 	},
 	arrowIcon: {
 		// TODO: embed icon as component
@@ -221,7 +222,11 @@ function PinConnections({
 										<button
 											className={classes.expandButton}
 											onClick={() => setIsExpanded && setIsExpanded(!isExpanded)}>
-											{isExpanded ? '-' : '+'}
+											{isExpanded ? (
+												<Icon id='arrowUp' stroke='#808080' />
+											) : (
+												<Icon id='arrowDown' stroke='#808080' />
+											)}
 										</button>
 									)}
 								</div>

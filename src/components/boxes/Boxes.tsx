@@ -125,7 +125,7 @@ function Boxes() {
 		});
 
 		return map;
-	}, [expandedGroups]);
+	}, [boxes, expandedGroups]);
 
 	const groupedBoxes = useMemo(() => {
 		let result: Entity[] = [];

@@ -52,6 +52,7 @@ const useStyles = createUseStyles({
 		},
 	},
 	content: {
+		width: '100%',
 		overflow: 'hidden',
 		display: 'grid',
 		gridTemplateColumns: '1.5fr 1fr 1.5fr',

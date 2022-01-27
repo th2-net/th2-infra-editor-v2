@@ -25,7 +25,7 @@ import { theme } from '../../styles/theme';
 import { getCountPinsConnections, PinsPositions } from '../../helpers/pinConnections';
 import { IRange } from 'monaco-editor';
 
-const useStyles = createUseStyles(() => ({
+const useStyles = createUseStyles({
 	textareaWrapper: {
 		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.08)',
 		borderRadius: 4,
@@ -34,7 +34,7 @@ const useStyles = createUseStyles(() => ({
 	grayText: {
 		color: `${theme.colorPrimary} !important`,
 	},
-}));
+});
 
 interface Props {
 	value: string;

@@ -22,7 +22,8 @@ import warningIcon from '../assets/icons/attention-error.svg';
 import CustomizedTooltip from './util/CustomizedTooltip';
 import ModalConfirmation from './util/ModalConfirmation';
 import InvalidLinksList from './util/InvalidLinksList';
-import arrowDown from '../assets/icons/arrow-down.svg';
+import classNames from 'classnames';
+import Icon from './Icon';
 
 const button: Styles = {
 	height: '32px',
@@ -79,27 +80,39 @@ const useStyles = createUseStyles({
 		right: '-5px',
 		background: '#ed4300',
 	},
-	disableBadge: {
+	disable: {
 		display: 'none',
 	},
+	selectWrapper: { border: 'none', outline: 'none', width: '171px' },
 	customSelect: {
-		position: 'relative',
-		border: 'none',
-		outline: 'none',
+		display: 'flex',
+		justifyContent: 'space-between',
 		cursor: 'pointer',
 		borderRadius: 4,
 		padding: '5px 12px',
-		width: '169px',
-		height: '32px',
-		appearance: 'none',
-		background: `url(${arrowDown})  no-repeat right #FFF`,
-		backgroundPositionX: '141px',
+		width: '100%',
+		margin: 2,
+		backgroundColor: '#FFF',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
+	},
+	openSelect: {
+		border: '1px solid #5CBEEF',
+	},
+	optionsWrapper: {
+		position: 'absolute',
+		height: '134px',
+		overflowY: 'scroll',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
+		borderRadius: 4,
+		margin: 2,
 		'&::-webkit-scrollbar': {
 			display: 'none',
 		},
 	},
 	customOption: {
-		appearance: 'none',
+		cursor: 'pointer',
+		backgroundColor: '#FFF',
+		border: 'none',
 		width: '169px',
 		padding: '8px 12px',
 	},
@@ -138,6 +151,8 @@ function Header() {
 		null,
 	);
 
+	const [openSelect, setOpenSelect] = useState(false);
+
 	const confirmationModalConfig = {
 		save: {
 			setOpen: setOpenConfirmationModal,
@@ -151,6 +166,11 @@ function Header() {
 		},
 	};
 
+	const changeSchema = (schema: string) => {
+		selectSchema(schema);
+		setOpenSelect(false);
+	};
+
 	useEffect(() => {
 		setOpenModal(false);
 	}, [boxesStore.selectedBox]);
@@ -159,17 +179,34 @@ function Header() {
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
 				<CustomizedTooltip title='submit pending changes first' disableCondition={!requestsExist}>
-					<select
-						className={classes.customSelect}
-						disabled={requestsExist}
-						onChange={e => selectSchema(e.target.value)}
-						value={selectedSchemaName || undefined}>
-						{schemas.map(schema => (
-							<option key={schema} value={schema}>
-								{schema}
-							</option>
-						))}
-					</select>
+					<div
+						className={classNames(classes.selectWrapper, requestsExist ? classes.disable : null)}>
+						<div
+							className={classNames(classes.customSelect, openSelect ? classes.openSelect : null)}
+							onClick={() => setOpenSelect(!openSelect)}>
+							{selectedSchemaName}
+							{openSelect ? (
+								<Icon id='arrowUp' stroke='#5CBEEF' />
+							) : (
+								<Icon id='arrowDown' stroke='#808080' />
+							)}
+						</div>
+						<div
+							className={classNames(
+								classes.optionsWrapper,
+								!openSelect ? classes.disable : classes.openSelect,
+							)}>
+							{openSelect &&
+								schemas.map(schema => (
+									<div
+										key={schema}
+										className={classes.customOption}
+										onClick={() => changeSchema(schema)}>
+										{schema}
+									</div>
+								))}
+						</div>
+					</div>
 				</CustomizedTooltip>
 			)}
 			<button
@@ -179,7 +216,7 @@ function Header() {
 					setOpenConfirmationModal(true);
 					setConfirmationModalType('save');
 				}}>
-				<span className={requestsExist ? classes.badge : classes.disableBadge}>
+				<span className={requestsExist ? classes.badge : classes.disable}>
 					{preparedRequests.length}
 				</span>
 				Submit Changes
