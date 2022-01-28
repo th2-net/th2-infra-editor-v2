@@ -29,6 +29,7 @@ interface UseInputProps {
 	autoFocus?: boolean;
 	spellCheck?: boolean;
 	disabled?: boolean;
+	required?: boolean;
 }
 
 export interface InputConfig {
@@ -51,6 +52,7 @@ export interface InputConfig {
 		autoFocus?: boolean;
 		spellCheck: boolean;
 	};
+	required?: boolean;
 }
 
 export const useInput = ({
@@ -63,6 +65,7 @@ export const useInput = ({
 	autoFocus,
 	spellCheck = false,
 	disabled = false,
+	required = true,
 }: UseInputProps): InputConfig => {
 	const [value, setValue] = React.useState(initialValue);
 	const [isValid, setIsValid] = React.useState(true);
@@ -73,10 +76,10 @@ export const useInput = ({
 	}, [initialValue]);
 
 	React.useEffect(() => {
-		if (validate) {
-			setIsValid(validate(value));
-		}
-	}, [value, validate]);
+		setIsValid(
+			(!isDirty || (!required || value.trim().length > 0))
+			&& (validate?.(value) ?? true));
+	}, [value, validate, isDirty, required]);
 
 	const onValueChange = (newValue: string) => {
 		setIsDirty(true);
@@ -101,5 +104,6 @@ export const useInput = ({
 			autoFocus,
 			spellCheck,
 		},
+		required,
 	};
 };

@@ -15,6 +15,7 @@
  ***************************************************************************** */
 
 import { action, computed, makeObservable, observable } from 'mobx';
+import { sortByKey } from '../helpers/array';
 import { BoxEntity, isBoxEntity } from '../models/Box';
 import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
 import FileBase from '../models/FileBase';
@@ -27,6 +28,7 @@ export class BoxesStore {
 			boxes: observable,
 			dictionaries: observable,
 			allEntities: computed,
+			types: computed,
 			setBoxes: action,
 			setDictionaries: action,
 			isSelectedBoxValid: observable,
@@ -89,6 +91,26 @@ export class BoxesStore {
 
 	public get allEntities() {
 		return [...this.boxes, ...this.dictionaries];
+	}
+
+	public get types() {
+		return this.groupsConfig
+			.map(group => {
+				let boxes: BoxEntity[];
+				if (group.title === 'Th2Resources') {
+					boxes = this.boxes.filter(box =>
+						this.groupsConfig.every(g => !g.types.includes(box.spec.type)),
+					);
+				} else {
+					boxes = this.boxes.filter(box => group.types.some(type => type === box.spec.type));
+				}
+
+				return {
+					...group,
+					boxes: sortByKey(boxes, 'name'),
+				};
+			})
+			.flatMap(group => group.types);
 	}
 
 	setBoxes = (allEntites: FileBase[]) => {

@@ -14,22 +14,24 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { observer, Observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { Virtuoso } from 'react-virtuoso';
 import { toLower } from 'lodash';
 import { BoxEntity, isBoxEntity } from '../../models/Box';
-import { scrollBar, visuallyHidden } from '../../styles/mixins';
+import { scrollBar } from '../../styles/mixins';
 import Box, { getBoxType } from './Box';
 import Dictionary from './Dictionary';
-import { useDebouncedCallback } from 'use-debounce/lib';
 import { DictionaryEntity, isDictionaryEntity } from '../../models/Dictionary';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
-import Icon from '../Icon';
 import classNames from 'classnames';
 import { useAppViewStore } from '../../hooks/useAppViewStore';
+import { BoxFilters } from './ResourcesFilter';
+import ResourcesSearch from './ResourcesSearch';
+import ResourcesListHeader from './ResourcesListHeader';
+import AppViewType from '../../util/AppViewType';
 
 const useStyles = createUseStyles(
 	{
@@ -64,7 +66,7 @@ const useStyles = createUseStyles(
 			WebkitBorderTopRightRadius: '0',
 		},
 	},
-	{ name: 'Boxes' },
+	{ name: 'ResourcesList' },
 );
 
 interface GroupEntity {
@@ -73,13 +75,13 @@ interface GroupEntity {
 
 type Entity = GroupEntity | BoxEntity | DictionaryEntity;
 
-function Boxes() {
+function ResourcesList() {
 	const boxesStore = useBoxesStore();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
 	const appViewStore = useAppViewStore();
 
 	const [searchValue, setSearchValue] = useState('');
-	const [filter, setFilter] = useState<BoxFilters>('all');
+	const [filter, setFilter] = useState<BoxFilters>(BoxFilters.all);
 	const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
 	const boxes = useMemo(() => {
@@ -176,7 +178,7 @@ function Boxes() {
 									box={box}
 									color={group?.color}
 									onSelect={box => {
-										appViewStore.setViewType('box');
+										appViewStore.setViewType(AppViewType.BoxView);
 										boxesStore.selectBox(box);
 									}}
 									isSelected={boxesStore.selectedBox?.name === (box as BoxEntity).name}
@@ -194,7 +196,7 @@ function Boxes() {
 								<Dictionary
 									dictionary={box}
 									onClick={() => {
-										appViewStore.setViewType('dictionary');
+										appViewStore.setViewType(AppViewType.DictionaryView);
 										selectedDictionaryStore.selectDictionary(box);
 									}}
 								/>
@@ -216,6 +218,7 @@ function Boxes() {
 				</Observer>
 			);
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[boxesStore, groupedBoxes, appViewStore, selectedDictionaryStore, expandedMap, expandGroup],
 	);
 
@@ -223,14 +226,14 @@ function Boxes() {
 
 	return (
 		<div className={classes.container}>
-			<BoxFilter filter={filter} setFilter={setFilter} />
-			<BoxSearch setValue={setSearchValue} />
+			<ResourcesListHeader filter={filter} setFilter={setFilter} setViewType={appViewStore.setViewType} />
+			<ResourcesSearch filter={filter} setValue={setSearchValue} />
 			<Virtuoso data={groupedBoxes} itemContent={renderBox} className={classes.boxList} />
 		</div>
 	);
 }
 
-export default observer(Boxes);
+export default observer(ResourcesList);
 
 const useExpandGroupStyles = createUseStyles(
 	{
@@ -315,129 +318,6 @@ function ExpandGroup(props: ExpandGroupProps) {
 				&gt;
 			</div>
 			<div className={classes.name}>{props.group.name}</div>
-		</div>
-	);
-}
-
-const useBoxSearchStyles = createUseStyles(
-	{
-		search: {
-			flexShrink: 0,
-			height: 50,
-			borderBottom: '1px solid',
-		},
-		searchInput: {
-			width: '100%',
-			height: '100%',
-			border: 'none',
-			outline: 'none',
-			padding: '0 15px',
-		},
-	},
-	{ name: 'BoxSearch' },
-);
-interface BoxSearchProps {
-	setValue: (debouncedSearchValue: string) => void;
-}
-
-function BoxSearch(props: BoxSearchProps) {
-	const classes = useBoxSearchStyles();
-
-	const [searchValue, setSearchValue] = useState('');
-
-	const setDebouncedValue = useDebouncedCallback((value: string) => {
-		props.setValue(value);
-	}, 600);
-
-	function onSearchValueChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const { value } = e.target;
-		setSearchValue(value);
-		setDebouncedValue(value);
-	}
-
-	return (
-		<div className={classes.search}>
-			<input
-				type='text'
-				placeholder='Box name'
-				value={searchValue}
-				className={classes.searchInput}
-				onChange={onSearchValueChange}
-			/>
-		</div>
-	);
-}
-
-type BoxFilters = 'all' | 'box' | 'dictionary';
-
-interface BoxFiltersProps {
-	filter: BoxFilters;
-	setFilter: (filter: BoxFilters) => void;
-}
-
-const useBoxFiltersStyles = createUseStyles({
-	filters: {
-		display: 'flex',
-	},
-	filtersInput: {
-		...visuallyHidden(),
-		'&:checked': {
-			'&+label': {
-				backgroundColor: '#fff',
-			},
-		},
-	},
-	filtersLabel: {
-		display: 'inline-flex',
-		verticalAlign: 'middle',
-		padding: 6,
-		cursor: 'pointer',
-	},
-});
-
-function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
-	const classes = useBoxFiltersStyles();
-	return (
-		<div className={classes.filters}>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				onClick={() => {
-					setFilter('all');
-				}}
-				id='all'
-				checked={filter === 'all'}
-			/>
-			<label htmlFor='all' className={classes.filtersLabel}>
-				all
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='box'
-				onClick={() => {
-					setFilter('box');
-				}}
-				checked={filter === 'box'}
-			/>
-			<label title='Box' htmlFor='box' className={classes.filtersLabel}>
-				<Icon id='box' stroke='black' />
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='dictionary'
-				onClick={() => {
-					setFilter('dictionary');
-				}}
-				checked={filter === 'dictionary'}
-			/>
-			<label title='Dictionary' htmlFor='dictionary' className={classes.filtersLabel}>
-				<Icon id='book' stroke='black' />
-			</label>
 		</div>
 	);
 }

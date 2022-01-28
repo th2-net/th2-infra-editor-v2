@@ -77,14 +77,12 @@ function Config() {
 
 	const imageName = useInput({
 		initialValue: selectedBox?.spec['image-name'] || '',
-		validate: name => name.length > 0,
 		id: 'imageName',
 		label: 'Image name',
 	});
 
 	const imageVersion = useInput({
 		initialValue: selectedBox?.spec['image-version'] || '',
-		validate: version => version.length > 0,
 		id: 'imageVersion',
 		label: 'Image version',
 	});
@@ -92,7 +90,6 @@ function Config() {
 	const name = useInput({
 		initialValue: selectedBox?.name || '',
 		validate: name =>
-			name.trim().length > 0 &&
 			/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/gm.test(name),
 		id: 'name',
 		label: 'Name',

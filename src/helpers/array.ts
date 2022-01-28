@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import Boxes from './Boxes';
-
-export default Boxes;
+export function sortByKey<T, K extends keyof T>(arr: T[], key: K): T[] {
+	const copy = arr.slice();
+	copy.sort((a, b) => (a[key] > b[key] ? 1 : -1));
+	return copy;
+}
