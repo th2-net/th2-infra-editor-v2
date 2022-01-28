@@ -1,0 +1,5 @@
+{
+    "cpuPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/infra-editor-dashboard?panelId=6",
+    "memoryPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/infra-editor-dashboard?panelId=4",
+    "logsPanel": "http://th2-qa:30000/grafana/d-solo/rHLPJ0K7k/infra-editor-dashboard?panelId=2"
+}

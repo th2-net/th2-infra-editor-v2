@@ -21,18 +21,18 @@ import { useDebouncedCallback } from 'use-debounce/lib';
 import { useBoxesStore } from '../hooks/useBoxesStore';
 import { useInput } from '../hooks/useInput';
 import { useSchemaStore } from '../hooks/useSchemaStore';
+import { cpuPanel, memoryPanel, logsPanel } from '../api/grafanaPaths.json';
 import Input from './util/Input';
 
 const useStyles = createUseStyles({
 	container: {
 		border: '1px solid',
 		borderRadius: '6px',
-		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'space-between',
 	},
 	metricsSection: {
-		margin: '0 0 1px 0',
+		'&:not(:first-child)': {
+			margin: '10px 0 0',
+		},
 		height: '33%',
 		borderRadius: '6px',
 	},
@@ -61,6 +61,7 @@ function Metrics() {
 		label: 'Search',
 	});
 
+	const [createDashboard, setCreateDashboard] = useState(false);
 	const [component, setComponent] = useState<string>('');
 	const [searchDebouncedValue, setSearchDebouncedValue] = useState<string>('');
 
@@ -72,12 +73,24 @@ function Metrics() {
 			return null;
 		}
 
-		return `orgId=1&refresh=10s&${options}&var-component=${component}&var-search=${searchDebouncedValue}&panelId=8`;
+		return `orgId=1&refresh=10s&${options}&var-workload=${component}&var-search=${searchDebouncedValue}&panelId=8`;
 	}, [options, component, searchDebouncedValue]);
 
 	const setDebouncedValue = useDebouncedCallback((value: string) => {
 		setSearchDebouncedValue(value);
 	}, 600);
+
+	const tryGetDashboard = () => {
+		fetch('grafana/api/dashboards/uid/rHLPJ0K7k')
+			.then(res => {
+				if (!res.ok) {
+					setCreateDashboard(true);
+				} else {
+					setCreateDashboard(false);
+				}
+			})
+			.catch(() => setCreateDashboard(true))
+	}
 
 	const metricsOptions = useMemo(() => {
 		if (component === '') {
@@ -86,6 +99,8 @@ function Metrics() {
 
 		return `orgId=1&refresh=5s&var-datasource=Prometheus&${options}&var-workload=${component}&var-type=deployment`;
 	}, [options, component]);
+
+	useEffect(tryGetDashboard, [])
 
 	useEffect(() => {
 		setDebouncedValue(search.value);
@@ -99,28 +114,37 @@ function Metrics() {
 
 	return (
 		<div className={classes.container}>
-			<section className={classes.metricsSection}>
-				<iframe
-					title={component}
-					className={classes.metrics}
-					src={`/grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=1`}
-				/>
-			</section>
-			<section className={classes.metricsSection}>
-				<iframe
-					title={component}
-					className={classes.metrics}
-					src={`grafana/d-solo/b164a7f0339f99f89cea5cb47e9be618/kubernetes-compute-resources-workload-5-second-update-interval?${metricsOptions}&panelId=3`}
-				/>
-			</section>
-			<section className={classes.metricsSection}>
-				<Input inputConfig={search} />
-				<iframe
-					title={component}
-					className={classes.logs}
-					src={`grafana/d-solo/logs/logs?${logsOptions}`}
-				/>
-			</section>
+			{
+				createDashboard 
+				? <>
+					<p>There is something wrong with grafana dashboard. Please, follow <a href="https://github.com/th2-net/th2-infra-editor-v2/README.md" target="_blank" rel="noopener noreferrer">this</a> instructions.</p>
+					<button onClick={tryGetDashboard}>Try again</button>
+				</> 
+				: <>
+					<section className={classes.metricsSection}>
+						<iframe
+							title={component}
+							className={classes.metrics}
+							src={`${cpuPanel}?${metricsOptions}`}
+						/>
+					</section>
+					<section className={classes.metricsSection}>
+						<iframe
+							title={component}
+							className={classes.metrics}
+							src={`${memoryPanel}?${metricsOptions}`}
+						/>
+					</section>
+					<section className={classes.metricsSection}>
+						<Input inputConfig={search} />
+						<iframe
+							title={component}
+							className={classes.logs}
+							src={`${logsPanel}?${logsOptions}`}
+						/>
+					</section>
+				</>
+			}
 		</div>
 	);
 }
