@@ -14,10 +14,11 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { createUseStyles } from "react-jss";
-import Icon from "../Icon";
+import React from 'react';
+import { capitalize } from 'lodash';
+import { createUseStyles } from 'react-jss';
+import Icon from '../Icon';
 import { visuallyHidden } from '../../styles/mixins';
-
 
 const useBoxFiltersStyles = createUseStyles({
 	filters: {
@@ -40,60 +41,41 @@ const useBoxFiltersStyles = createUseStyles({
 });
 
 export enum BoxFilters {
-	all = 'resource',
+	all = 'all',
 	box = 'box',
 	dictionary = 'dictionary',
-};
+}
+
+const filterOptions: BoxFilters[] = [BoxFilters.all, BoxFilters.box, BoxFilters.dictionary];
 
 interface BoxFiltersProps {
 	filter: BoxFilters;
 	setFilter: (filter: BoxFilters) => void;
 }
 
-function ResourcesFilter({ filter, setFilter }: BoxFiltersProps) {
+function ResourcesFilter(props: BoxFiltersProps) {
+	const { filter: selectedFilter, setFilter } = props;
+
 	const classes = useBoxFiltersStyles();
 
 	return (
 		<div className={classes.filters}>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				onClick={() => {
-					setFilter(BoxFilters.all);
-				}}
-				id='all'
-				defaultChecked={filter === BoxFilters.all}
-			/>
-			<label htmlFor='all' className={classes.filtersLabel}>
-				all
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='box'
-				onClick={() => {
-					setFilter(BoxFilters.box);
-				}}
-				defaultChecked={filter === BoxFilters.box}
-			/>
-			<label title='Box' htmlFor='box' className={classes.filtersLabel}>
-				<Icon id='box' stroke='black' />
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='dictionary'
-				onClick={() => {
-					setFilter(BoxFilters.dictionary);
-				}}
-				defaultChecked={filter === BoxFilters.dictionary}
-			/>
-			<label title='Dictionary' htmlFor='dictionary' className={classes.filtersLabel}>
-				<Icon id='book' stroke='black' />
-			</label>
+			{filterOptions.map(filter => (
+				<React.Fragment key={filter}>
+					<input
+						className={classes.filtersInput}
+						type='radio'
+						name={filter}
+						id={filter}
+						value={filter}
+						onChange={e => setFilter(e.target.value as BoxFilters)}
+						checked={selectedFilter === filter}
+					/>
+					<label title={capitalize(filter)} htmlFor={filter} className={classes.filtersLabel}>
+						{filter === BoxFilters.all ? filter : <Icon id={filter} stroke='black' />}
+					</label>
+				</React.Fragment>
+			))}
 		</div>
 	);
 }

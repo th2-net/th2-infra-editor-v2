@@ -14,18 +14,18 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { createUseStyles } from "react-jss";
-import Icon from "../Icon";
-import ResourcesFilter, { BoxFilters } from "./ResourcesFilter";
+import { createUseStyles } from 'react-jss';
+import Icon from '../Icon';
+import ResourcesFilter, { BoxFilters } from './ResourcesFilter';
 import { buttonReset, clickable } from '../../styles/mixins';
-import AppViewType from "../../util/AppViewType";
+import AppViewType from '../../util/AppViewType';
 
 const useStyles = createUseStyles(
 	{
 		header: {
 			display: 'flex',
 			justifyContent: 'space-between',
-			alignItems: 'center'
+			alignItems: 'center',
 		},
 		addButton: {
 			...buttonReset(),
@@ -34,8 +34,8 @@ const useStyles = createUseStyles(
 			borderRadius: 4,
 			display: 'flex',
 			justifyContent: 'center',
-			alignItems: 'center'
-		}
+			alignItems: 'center',
+		},
 	},
 	{ name: 'ResourcesListHeader' },
 );
@@ -50,7 +50,7 @@ const ResourcesListHeader = (props: BoxFiltersProps) => {
 	const classes = useStyles();
 
 	const createNewResource = () => {
-		if (props.filter === BoxFilters.all || props.filter ===  BoxFilters.box) {
+		if (props.filter === BoxFilters.all || props.filter === BoxFilters.box) {
 			props.setViewType(AppViewType.BoxCreate);
 		} else {
 			// Implement dictionary creating
@@ -61,7 +61,7 @@ const ResourcesListHeader = (props: BoxFiltersProps) => {
 	return (
 		<div className={classes.header}>
 			<ResourcesFilter {...props} />
-			<button className={classes.addButton} onClick={createNewResource}>
+			<button className={classes.addButton} onClick={createNewResource} title='New box'>
 				<Icon id='plus' stroke='black' />
 			</button>
 		</div>

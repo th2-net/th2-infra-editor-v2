@@ -14,16 +14,16 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { observer } from "mobx-react-lite";
-import { createUseStyles } from "react-jss";
-import { useAppViewStore } from "../../hooks/useAppViewStore";
-import { useBoxesStore } from "../../hooks/useBoxesStore";
-import { useBoxUpdater } from "../../hooks/useBoxUpdater";
-import { useInput } from "../../hooks/useInput";
-import { BoxEntity } from "../../models/Box";
-import { button } from "../../styles/mixins";
-import AppViewType from "../../util/AppViewType";
-import Input from "../util/Input";
+import { observer } from 'mobx-react-lite';
+import { createUseStyles } from 'react-jss';
+import { useAppViewStore } from '../../hooks/useAppViewStore';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { useInput } from '../../hooks/useInput';
+import { BoxEntity } from '../../models/Box';
+import { button } from '../../styles/mixins';
+import AppViewType from '../../util/AppViewType';
+import Input from '../util/Input';
 
 const useStyles = createUseStyles({
 	boxCreationLayout: {
@@ -38,8 +38,11 @@ const useStyles = createUseStyles({
 	},
 	submitButton: {
 		...button(),
-		alignSelf: 'end'
-	}
+		alignSelf: 'end',
+	},
+	title: {
+		margin: '5px 0 0 0',
+	},
 });
 
 const BoxCreationLayout = () => {
@@ -56,7 +59,7 @@ const BoxCreationLayout = () => {
 		validate: name =>
 			/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/gm.test(name),
 	});
-	
+
 	const type = useInput({
 		id: 'box-type',
 		name: 'box-type',
@@ -106,9 +109,11 @@ const BoxCreationLayout = () => {
 						enabled: false,
 					},
 				},
-				...(nodePort ? {
-					"node-port": nodePort,
-				} : {})
+				...(nodePort
+					? {
+							'node-port': nodePort,
+					  }
+					: {}),
 			};
 
 			const box = {
@@ -127,8 +132,11 @@ const BoxCreationLayout = () => {
 
 	return (
 		<div className={classes.boxCreationLayout}>
+			<h4 className={classes.title}>New box</h4>
 			<div className={classes.inputGroup}>
-				{inputs.map(inputConfig => <Input key={inputConfig.label} inputConfig={inputConfig} />)}
+				{inputs.map(inputConfig => (
+					<Input key={inputConfig.label} inputConfig={inputConfig} />
+				))}
 			</div>
 			<button
 				disabled={inputs.some(input => !input.isValid)}
@@ -137,7 +145,7 @@ const BoxCreationLayout = () => {
 				Create
 			</button>
 		</div>
-	)
+	);
 };
 
 export default observer(BoxCreationLayout);

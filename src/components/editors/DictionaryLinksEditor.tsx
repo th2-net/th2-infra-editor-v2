@@ -82,7 +82,7 @@ const Link = ({link, deleteLink}: DictionaryLinkProps) => {
 	return (
 		<div className={classes.link}>
 			<div className={classes.title}>
-				<Icon id='book' stroke='black' />
+				<Icon id='dictionary' stroke='black' />
 				<p>{link.dictionary.name}</p>
 			</div>
 			<button className={classes.delete} onClick={deleteLink}><Icon id='cross' stroke='black' width={8} height={8}/></button>
