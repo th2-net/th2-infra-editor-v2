@@ -235,6 +235,16 @@ export class BoxUpdater {
 		}
 	}
 
+	createBox = (box: BoxEntity) => {
+		if (this.boxesStore.boxes.find(b => b.name === box.name)) {
+			alert(`Box "${box.name}" already exists`);
+			return;
+		}
+
+		this.boxesStore.boxes.push(box);
+		this.requestsStore.saveEntityChanges(box, 'add');
+	}
+
 	saveBoxChanges = (box: BoxEntity, updatedBox: BoxEntity) => {
 		if (
 			box.name !== updatedBox.name &&

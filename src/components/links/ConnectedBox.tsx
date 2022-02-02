@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import { getBoxType, Status } from '../boxes/Box';
+import { getBoxType, Status } from '../resources/Box';
 import { BoxEntity, BoxStatus } from '../../models/Box';
 import { ellipsis } from '../../styles/mixins';
 import directionIcon from '../../assets/icons/direction-icon.svg';

@@ -23,8 +23,8 @@ import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { useEffect, useMemo, useState } from 'react';
 import ConnectionEditor from '../editors/ConnectionEditor';
 import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
-import SelectedBox from '../boxes/SelectedBox';
 import { ModalPortal } from '../util/Portal';
+import SelectedBox from '../resources/SelectedBox';
 import { ConnectionDirection, Link } from '../../models/LinksDefinition';
 import { chain } from 'lodash';
 

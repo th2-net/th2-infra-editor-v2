@@ -47,6 +47,13 @@ const useStyles = createUseStyles<string, StylesProps>(
 			fontSize: 14,
 			lineHeight: '14px',
 			marginBottom: '12px',
+
+			'&.required:after': {
+				content: '"*"',
+				color: 'red',
+				marginLeft: '2px',
+				verticalAlign: 'super',
+			},
 		},
 		invalid: {
 			outline: 'none',
@@ -66,7 +73,11 @@ const Input = ({ inputConfig, width }: InputProps) => {
 
 	return (
 		<div className={classes.container}>
-			<label htmlFor={inputConfig.bind.id} className={classes.label}>
+			<label
+				htmlFor={inputConfig.bind.id}
+				className={classNames(classes.label, {
+					required: inputConfig.required,
+				})}>
 				{inputConfig.label}
 			</label>
 			<input

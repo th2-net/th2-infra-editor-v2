@@ -94,3 +94,12 @@ export function modalWindow(): Styles {
 		backgroundColor: 'white',
 	};
 }
+
+export const clickable = (): Styles => ({
+	cursor: 'pointer',
+	borderRadius: '2px',
+
+	'&:hover': {
+		backgroundColor: 'rgba(102, 102, 102, 0.15)',
+	},
+});

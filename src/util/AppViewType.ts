@@ -14,6 +14,10 @@
  * limitations under the License.
  ***************************************************************************** */
 
-type AppViewType = 'box' | 'dictionary';
+enum AppViewType {
+	BoxView = 'boxView',
+	DictionaryView = 'dictionaryView',
+	BoxCreate = 'boxCreate'
+}
 
 export default AppViewType;

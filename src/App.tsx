@@ -18,7 +18,6 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import Header from './components/Header';
-import Boxes from './components/boxes';
 import DictionaryLayout from './components/layouts/DictionaryLayout';
 import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
@@ -31,6 +30,9 @@ import { useURLParamsStore } from './hooks/useURLParamsStore';
 import EmbeddedLayout from './components/embedded/EmbeddedLayout';
 import loader from '@monaco-editor/loader';
 import { useMonaco } from '@monaco-editor/react';
+import ResourcesList from './components/resources/ResourcesList';
+import AppViewType from './util/AppViewType';
+import BoxCreationLayout from './components/layouts/BoxCreationLayout';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -117,9 +119,10 @@ function App() {
 			<Header />
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
-					<Boxes />
-					{viewType === 'dictionary' && <DictionaryLayout />}
-					{viewType === 'box' && <BoxLayout />}
+					<ResourcesList />
+					{viewType === AppViewType.DictionaryView && <DictionaryLayout />}
+					{viewType === AppViewType.BoxView && <BoxLayout />}
+					{viewType === AppViewType.BoxCreate && <BoxCreationLayout />}
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>
