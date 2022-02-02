@@ -38,7 +38,7 @@ const button: Styles = {
 	fontSize: '14px',
 	position: 'relative',
 	cursor: 'pointer',
-	backgroundColor: '#5CBEEF',
+	backgroundColor: '#0099E5',
 	'&:hover': {
 		backgroundColor: '#EEF2F6',
 		color: 'rgba(51, 51, 51, 0.8)',

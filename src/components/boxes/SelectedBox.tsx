@@ -98,7 +98,7 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 			height: '40px',
 			whiteSpace: 'nowrap',
 			padding: '12px 30px',
-			backgroundColor: '#5CBEEF',
+			backgroundColor: '#0099E5',
 			'&:hover': {
 				backgroundColor: '#EEF2F6',
 				color: 'rgba(51, 51, 51, 0.8)',
