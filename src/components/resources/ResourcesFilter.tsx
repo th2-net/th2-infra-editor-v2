@@ -19,6 +19,7 @@ import { capitalize } from 'lodash';
 import { createUseStyles } from 'react-jss';
 import { buttonReset, clickable, visuallyHidden } from '../../styles/mixins';
 import Icon from '../Icon';
+import AppViewType from '../../util/AppViewType';
 
 const useBoxFiltersStyles = createUseStyles({
 	filters: {
