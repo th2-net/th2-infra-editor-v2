@@ -74,7 +74,6 @@ function DictionaryLayout() {
 	return (
 		dictionary && (
 			<div className={classes.dictionaryLayout}>
-				<button onClick={() => setViewType('box')}></button>
 				<button className={classes.button} onClick={() => setViewType(AppViewType.BoxView)}>
 					{' '}
 					Go Back
