@@ -32,9 +32,7 @@ import { BoxFilters } from './ResourcesFilter';
 import ResourcesSearch from './ResourcesSearch';
 import ResourcesListHeader from './ResourcesListHeader';
 import AppViewType from '../../util/AppViewType';
-import { visuallyHidden } from '../../styles/mixins';
 import Icon from '../Icon';
-import { useDebouncedCallback } from 'use-debounce/lib';
 
 const useStyles = createUseStyles(
 	{
@@ -82,10 +80,10 @@ function ResourcesList() {
 	const boxes = useMemo(() => {
 		let allEntities;
 		switch (filter) {
-			case 'box':
+			case 'Boxes':
 				allEntities = boxesStore.boxes;
 				break;
-			case 'dictionary':
+			case 'Dictionaries':
 				allEntities = boxesStore.dictionaries;
 				break;
 			default:
@@ -220,7 +218,7 @@ function ResourcesList() {
 				setFilter={setFilter}
 				setViewType={appViewStore.setViewType}
 			/>
-			<ResourcesSearch filter={filter} setValue={setSearchValue} />
+			<ResourcesSearch setValue={setSearchValue} />
 			<Virtuoso data={groupedBoxes} itemContent={renderBox} className={classes.boxList} />
 		</div>
 	);
@@ -306,145 +304,6 @@ function ExpandGroup(props: ExpandGroupProps) {
 					<Icon id='arrowDown' stroke='#666' />
 				)
 			) : null}
-		</div>
-	);
-}
-
-const useBoxSearchStyles = createUseStyles(
-	{
-		search: {
-			flexShrink: 0,
-			height: 40,
-			fontSize: '14px',
-			margin: '0 24px 16px 24px',
-			borderRadius: 4,
-			boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
-		},
-		searchInput: {
-			backgroundColor: '#F3F3F6',
-			width: '100%',
-			height: '100%',
-			border: 'none',
-			outline: 'none',
-			padding: '12px',
-		},
-	},
-	{ name: 'BoxSearch' },
-);
-interface BoxSearchProps {
-	setValue: (debouncedSearchValue: string) => void;
-}
-
-function BoxSearch(props: BoxSearchProps) {
-	const classes = useBoxSearchStyles();
-
-	const [searchValue, setSearchValue] = useState('');
-
-	const setDebouncedValue = useDebouncedCallback((value: string) => {
-		props.setValue(value);
-	}, 600);
-
-	function onSearchValueChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const { value } = e.target;
-		setSearchValue(value);
-		setDebouncedValue(value);
-	}
-
-	return (
-		<div className={classes.search}>
-			<input
-				type='text'
-				placeholder='Search for example "Something"'
-				value={searchValue}
-				className={classes.searchInput}
-				onChange={onSearchValueChange}
-			/>
-		</div>
-	);
-}
-
-type BoxFiltersTwo = 'all' | 'box' | 'dictionary';
-
-interface BoxFiltersProps {
-	filter: BoxFiltersTwo;
-	setFilter: (filter: BoxFiltersTwo) => void;
-}
-
-const useBoxFiltersStyles = createUseStyles({
-	filters: {
-		display: 'flex',
-		margin: '24px 24px 12px 24px',
-		lineHeight: '16px',
-		fontSize: '12px',
-		color: '#333333',
-		borderRadius: 4,
-		gap: 12,
-	},
-	filtersInput: {
-		...visuallyHidden(),
-		'&:checked': {
-			'&+label': {
-				backgroundColor: '#5CBEEF',
-				color: '#FFF',
-				border: '1px solid #0099E5',
-				boxSizing: 'border-box',
-			},
-		},
-	},
-	filtersLabel: {
-		display: 'inline-flex',
-		backgroundColor: '#F3F3F6',
-		verticalAlign: 'middle',
-		padding: '8px 12px',
-		border: '1px solid #E5E5E5',
-		borderRadius: 4,
-		cursor: 'pointer',
-	},
-});
-
-function BoxFilter({ filter, setFilter }: BoxFiltersProps) {
-	const classes = useBoxFiltersStyles();
-	return (
-		<div className={classes.filters}>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				onChange={() => {
-					setFilter('all');
-				}}
-				id='all'
-				checked={filter === 'all'}
-			/>
-			<label htmlFor='all' className={classes.filtersLabel}>
-				All
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='box'
-				onChange={() => {
-					setFilter('box');
-				}}
-				checked={filter === 'box'}
-			/>
-			<label title='Box' htmlFor='box' className={classes.filtersLabel}>
-				Boxes
-			</label>
-			<input
-				className={classes.filtersInput}
-				type='radio'
-				name='filter'
-				id='dictionary'
-				onChange={() => {
-					setFilter('dictionary');
-				}}
-				checked={filter === 'dictionary'}
-			/>
-			<label title='Dictionary' htmlFor='dictionary' className={classes.filtersLabel}>
-				Dictionaries
-			</label>
 		</div>
 	);
 }

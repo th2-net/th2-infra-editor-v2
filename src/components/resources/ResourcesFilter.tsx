@@ -17,33 +17,54 @@
 import React from 'react';
 import { capitalize } from 'lodash';
 import { createUseStyles } from 'react-jss';
+import { buttonReset, clickable, visuallyHidden } from '../../styles/mixins';
 import Icon from '../Icon';
-import { visuallyHidden } from '../../styles/mixins';
 
 const useBoxFiltersStyles = createUseStyles({
 	filters: {
 		display: 'flex',
+		margin: '24px 24px 12px 24px',
+		lineHeight: '16px',
+		fontSize: '12px',
+		color: '#333333',
+		borderRadius: 4,
+		gap: 12,
 	},
 	filtersInput: {
 		...visuallyHidden(),
 		'&:checked': {
 			'&+label': {
-				backgroundColor: '#fff',
+				backgroundColor: '#5CBEEF',
+				color: '#FFF',
+				border: '1px solid #0099E5',
+				boxSizing: 'border-box',
 			},
 		},
 	},
 	filtersLabel: {
 		display: 'inline-flex',
+		backgroundColor: '#F3F3F6',
 		verticalAlign: 'middle',
-		padding: 6,
+		padding: '8px 12px',
+		border: '1px solid #E5E5E5',
+		borderRadius: 4,
 		cursor: 'pointer',
+	},
+	addButton: {
+		...buttonReset(),
+		...clickable(),
+		padding: 3,
+		borderRadius: 4,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 });
 
 export enum BoxFilters {
-	all = 'all',
-	box = 'box',
-	dictionary = 'dictionary',
+	all = 'All',
+	box = 'Boxes',
+	dictionary = 'Dictionaries',
 }
 
 const filterOptions: BoxFilters[] = [BoxFilters.all, BoxFilters.box, BoxFilters.dictionary];
@@ -51,12 +72,22 @@ const filterOptions: BoxFilters[] = [BoxFilters.all, BoxFilters.box, BoxFilters.
 interface BoxFiltersProps {
 	filter: BoxFilters;
 	setFilter: (filter: BoxFilters) => void;
+	setViewType: (viewType: AppViewType) => void;
 }
 
 function ResourcesFilter(props: BoxFiltersProps) {
 	const { filter: selectedFilter, setFilter } = props;
 
 	const classes = useBoxFiltersStyles();
+
+	const createNewResource = () => {
+		if (props.filter === BoxFilters.all || props.filter === BoxFilters.box) {
+			props.setViewType(AppViewType.BoxCreate);
+		} else {
+			// Implement dictionary creating
+			props.setViewType(AppViewType.BoxCreate);
+		}
+	};
 
 	return (
 		<div className={classes.filters}>
@@ -72,10 +103,13 @@ function ResourcesFilter(props: BoxFiltersProps) {
 						checked={selectedFilter === filter}
 					/>
 					<label title={capitalize(filter)} htmlFor={filter} className={classes.filtersLabel}>
-						{filter === BoxFilters.all ? filter : <Icon id={filter} stroke='black' />}
+						{filter}
 					</label>
 				</React.Fragment>
 			))}
+			<button className={classes.addButton} onClick={createNewResource} title='New box'>
+				<Icon id='plus' stroke='black' />
+			</button>
 		</div>
 	);
 }

@@ -15,9 +15,7 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import Icon from '../Icon';
 import ResourcesFilter, { BoxFilters } from './ResourcesFilter';
-import { buttonReset, clickable } from '../../styles/mixins';
 import AppViewType from '../../util/AppViewType';
 
 const useStyles = createUseStyles(
@@ -25,15 +23,6 @@ const useStyles = createUseStyles(
 		header: {
 			display: 'flex',
 			justifyContent: 'space-between',
-			alignItems: 'center',
-		},
-		addButton: {
-			...buttonReset(),
-			...clickable(),
-			padding: 3,
-			borderRadius: 4,
-			display: 'flex',
-			justifyContent: 'center',
 			alignItems: 'center',
 		},
 	},
@@ -49,21 +38,9 @@ interface BoxFiltersProps {
 const ResourcesListHeader = (props: BoxFiltersProps) => {
 	const classes = useStyles();
 
-	const createNewResource = () => {
-		if (props.filter === BoxFilters.all || props.filter === BoxFilters.box) {
-			props.setViewType(AppViewType.BoxCreate);
-		} else {
-			// Implement dictionary creating
-			props.setViewType(AppViewType.BoxCreate);
-		}
-	};
-
 	return (
 		<div className={classes.header}>
 			<ResourcesFilter {...props} />
-			<button className={classes.addButton} onClick={createNewResource} title='New box'>
-				<Icon id='plus' stroke='black' />
-			</button>
 		</div>
 	);
 };

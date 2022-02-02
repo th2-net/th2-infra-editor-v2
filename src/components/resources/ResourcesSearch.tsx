@@ -17,21 +17,24 @@
 import React from 'react';
 import { createUseStyles } from 'react-jss';
 import { useDebouncedCallback } from 'use-debounce/lib';
-import { BoxFilters } from './ResourcesFilter';
 
 const useResourcesSearchStyles = createUseStyles(
 	{
 		search: {
 			flexShrink: 0,
-			height: 50,
-			borderBottom: '1px solid',
+			height: 40,
+			fontSize: '14px',
+			margin: '0 24px 16px 24px',
+			borderRadius: 4,
+			boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
 		},
 		searchInput: {
+			backgroundColor: '#F3F3F6',
 			width: '100%',
 			height: '100%',
 			border: 'none',
 			outline: 'none',
-			padding: '0 15px',
+			padding: '12px',
 		},
 	},
 	{ name: 'BoxSearch' },
@@ -39,10 +42,9 @@ const useResourcesSearchStyles = createUseStyles(
 
 interface ResourcesSearchProps {
 	setValue: (debouncedSearchValue: string) => void;
-	filter: BoxFilters;
 }
 
-function ResourcesSearch({ setValue, filter }: ResourcesSearchProps) {
+function ResourcesSearch({ setValue }: ResourcesSearchProps) {
 	const classes = useResourcesSearchStyles();
 
 	const [searchValue, setSearchValue] = React.useState('');
@@ -57,13 +59,11 @@ function ResourcesSearch({ setValue, filter }: ResourcesSearchProps) {
 		setDebouncedValue(value);
 	}
 
-	const placeholder = `${filter[0].toUpperCase() + filter.slice(1)} name`;
-
 	return (
 		<div className={classes.search}>
 			<input
 				type='text'
-				placeholder={placeholder}
+				placeholder='Search for example "Something"'
 				value={searchValue}
 				className={classes.searchInput}
 				onChange={onSearchValueChange}
