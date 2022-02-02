@@ -59,9 +59,10 @@ const useStyles = createUseStyles((t: Theme) => ({
 	},
 
 	saveButton: {
+		height: '40px',
 		width: 'fit-content',
 		border: 'none',
-		padding: '8px 16px',
+		padding: '12px 24px',
 		backgroundColor: '#0099E5',
 		borderRadius: 4,
 		color: '#FFF',

@@ -26,18 +26,16 @@ import classNames from 'classnames';
 import Icon from './Icon';
 
 const button: Styles = {
-	height: '32px',
+	height: '40px',
 	width: 'auto',
 	borderRadius: '4px',
 	color: '#fff',
-	padding: '7px 12px',
+	padding: '12px 24px',
 	textTransform: 'capitalize',
 	outline: 'none',
 	border: 'none',
-	margin: '0 25px',
 	fontWeight: '700',
 	fontSize: '14px',
-	lineHeight: '16px',
 	position: 'relative',
 	cursor: 'pointer',
 	backgroundColor: '#5CBEEF',
@@ -80,9 +78,10 @@ const useStyles = createUseStyles({
 		right: '-5px',
 		background: '#ed4300',
 	},
-	disable: {
-		display: 'none',
+	discard: {
+		backgroundColor: '#4E4E4E',
 	},
+	disable: { display: 'none' },
 	selectWrapper: { border: 'none', outline: 'none', width: '171px' },
 	customSelect: {
 		display: 'flex',
@@ -145,7 +144,7 @@ function Header() {
 
 	const [openModal, setOpenModal] = useState(false);
 
-	const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
+	const [isOpenConfirmationModal, setIsOpenConfirmationModal] = useState(false);
 
 	const [confirmationModalType, setConfirmationModalType] = useState<'save' | 'discard' | null>(
 		null,
@@ -155,12 +154,16 @@ function Header() {
 
 	const confirmationModalConfig = {
 		save: {
-			setOpen: setOpenConfirmationModal,
+			isOpen: isOpenConfirmationModal,
+			setOpen: setIsOpenConfirmationModal,
+			header: 'Submit Changes',
 			message: 'Do you want to submit pending changes?',
 			action: saveChanges,
 		},
 		discard: {
-			setOpen: setOpenConfirmationModal,
+			isOpen: isOpenConfirmationModal,
+			setOpen: setIsOpenConfirmationModal,
+			header: 'Discard Changes',
 			message: 'Do you want to discard pending changes?',
 			action: discardChanges,
 		},
@@ -179,8 +182,7 @@ function Header() {
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
 				<CustomizedTooltip title='submit pending changes first' disableCondition={!requestsExist}>
-					<div
-						className={classNames(classes.selectWrapper, requestsExist ? classes.disable : null)}>
+					<div className={classes.selectWrapper}>
 						<div
 							className={classNames(classes.customSelect, openSelect ? classes.openSelect : null)}
 							onClick={() => setOpenSelect(!openSelect)}>
@@ -209,29 +211,31 @@ function Header() {
 					</div>
 				</CustomizedTooltip>
 			)}
-			<button
-				disabled={!requestsExist}
-				className={classes.button}
-				onClick={() => {
-					setOpenConfirmationModal(true);
-					setConfirmationModalType('save');
-				}}>
-				<span className={requestsExist ? classes.badge : classes.disable}>
-					{preparedRequests.length}
-				</span>
-				Submit Changes
-			</button>
-			{requestsExist && (
+			<div style={{ gap: 16, display: 'flex' }}>
 				<button
+					disabled={!requestsExist}
 					className={classes.button}
 					onClick={() => {
-						setOpenConfirmationModal(true);
-						setConfirmationModalType('discard');
+						setIsOpenConfirmationModal(true);
+						setConfirmationModalType('save');
 					}}>
-					Discard changes
+					<span className={requestsExist ? classes.badge : classes.disable}>
+						{preparedRequests.length}
+					</span>
+					Submit Changes
 				</button>
-			)}
-			{openConfirmationModal && confirmationModalType && (
+				{requestsExist && (
+					<button
+						className={classNames(classes.button, classes.discard)}
+						onClick={() => {
+							setIsOpenConfirmationModal(true);
+							setConfirmationModalType('discard');
+						}}>
+						Discard changes
+					</button>
+				)}
+			</div>
+			{isOpenConfirmationModal && confirmationModalType && (
 				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} />
 			)}
 			{openModal && <InvalidLinksList setOpen={setOpenModal} />}

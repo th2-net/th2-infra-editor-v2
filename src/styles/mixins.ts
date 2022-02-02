@@ -73,7 +73,7 @@ export function button(): Styles {
 		...buttonReset(),
 		borderRadius: '4px',
 		color: '#fff',
-		padding: '8px 16px',
+		padding: '12px 10px',
 		textTransform: 'capitalize',
 		outline: 'none',
 		border: 'none',
@@ -86,15 +86,11 @@ export function button(): Styles {
 
 export function modalWindow(): Styles {
 	return {
-		position: 'relative',
-		borderRadius: '6px',
-		boxShadow:
-			'0 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)',
-		padding: '20px 30px',
-		overflow: 'auto',
-		top: '50px',
-		marginRight: 'auto',
-		marginLeft: 'auto',
+		display: 'grid',
+		gap: '24px',
+		borderRadius: '4px',
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+		padding: '24px',
 		backgroundColor: 'white',
 	};
 }

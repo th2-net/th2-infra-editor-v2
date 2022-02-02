@@ -14,7 +14,6 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
 import { InputConfig } from '../../hooks/useInput';
 import { defineFileFormat } from '../../helpers/files';
 import { createUseStyles } from 'react-jss';
@@ -29,8 +28,7 @@ const useStyle = createUseStyles({
 	textarea: {
 		...scrollBar(),
 		width: '100%',
-		backgroundColor: '#fff',
-		border: (props: InputConfig) => (props.isValid ? '1px solid #7a99b8' : '2px solid red'),
+		border: 'none',
 		borderRadius: 4,
 		height: '100%',
 		resize: 'none',
@@ -47,7 +45,6 @@ const useStyle = createUseStyles({
 		overflow: 'hidden',
 	},
 	textarea_label: {
-		padding: '6px 0',
 		color: '#666666',
 		fontSize: 11,
 	},
@@ -64,6 +61,7 @@ const ConfigEditor = ({ configInput }: ConfigEditorProps) => {
 			<AutoResizableEditor
 				language={defineFileFormat(configInput.value)}
 				value={configInput.value}
+				theme={'my-theme'}
 				options={{
 					fontSize: 12,
 					codeLens: false,

@@ -95,6 +95,9 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		},
 		addLink: {
 			...button(),
+			height: '40px',
+			whiteSpace: 'nowrap',
+			padding: '12px 30px',
 			backgroundColor: '#5CBEEF',
 			'&:hover': {
 				backgroundColor: '#EEF2F6',
@@ -107,6 +110,9 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		},
 		addDictionary: {
 			...button(),
+			height: '40px',
+			whiteSpace: 'nowrap',
+			padding: '12px 10px',
 			backgroundColor: '#4E4E4E',
 			'&:hover': {
 				backgroundColor: '#EEF2F6',

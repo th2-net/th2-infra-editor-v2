@@ -24,10 +24,44 @@ import { observer } from 'mobx-react-lite';
 const useStyles = createUseStyles({
 	dictionaryLayout: {
 		width: '100%',
-		height: 700,
+		height: '100%',
 		display: 'grid',
-		gridTemplateRows: 'auto 1fr auto',
+		gridTemplateRows: 'auto 400px 1fr',
 		placeItems: 'start',
+	},
+	button: {
+		margin: '3px 0 24px 0',
+		height: '40px',
+		width: 'auto',
+		borderRadius: '4px',
+		color: '#fff',
+		padding: '12px 24px',
+		textTransform: 'capitalize',
+		outline: 'none',
+		border: 'none',
+		fontWeight: '500',
+		fontSize: '14px',
+		lineHeight: '16px',
+		position: 'relative',
+		cursor: 'pointer',
+		backgroundColor: '#4E4E4E',
+		'&:hover': {
+			backgroundColor: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
+		},
+		'&:active': {
+			backgroundColor: '#0099E5',
+		},
+		'&:disabled': {
+			opacity: '0.4',
+		},
+	},
+	controls: {
+		display: 'flex',
+		height: 'fit-content',
+		margin: '36px 69px 0 0',
+		gap: 16,
+		alignItems: 'center',
 	},
 });
 
@@ -39,7 +73,9 @@ function DictionaryLayout() {
 	return (
 		dictionary && (
 			<div className={classes.dictionaryLayout}>
-				<button onClick={() => setViewType('box')}>back</button>
+				<button className={classes.button} onClick={() => setViewType('box')}>
+					Go Back
+				</button>
 				<DictionaryEditor dictionary={dictionary} editDictionary={editDictionary} />
 				<BoxLinksEditor />
 			</div>

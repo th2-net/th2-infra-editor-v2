@@ -33,13 +33,20 @@ const useLinkStyle = createUseStyles({
 		alignItems: 'center',
 	},
 	title: {
+		width: '150px',
 		backgroundColor: '#EEF2F6',
 		borderRadius: 4,
-		display: 'flex',
+		display: 'grid',
+		gridTemplateColumns: 'auto 1fr auto',
 		gap: 14,
 		padding: '8px 10px',
 		fontWeight: 600,
 		alignItems: 'center',
+	},
+	name: {
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+		overflow: 'hidden',
 	},
 	delete: {
 		display: 'inline-flex',
@@ -65,8 +72,8 @@ const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 	return (
 		<div className={classes.link}>
 			<div className={classes.title}>
-				<Icon id='dictionary' stroke='black' />
-				<div>{link.dictionary.name}</div>
+				<Icon id='dictionary' stroke='black' fill='#333' />
+				<div className={classes.name}>{link.dictionary.name}</div>
 				<button className={classes.delete} onClick={deleteLink}>
 					<Icon id='cross' stroke='black' />
 				</button>
@@ -213,6 +220,20 @@ export const useLinksStyles = createUseStyles({
 	},
 	disable: {
 		display: 'none',
+	},
+	addDictionary: {
+		marginTop: 24,
+		width: 'fit-content',
+		...button(),
+		backgroundColor: '#0099E5',
+		'&:hover': {
+			backgroundColor: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
+		},
+		'&:active': {
+			backgroundColor: '#0099E5',
+			color: '#FFF',
+		},
 	},
 });
 

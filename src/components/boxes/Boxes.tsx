@@ -48,9 +48,6 @@ const useStyles = createUseStyles(
 			...scrollBar(),
 			marginBottom: '24px',
 		},
-		item: {
-			paddingBottom: '6px',
-		},
 		groupItem: {
 			background: '#5CBEEF',
 			margin: '0 24px 4px 24px',
@@ -176,7 +173,7 @@ function Boxes() {
 			}
 			if (isDictionaryEntity(box)) {
 				return (
-					<div className={classes.item}>
+					<div className={classes.groupItem}>
 						<Observer>
 							{() => (
 								<Dictionary
@@ -185,6 +182,9 @@ function Boxes() {
 										appViewStore.setViewType('dictionary');
 										selectedDictionaryStore.selectDictionary(box);
 									}}
+									isSelected={
+										selectedDictionaryStore.dictionary?.name === (box as DictionaryEntity).name
+									}
 								/>
 							)}
 						</Observer>
@@ -212,7 +212,6 @@ function Boxes() {
 			expandedMap,
 			expandGroup,
 			classes.groupItem,
-			classes.item,
 		],
 	);
 	return (
@@ -288,7 +287,9 @@ function ExpandGroup(props: ExpandGroupProps) {
 				[classes.expanded]: props.isExpand,
 				[classes.dictionaries]: props.group.name === 'dictionaries',
 			})}>
-			{props.group.name === 'dictionaries' ? <Icon id='dictionary' stroke='#333' /> : null}
+			{props.group.name === 'dictionaries' ? (
+				<Icon id='dictionary' stroke='#333' fill='#333' />
+			) : null}
 			<div style={{ gap: '16px', display: 'flex', alignItems: 'center' }}>
 				<div className={classes.name}>{props.group.name}</div>
 				{props.group.name !== 'dictionaries' ? (

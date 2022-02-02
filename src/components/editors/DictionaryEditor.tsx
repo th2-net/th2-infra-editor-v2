@@ -14,42 +14,69 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
 import { useInput } from '../../hooks/useInput';
 import ConfigEditor from './ConfigEditor';
-import { downloadFile, isXMLValid } from '../../helpers/files';
 import { usePrevious } from '../../hooks/usePrevious';
 import { createUseStyles } from 'react-jss';
+import classNames from 'classnames';
 import { DictionaryEntity } from '../../models/Dictionary';
+import { downloadFile, isXMLValid } from '../../helpers/files';
+import { visuallyHidden } from '../../styles/mixins';
 import Icon from '../Icon';
-import { buttonReset, visuallyHidden } from '../../styles/mixins';
 
 const useStyle = createUseStyles({
 	container: {
+		backgroundColor: '#FFF',
+		border: 'none',
+		borderRadius: 24,
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+		padding: 16,
 		width: '100%',
 		height: '100%',
 		display: 'grid',
-		gridTemplateRows: '1fr auto',
-		gap: 8,
+		gridTemplateRows: 'auto 1fr auto',
+		gap: 24,
+	},
+	header: {
+		fontSize: 16,
+		fontWeight: 700,
 	},
 	controls: {
 		display: 'flex',
-		justifyContent: 'flex-end',
+		justifyContent: 'space-between',
 		alignItems: 'center',
 	},
-	applyChanges: {
-		...buttonReset(),
-	},
-	download: {
-		...buttonReset(),
-		display: 'inline-flex',
-		marginLeft: 10,
-	},
-	upload: {
-		display: 'inline-flex',
-		marginLeft: 10,
+
+	button: {
+		display: 'flex',
+		gap: 14,
+		height: '40px',
+		width: 'fit-content',
+		borderRadius: '4px',
+		color: '#fff',
+		padding: '12px 24px',
+		textTransform: 'capitalize',
+		outline: 'none',
+		border: 'none',
+		fontWeight: '500',
+		fontSize: '14px',
+		position: 'relative',
 		cursor: 'pointer',
-		transform: 'rotate(180deg)',
+		backgroundColor: '#0099E5',
+		'&:hover': {
+			backgroundColor: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
+		},
+		'&:active': {
+			backgroundColor: '#0099E5',
+		},
+		'&:disabled': {
+			opacity: '0.4',
+		},
+	},
+	buttonSecondary: {
+		padding: '12px 24px',
+		backgroundColor: 'rgba(51, 51, 51, 0.6)',
 	},
 	input: {
 		...visuallyHidden(),
@@ -57,11 +84,11 @@ const useStyle = createUseStyles({
 });
 
 interface DictionaryEditorProps {
-	dictionary: DictionaryEntity | null;
 	editDictionary: (v: string) => void;
+	dictionary: DictionaryEntity;
 }
 
-const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps) => {
+const DictionaryEditor = ({ editDictionary, dictionary }: DictionaryEditorProps) => {
 	const classes = useStyle();
 
 	const dictionaryInputConfig = useInput({
@@ -89,10 +116,12 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 
 	return (
 		<div className={classes.container}>
+			<div className={classes.header}>Dictionary Editor</div>
+
 			<ConfigEditor configInput={dictionaryInputConfig} />
 			<div className={classes.controls}>
 				<button
-					className={classes.applyChanges}
+					className={classes.button}
 					disabled={prevValue === dictionaryInputConfig.value || !dictionaryInputConfig.isValid}
 					onClick={() => {
 						if (dictionaryInputConfig.isValid) {
@@ -101,19 +130,29 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 					}}>
 					Apply changes
 				</button>
-				<label className={classes.upload} htmlFor='dictionary-file-input' title='Upload'>
-					<Icon id='download' fill='black' />
-				</label>
-				<input
-					onChange={uploadDictionary}
-					type='file'
-					accept='.xml'
-					className={classes.input}
-					id='dictionary-file-input'
-				/>
-				<button onClick={downloadDictionary} className={classes.download} title='Download'>
-					<Icon id='download' fill='black' />
-				</button>
+				<div style={{ display: 'flex', gap: 19 }}>
+					<label
+						className={classNames(classes.button, classes.buttonSecondary)}
+						htmlFor='dictionary-file-input'
+						title='Upload'>
+						<Icon id='upload' stroke='#FFF' fill='#FFF' />
+						Upload
+					</label>
+					<input
+						onChange={uploadDictionary}
+						type='file'
+						accept='.xml'
+						className={classes.input}
+						id='dictionary-file-input'
+					/>
+					<button
+						onClick={downloadDictionary}
+						className={classNames(classes.button, classes.buttonSecondary)}
+						title='Download'>
+						<Icon id='downloadDictionary' stroke='#FFF' fill='#FFF' />
+						Download
+					</button>
+				</div>
 			</div>
 		</div>
 	);
