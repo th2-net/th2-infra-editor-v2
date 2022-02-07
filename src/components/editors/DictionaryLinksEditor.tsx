@@ -22,6 +22,7 @@ import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
 import { DictionaryRelation } from '../../models/Dictionary';
 import Icon from '../Icon';
 import { ModalPortal } from '../util/Portal';
+import Select from '../util/Select';
 import closeIcon from '../../assets/icons/close-icon.svg';
 import { button, scrollBar } from '../../styles/mixins';
 import classNames from 'classnames';
@@ -33,7 +34,7 @@ const useLinkStyle = createUseStyles({
 		alignItems: 'center',
 	},
 	title: {
-		width: '150px',
+		width: '100%',
 		backgroundColor: '#EEF2F6',
 		borderRadius: 4,
 		display: 'grid',
@@ -75,7 +76,7 @@ const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 				<Icon id='dictionary' stroke='black' fill='#333' />
 				<div className={classes.name}>{link.dictionary.name}</div>
 				<button className={classes.delete} onClick={deleteLink}>
-					<Icon id='cross' stroke='black' />
+					<Icon id='cross' stroke='black' width={9} height={9} />
 				</button>
 			</div>
 		</div>
@@ -184,40 +185,6 @@ export const useLinksStyles = createUseStyles({
 			color: '#FFF',
 		},
 	},
-	selectWrapper: { border: 'none', outline: 'none', width: '368px' },
-	customSelect: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		cursor: 'pointer',
-		borderRadius: 4,
-		padding: '5px 12px',
-		width: '100%',
-		margin: 2,
-		backgroundColor: '#FFF',
-		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
-	},
-	openSelect: {
-		border: '1px solid #5CBEEF',
-	},
-	optionsWrapper: {
-		position: 'absolute',
-		height: '134px',
-		width: '368px',
-		overflowY: 'scroll',
-		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
-		borderRadius: 4,
-		margin: 2,
-		'&::-webkit-scrollbar': {
-			display: 'none',
-		},
-	},
-	customOption: {
-		width: '100%',
-		cursor: 'pointer',
-		backgroundColor: '#FFF',
-		border: 'none',
-		padding: '8px 12px',
-	},
 	disable: {
 		display: 'none',
 	},
@@ -307,36 +274,14 @@ const DictionaryLinksEditor = ({
 								onClick={() => setShowAddDictionary(false)}></span>
 						</div>
 						<div className={classes.content}>
-							<div className={classes.selectWrapper}>
-								<div
-									className={classNames(
-										classes.customSelect,
-										openSelect ? classes.openSelect : null,
-									)}
-									onClick={() => setOpenSelect(!openSelect)}>
-									{newLinkedDictionaryName}
-									{openSelect ? (
-										<Icon id='arrowUp' stroke='#5CBEEF' />
-									) : (
-										<Icon id='arrowDown' stroke='#808080' />
-									)}
-								</div>
-								<div
-									className={classNames(
-										classes.optionsWrapper,
-										!openSelect ? classes.disable : classes.openSelect,
-									)}>
-									{openSelect &&
-										options.map(option => (
-											<div
-												key={option}
-												className={classes.customOption}
-												onClick={() => changeDictionary(option)}>
-												{option}
-											</div>
-										))}
-								</div>
-							</div>
+							<Select
+								options={options}
+								selected={newLinkedDictionaryName}
+								onChange={changeDictionary}
+								openSelect={openSelect}
+								setOpenSelect={setOpenSelect}
+								width={368}
+							/>
 						</div>
 						<div className={classes.actions}>
 							<button onClick={applyNewLink} className={classNames(classes.button, classes.submit)}>

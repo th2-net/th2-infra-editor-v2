@@ -17,14 +17,13 @@
 import React from 'react';
 import { capitalize } from 'lodash';
 import { createUseStyles } from 'react-jss';
-import { buttonReset, clickable, visuallyHidden } from '../../styles/mixins';
-import Icon from '../Icon';
+import { visuallyHidden } from '../../styles/mixins';
 import AppViewType from '../../util/AppViewType';
 
 const useBoxFiltersStyles = createUseStyles({
 	filters: {
 		display: 'flex',
-		margin: '24px 24px 12px 24px',
+		margin: '24px 12px 12px 24px',
 		lineHeight: '16px',
 		fontSize: '12px',
 		color: '#333333',
@@ -51,15 +50,6 @@ const useBoxFiltersStyles = createUseStyles({
 		borderRadius: 4,
 		cursor: 'pointer',
 	},
-	addButton: {
-		...buttonReset(),
-		...clickable(),
-		padding: 3,
-		borderRadius: 4,
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
 });
 
 export enum BoxFilters {
@@ -81,15 +71,6 @@ function ResourcesFilter(props: BoxFiltersProps) {
 
 	const classes = useBoxFiltersStyles();
 
-	const createNewResource = () => {
-		if (props.filter === BoxFilters.all || props.filter === BoxFilters.box) {
-			props.setViewType(AppViewType.BoxCreate);
-		} else {
-			// Implement dictionary creating
-			props.setViewType(AppViewType.BoxCreate);
-		}
-	};
-
 	return (
 		<div className={classes.filters}>
 			{filterOptions.map(filter => (
@@ -108,9 +89,6 @@ function ResourcesFilter(props: BoxFiltersProps) {
 					</label>
 				</React.Fragment>
 			))}
-			<button className={classes.addButton} onClick={createNewResource} title='New box'>
-				<Icon id='plus' stroke='black' />
-			</button>
 		</div>
 	);
 }

@@ -14,60 +14,90 @@
  *  limitations under the License.
  ***************************************************************************** */
 
+import classNames from 'classnames';
 import { createUseStyles } from 'react-jss';
-import arrowDown from '../../assets/icons/arrow-down.svg';
+import Icon from '../Icon';
 
-interface Props<T> {
-	options: Array<T>;
-	selected: string;
-	prefix?: string;
-	onChange: (option: T) => void;
-	onSelect?: () => void;
+interface Props {
+	options: string[];
+	selected: string | null;
+	onChange: (option: string) => void;
+	openSelect: boolean;
+	setOpenSelect: (value: React.SetStateAction<boolean>) => void;
+	width: number;
 }
 
 const useStyles = createUseStyles({
-	select: {
-		position: 'relative',
-		border: '1px solid #5CBEEF',
-		outline: 'none',
+	disable: { display: 'none' },
+	selectWrapper: { border: 'none', outline: 'none', width: (width: number) => `${width}px` },
+	customSelect: {
+		display: 'flex',
+		justifyContent: 'space-between',
 		cursor: 'pointer',
 		borderRadius: 4,
 		padding: '5px 12px',
-		width: '169px',
-		height: '32px',
-		appearance: 'none',
-		background: `url(${arrowDown})  no-repeat right #FFF`,
-		backgroundPositionX: '141px',
+		width: '100%',
+		margin: 2,
+		backgroundColor: '#FFF',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
+	},
+	openSelect: {
+		border: '1px solid #5CBEEF',
+	},
+	optionsWrapper: {
+		position: 'absolute',
+		height: '134px',
+		overflowY: 'scroll',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
+		borderRadius: 4,
+		margin: 2,
 		'&::-webkit-scrollbar': {
 			display: 'none',
 		},
-		'&::active': {
-			backgroundColor: 'red',
-		},
+	},
+	customOption: {
+		cursor: 'pointer',
+		backgroundColor: '#FFF',
+		border: 'none',
+		width: (width: number) => `${width}px`,
+		padding: '8px 12px',
 	},
 });
 
-export default function Select<T extends string>({
+export default function Select({
 	options,
 	selected,
 	onChange,
-	onSelect,
-}: Props<T>) {
-	const classes = useStyles();
+	openSelect,
+	setOpenSelect,
+	width,
+}: Props) {
+	const classes = useStyles(width);
 
 	return (
-		<select
-			className={classes.select}
-			value={selected}
-			onChange={e => {
-				onChange(e.target.value as T);
-				if (onSelect) {
-					onSelect();
-				}
-			}}>
-			{options.map((opt, index) => (
-				<option key={index}>{opt}</option>
-			))}
-		</select>
+		<div className={classes.selectWrapper}>
+			<div
+				className={classNames(classes.customSelect, openSelect ? classes.openSelect : null)}
+				onClick={() => setOpenSelect(!openSelect)}>
+				{selected}
+				{openSelect ? (
+					<Icon id='arrowUp' stroke='#5CBEEF' />
+				) : (
+					<Icon id='arrowDown' stroke='#808080' />
+				)}
+			</div>
+			<div
+				className={classNames(
+					classes.optionsWrapper,
+					!openSelect ? classes.disable : classes.openSelect,
+				)}>
+				{openSelect &&
+					options.map(option => (
+						<div key={option} className={classes.customOption} onClick={() => onChange(option)}>
+							{option}
+						</div>
+					))}
+			</div>
+		</div>
 	);
 }

@@ -35,7 +35,7 @@ interface IconProps {
 	className?: string;
 }
 
-function Icon({id, className, ...props}: IconProps) {
+function Icon({ id, className, ...props }: IconProps) {
 	const classes = useStyles(props);
 
 	return (
@@ -48,7 +48,6 @@ function Icon({id, className, ...props}: IconProps) {
 Icon.defaultProps = {
 	width: 16,
 	height: 16,
-}
+};
 
 export default Icon;
-

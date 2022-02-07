@@ -26,6 +26,7 @@ import Icon from '../Icon';
 import { ModalPortal } from '../util/Portal';
 import { useLinksStyles } from './DictionaryLinksEditor';
 import { scrollBar } from '../../styles/mixins';
+import Select from '../util/Select';
 
 interface DictionaryLinkProps {
 	link: DictionaryRelation;
@@ -39,7 +40,7 @@ const useLinkStyle = createUseStyles({
 		alignItems: 'center',
 	},
 	title: {
-		width: '150px',
+		width: '100%',
 		backgroundColor: '#EEF2F6',
 		borderRadius: 4,
 		display: 'grid',
@@ -94,7 +95,7 @@ const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 				<Icon id='dictionary' stroke='black' fill='#333' />
 				<div className={classes.name}>{link.dictionary.name}</div>
 				<button className={classes.delete} onClick={deleteLink}>
-					<Icon id='cross' stroke='black' />
+					<Icon id='cross' stroke='black' width={9} height={9} />
 				</button>
 			</div>
 		</div>
@@ -164,36 +165,14 @@ const BoxLinksEditor = () => {
 							<span className={classes.closeButton} onClick={() => setShowAddBox(false)}></span>
 						</div>
 						<div className={classes.content}>
-							<div className={classes.selectWrapper}>
-								<div
-									className={classNames(
-										classes.customSelect,
-										openSelect ? classes.openSelect : null,
-									)}
-									onClick={() => setOpenSelect(!openSelect)}>
-									{newLinkedBoxName}
-									{openSelect ? (
-										<Icon id='arrowUp' stroke='#5CBEEF' />
-									) : (
-										<Icon id='arrowDown' stroke='#808080' />
-									)}
-								</div>
-								<div
-									className={classNames(
-										classes.optionsWrapper,
-										!openSelect ? classes.disable : classes.openSelect,
-									)}>
-									{openSelect &&
-										options.map(option => (
-											<div
-												key={option}
-												className={classes.customOption}
-												onClick={() => changeBox(option)}>
-												{option}
-											</div>
-										))}
-								</div>
-							</div>
+							<Select
+								options={options}
+								selected={newLinkedBoxName}
+								onChange={changeBox}
+								openSelect={openSelect}
+								setOpenSelect={setOpenSelect}
+								width={368}
+							/>
 						</div>
 						<div className={classes.actions}>
 							<button onClick={applyNewLink} className={classNames(classes.button, classes.submit)}>

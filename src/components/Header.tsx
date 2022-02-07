@@ -22,8 +22,8 @@ import warningIcon from '../assets/icons/attention-error.svg';
 import CustomizedTooltip from './util/CustomizedTooltip';
 import ModalConfirmation from './util/ModalConfirmation';
 import InvalidLinksList from './util/InvalidLinksList';
+import Select from './util/Select';
 import classNames from 'classnames';
-import Icon from './Icon';
 
 const button: Styles = {
 	height: '40px',
@@ -82,39 +82,6 @@ const useStyles = createUseStyles({
 		backgroundColor: '#4E4E4E',
 	},
 	disable: { display: 'none' },
-	selectWrapper: { border: 'none', outline: 'none', width: '171px' },
-	customSelect: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		cursor: 'pointer',
-		borderRadius: 4,
-		padding: '5px 12px',
-		width: '100%',
-		margin: 2,
-		backgroundColor: '#FFF',
-		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
-	},
-	openSelect: {
-		border: '1px solid #5CBEEF',
-	},
-	optionsWrapper: {
-		position: 'absolute',
-		height: '134px',
-		overflowY: 'scroll',
-		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
-		borderRadius: 4,
-		margin: 2,
-		'&::-webkit-scrollbar': {
-			display: 'none',
-		},
-	},
-	customOption: {
-		cursor: 'pointer',
-		backgroundColor: '#FFF',
-		border: 'none',
-		width: '169px',
-		padding: '8px 12px',
-	},
 	invalidSchemaIndicator: {
 		display: 'grid',
 		gridTemplateColumns: '20px auto',
@@ -182,33 +149,14 @@ function Header() {
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
 				<CustomizedTooltip title='submit pending changes first' disableCondition={!requestsExist}>
-					<div className={classes.selectWrapper}>
-						<div
-							className={classNames(classes.customSelect, openSelect ? classes.openSelect : null)}
-							onClick={() => setOpenSelect(!openSelect)}>
-							{selectedSchemaName}
-							{openSelect ? (
-								<Icon id='arrowUp' stroke='#5CBEEF' />
-							) : (
-								<Icon id='arrowDown' stroke='#808080' />
-							)}
-						</div>
-						<div
-							className={classNames(
-								classes.optionsWrapper,
-								!openSelect ? classes.disable : classes.openSelect,
-							)}>
-							{openSelect &&
-								schemas.map(schema => (
-									<div
-										key={schema}
-										className={classes.customOption}
-										onClick={() => changeSchema(schema)}>
-										{schema}
-									</div>
-								))}
-						</div>
-					</div>
+					<Select
+						options={schemas}
+						selected={selectedSchemaName}
+						onChange={changeSchema}
+						openSelect={openSelect}
+						setOpenSelect={setOpenSelect}
+						width={171}
+					/>
 				</CustomizedTooltip>
 			)}
 			<div style={{ gap: 16, display: 'flex' }}>
