@@ -13,6 +13,7 @@
 		"@types/react": "^17.0.0",
 		"@types/react-dom": "^17.0.0",
 		"classnames": "^2.3.1",
+		"diff": "^5.0.0",
 		"http-proxy-middleware": "^2.0.0",
 		"lodash": "^4.17.21",
 		"material-ui-modal": "^1.0.0",
@@ -66,6 +67,7 @@
 		]
 	},
 	"devDependencies": {
+		"@types/diff": "^5.0.2",
 		"@types/lodash": "^4.14.170",
 		"fs-extra": "^10.0.0",
 		"prettier": "^2.3.1"

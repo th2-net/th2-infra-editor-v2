@@ -14,21 +14,26 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { createUseStyles } from 'react-jss';
 import ModalWindow from './ModalWindow';
 import { modalWindow } from '../../styles/mixins';
+import DifferenceWindow from './DifferenceWindow';
+import { Change } from 'diff';
 
 const useStyles = createUseStyles({
 	modalWindow: {
 		...modalWindow(),
-		width: 350,
-		height: 150,
+		display: 'flex',
+		flexDirection: 'column',
+		overflow: 'scroll',
+		gap: 20,
+		width: '90%',
 	},
 	messageContainer: {
 		fontSize: 20,
 		overflowY: 'auto',
-		height: 60,
+		height: 30,
 	},
 	buttonArea: {
 		height: 50,
@@ -47,13 +52,17 @@ const ModalConfirmation = (props: {
 	setOpen: Dispatch<SetStateAction<boolean>>;
 	action: () => void;
 	message: string;
+	dif?: {key:string, change:Change[]}[];
 }) => {
+	console.log(props.dif);
 	const classes = useStyles();
+	useEffect(()=>console.log(props.dif), [props.dif])
 	return (
 		<ModalWindow setOpen={props.setOpen}>
 			<div className={classes.modalWindow}>
 				<div className={classes.messageContainer}>{props.message}</div>
-
+				{props.dif&& props.dif.length > 0 && <DifferenceWindow dif={props.dif}/>}
+				Are you sure you want  to submit on those changes ?
 				<div className={classes.buttonArea}>
 					<button
 						onClick={() => {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
-
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
@@ -23,6 +23,8 @@ import CustomizedTooltip from './util/CustomizedTooltip';
 import ModalConfirmation from './util/ModalConfirmation';
 import InvalidLinksList from './util/InvalidLinksList';
 import { button } from '../styles/mixins';
+import { useBoxUpdater } from '../hooks/useBoxUpdater';
+import { Change, diffJson, diffLines } from 'diff';
 
 const useStyles = createUseStyles({
 	button: {
@@ -88,13 +90,14 @@ const useStyles = createUseStyles({
 });
 
 function Header() {
-	const { requestsStore, schemas, selectSchema, selectedSchemaName, isSchemaValid, boxesStore } =
+	const { requestsStore, schemas, selectSchema, selectedSchemaName, isSchemaValid, boxesStore, fetchSchema } =
 		useSchemaStore();
 	const { requestsExist, saveChanges, preparedRequests, discardChanges } = requestsStore;
 
 	const classes = useStyles();
 
 	const [openModal, setOpenModal] = useState(false);
+	const [difResource, setDifResource] = useState<{key:string, change:Change[]}[]>([]);
 
 	const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
@@ -114,10 +117,36 @@ function Header() {
 			action: discardChanges,
 		},
 	};
+	const boxUpdater = useBoxUpdater();
+
+	const fetchDifference = () => {
+		const schema = fetchSchema(selectedSchemaName);
+		boxUpdater.changes.forEach(req=> console.log(JSON.stringify(req), JSON.parse(JSON.stringify(req))))
+		const changes = boxUpdater.changes.slice();
+		if (schema)
+			schema.then(val => {
+				const res = val.resources.filter(resource => changes.filter(change => change.prevName === resource.name).length > 0).slice();
+				console.log(res);
+				setDifResource(res.map(prevVal => {
+					const boxCopy = toJS(boxesStore.boxes.find(box => changes.find(b=>b.prevName===prevVal.name)?.nextName === box.name));
+					if (boxCopy) {
+						const dif = diffJson(boxCopy, prevVal);
+						const before = dif.filter(change=>!change.added).map(change=>change.value).join('');
+						const after = dif.filter(change=>!change.removed).map(change=>change.value).join('');
+						return {key: prevVal.name, change:diffLines(after, before)};
+					}
+					return {key: prevVal.name, change:[]}
+				}));
+			});
+	}
 
 	useEffect(() => {
 		setOpenModal(false);
 	}, [boxesStore.selectedBox]);
+
+	useEffect(() => {
+		openConfirmationModal || setDifResource([]);
+	}, [openConfirmationModal]);
 
 	return (
 		<div className={classes.container}>
@@ -139,6 +168,7 @@ function Header() {
 				disabled={!requestsExist}
 				className={classes.button}
 				onClick={() => {
+					fetchDifference();
 					setOpenConfirmationModal(true);
 					setConfirmationModalType('save');
 				}}>
@@ -158,7 +188,7 @@ function Header() {
 				</button>
 			)}
 			{openConfirmationModal && confirmationModalType && (
-				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} />
+				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} dif={difResource}/>
 			)}
 			{openModal && <InvalidLinksList setOpen={setOpenModal} />}
 			{!isSchemaValid && (

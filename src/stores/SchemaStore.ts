@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, flowResult, makeObservable, observable, computed } from 'mobx';
+import { action, flow, flowResult, makeObservable, observable, computed, toJS } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { isSettingsEntity, Schema, SchemaSettings } from '../models/Schema';
@@ -84,6 +84,11 @@ export class SchemaStore {
 		this.subscriptionStore = new SubscriptionStore(this.api, this);
 
 		this.schemaSettings = null;
+	}
+
+	public fetchSchema = (schemaName: string | null) => {
+		if (schemaName === null) return undefined;
+		return this.api.fetchSchemaState(schemaName);
 	}
 
 	public get invalidLinks(): InvalidLink[] {
