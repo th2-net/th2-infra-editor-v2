@@ -26,7 +26,6 @@ const useStyles = createUseStyles({
 		...modalWindow(),
 		display: 'flex',
 		flexDirection: 'column',
-		overflow: 'scroll',
 		gap: 20,
 		width: '90%',
 	},

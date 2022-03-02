@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { createUseStyles } from 'react-jss';
-import { Change } from 'diff';
+import { Change, diffChars } from 'diff';
 
 const useStylesGeneral = createUseStyles({
     removed: {
@@ -13,7 +13,7 @@ const useStylesGeneral = createUseStyles({
         fontWeight: 900,
     },
     Window:{
-        overflow: 'scroll',
+        overflowY: 'scroll',
         maxHeight: 630,
         display:'flex',
         flexDirection: 'column',
@@ -204,61 +204,75 @@ const useStylesAttr = createUseStyles({
         width: '49%',
     },
     val:{
+        display:'flex',
         width: '100%',
-        overflow: 'auto',
     },
     wrap: {
         whiteSpace: 'pre-wrap',
+    },
+    high:{
+        color:'red',
+    },
+    low:{
+        color:'green',
     }
 });
 
-const getChange = (dif: Change[]) => {
-    const res: {prev: string, next: string}[] = []
-    dif.forEach((change, index, self)=> {
-        if (change.removed && index+1 < self.length  && self[index+1].added) {
-            res.push({prev: change.value, next: self[index-1].value})
-            return;
-        }
-        if (change.added && index-1 < self.length && !self[index-1].removed) {
-            res.push({prev: '', next: change.value})
-            return;
-        }
-        if (change.removed) {
-            res.push({prev: change.value, next: ''})
-            return;
-        }
-        res.push({prev: change.value, next: change.value});
-    })
-    return res;
+const ValueWrapper = (props: { valKey: string, changes: Change[][] }) => {
+    const classesAttr = useStylesAttr();
+    const {valKey, changes} = props;
+    return <div className={classesAttr.specDif}>
+        <div>
+            {valKey}
+        </div>
+    {
+        changes.map(change => {
+            const clear = change.filter(ch => ch.removed || ch.added).length === 0;
+            const before = !clear && change.filter(val=>!val.added);
+            const after = !clear && change.filter(val=>!val.removed);
+            return clear
+                ? <div className={classesAttr.val}><span><pre>{change[0].value}</pre></span></div>
+                : <div className={classesAttr.val}>
+                    <div className={classesAttr.change}>
+                        <i/>
+                        {before && before.map(ch => <span className={ch.removed ? classesAttr.high : undefined}>
+                            {ch.value}
+                        </span>)}
+                    </div>
+                    <div className={classesAttr.change}>
+                        <i/>
+                        {after && after.map(ch => <span className={ch.added ? classesAttr.low : undefined}>
+                            {ch.value}
+                        </span>)}
+                    </div>
+                </div>
+        })
+    }
+</div>;
 }
 
 const DifferenceWindow = (prop: { dif: {key:string, change:Change[]}[], temp?: {prev:string, next:string} }) => {
     const classesGeneral = useStylesGeneral();
     const classesAttr = useStylesAttr();
+    const bef = prop.dif.map(val=>{
+        return {
+            key: val.key,
+            change:val.change.map((val, ind, self) => {
+                if (val.removed) {
+                    if (ind + 1 < self.length && self[ind+1].added) return diffChars(val.value, self[ind+1].value);
+                    return diffChars(val.value, '');
+                }
+                if (val.added) {
+                    if (ind - 1 < self.length && self[ind-1].removed) return [];
+                   return diffChars('', val.value);
+                }
+                return diffChars(val.value, val.value);
+            }).filter(val=>val.length>0),
+        }});
+    console.log(bef, prop.dif);
     return <div className={classesGeneral.Window}>
         <div className={classesGeneral.difContainer}>
-            {prop.dif.map(val => <div className={classesAttr.specDif}>
-                {val.key}
-                <div className={classesAttr.difValueContainer}>
-                    {val.change.map((change, index, self) => {
-                        if (change.removed || change.added)
-                            return <>
-                                {change.removed && index + 1 < self.length && !self[index + 1].added && <div className={classesAttr.change}><pre className={classesAttr.wrap}>
-                                    ---
-                                </pre> </div>}
-                                <div className={classesAttr.change}><pre className={classesAttr.wrap}>
-                                    {change.removed ? 'Before: ' : 'Now: '}{change.value}
-                                </pre></div>
-                                {change.added && index - 1 < self.length && !self[index - 1].removed && <div className={classesAttr.change}><pre className={classesAttr.wrap}>
-                                    +++
-                                </pre> </div>}
-                            </>
-                        return <div className={classesAttr.val}><pre className={classesAttr.wrap}>
-                            {change.value}
-                        </pre></div>
-                    })}
-                </div>
-            </div>)}
+            {bef.map(val => <ValueWrapper valKey={val.key} changes={val.change}/>)}
         </div>
     </div>
 }
