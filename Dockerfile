@@ -4,7 +4,7 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends make build-essential
 WORKDIR /home/node
 COPY ./ .
-RUN npm ci && npm run build
+RUN npm run build
 
 FROM nginx:1.17.10-alpine
 ENV NGINX_PORT=8080
