@@ -72,5 +72,8 @@
 		"@types/react-jss": "^10.0.0",
 		"fs-extra": "^10.0.0",
 		"prettier": "^2.3.1"
+	},
+	"optionalDependencies": {
+		"fsevents": "^2.3.2"
 	}
 }
