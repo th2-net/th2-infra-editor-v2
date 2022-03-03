@@ -247,7 +247,6 @@ export class BoxUpdater {
 		}
 
 		const hasChanges = !isEqual(toJS(box), updatedBox);
-		console.log(JSON.parse(JSON.stringify(box)), JSON.parse(JSON.stringify(updatedBox)))
 
 		if (hasChanges) {
 			const sameBox = this.changes
@@ -257,7 +256,6 @@ export class BoxUpdater {
 				this.changes[sameBox[0].index].nextName = updatedBox.name
 			else
 				this.changes.push({ prevName: box.name, nextName: updatedBox.name });
-			console.log(this.changes);
 			const boxIndex = this.boxesStore.boxes.findIndex((b) => b.name === box.name);
 
 			if (boxIndex === -1) throw new Error(`Cannot find box with name "${box.name}"`);

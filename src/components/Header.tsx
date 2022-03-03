@@ -121,12 +121,10 @@ function Header() {
 
 	const fetchDifference = () => {
 		const schema = fetchSchema(selectedSchemaName);
-		boxUpdater.changes.forEach(req=> console.log(JSON.stringify(req), JSON.parse(JSON.stringify(req))))
 		const changes = boxUpdater.changes.slice();
 		if (schema)
 			schema.then(val => {
 				const res = val.resources.filter(resource => changes.filter(change => change.prevName === resource.name).length > 0).slice();
-				console.log(res);
 				setDifResource(res.map(prevVal => {
 					const boxCopy = toJS(boxesStore.boxes.find(box => changes.find(b=>b.prevName===prevVal.name)?.nextName === box.name));
 					if (boxCopy) {

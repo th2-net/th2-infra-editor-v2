@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { Dispatch, SetStateAction, useEffect } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { createUseStyles } from 'react-jss';
 import ModalWindow from './ModalWindow';
 import { modalWindow } from '../../styles/mixins';
@@ -53,9 +53,8 @@ const ModalConfirmation = (props: {
 	message: string;
 	dif?: {key:string, change:Change[]}[];
 }) => {
-	console.log(props.dif);
 	const classes = useStyles();
-	useEffect(()=>console.log(props.dif), [props.dif])
+
 	return (
 		<ModalWindow setOpen={props.setOpen}>
 			<div className={classes.modalWindow}>
