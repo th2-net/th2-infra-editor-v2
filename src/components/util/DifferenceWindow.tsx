@@ -4,6 +4,7 @@ import { createUseStyles } from 'react-jss';
 import { Change, diffChars } from 'diff';
 import Input from './Input';
 import { useInput } from '../../hooks/useInput';
+import arrowUp from '../../assets/icons/arrow-up.svg'
 
 const useStyles = createUseStyles({
 	window: {
@@ -12,7 +13,7 @@ const useStyles = createUseStyles({
 		maxHeight: 700,
 		display: 'flex',
 		flexDirection: 'column',
-		gap: 5,
+		gap: 16,
 		padding: 5,
 	},
 	valueWrapper: {
@@ -47,6 +48,14 @@ const useStyles = createUseStyles({
 		cursor: 'pointer',
 		margin: '16px 0px',
 	},
+	separatorInline: {
+		width: '40%',
+		borderBottom: '1px solid black',
+		lineHeight: 0.1,
+		textAlign: 'center',
+		cursor: 'pointer',
+		margin: '16px 0px',
+	},
 	separatorText: {
 		padding: '0 16px',
 		backgroundColor: 'white',
@@ -69,13 +78,31 @@ const useStyles = createUseStyles({
 		fontWeight: 900,
 	},
 	boundary: {
+		width:'95%',
 		cursor: 'pointer',
 		display: 'flex',
+		justifyContent: 'space-between',
 		gap: 4,
-		'& div': {
-			transform: 'rotate(180deg)',
-		}
-	}
+	'&:hover $tooltip':{
+		visibility: 'visible',
+	},
+	},
+	arrowUp: {
+		width: 25,
+		height: 25,
+		backgroundImage: `url(${arrowUp})`,
+		backgroundSize: '100%',
+		display: 'inline-block',
+		verticalAlign: 'middle',
+	},
+	arrowDown: {
+		width: 25,
+		height: 25,
+		backgroundImage: `url(${arrowUp})`,
+		backgroundSize: '100%',
+		transform: 'rotate(180deg)',
+		display: 'inline',
+	},
 });
 
 const UnchangedValue = (props: { value: Change }) => {
@@ -85,7 +112,9 @@ const UnchangedValue = (props: { value: Change }) => {
 	return isOpen
 		? <>
 			<div className={classes.boundary} onClick={() => setIsOpen(false)}>
-				<div>V</div> hide {lineAmount} lines <div>V</div>
+				<i className={classes.arrowDown} />
+				<div className={classes.separator} />
+				<i className={classes.arrowDown} />
 			</div>
 			<div className={classes.line}>
 				<div className={classes.cell}><pre className={classes.wrap}>
@@ -96,7 +125,9 @@ const UnchangedValue = (props: { value: Change }) => {
 				</pre></div>
 			</div>
 			<div className={classes.boundary} onClick={() => setIsOpen(false)}>
-				V hide {lineAmount} lines V
+				<i className={classes.arrowUp} />
+				<div className={classes.separator} />
+				<i className={classes.arrowUp} />
 			</div>
 		</>
 		: <div onClick={() => setIsOpen(true)} className={classes.separator}>
@@ -134,7 +165,7 @@ const ValueWrapper = (props: { valKey: string, changes: Change[][] }) => {
 	return <div className={classes.valueWrapper}>
 		<div className={classes.header} onClick={() => setIsOpen(!isOpen)}>
 			{valKey}
-			<span>{isOpen ? '-' : '+'}</span>
+			<i className={isOpen ? classes.arrowUp:classes.arrowDown}/>
 		</div>
 		{
 			isOpen && changes.map(change => {
@@ -149,17 +180,19 @@ const ValueWrapper = (props: { valKey: string, changes: Change[][] }) => {
 	</div>;
 }
 
-const DifferenceWindow = (prop: { dif: { key: string, change: Change[] }[], }) => {
+const DifferenceWindow = (prop: { changes: { key: string, change: Change[] }[], }) => {
 	const classes = useStyles();
+	const { changes } = prop;
 	const inputConfig = useInput({
 		id:`Changes`,
 		initialValue: '',
 		autocomplete: {
 			datalistKey: `ChangesDatalist`,
-			variants: [...prop.dif.map(val=>val.key)],
+			variants: [...changes.map(val=>val.key)],
 		}
 	})
-	const pairs = prop.dif.filter(val=>val.key.includes(inputConfig.value)).map(val => {
+
+	const pairs = changes.filter(val=>val.key.includes(inputConfig.value)).map(val => {
 		return {
 			key: val.key,
 			change: val.change.map((val, ind, self) => {
@@ -175,7 +208,7 @@ const DifferenceWindow = (prop: { dif: { key: string, change: Change[] }[], }) =
 			}).filter(val => val.length > 0),
 		}
 	});
-	React.useEffect(()=>console.log(inputConfig), [inputConfig])
+
 	return <div className={classes.window}>
 		<Input inputConfig={inputConfig}/>
 		{pairs.map(val => <ValueWrapper valKey={val.key} changes={val.change} />)}

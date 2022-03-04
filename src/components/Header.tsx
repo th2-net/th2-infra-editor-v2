@@ -23,8 +23,6 @@ import CustomizedTooltip from './util/CustomizedTooltip';
 import ModalConfirmation from './util/ModalConfirmation';
 import InvalidLinksList from './util/InvalidLinksList';
 import { button } from '../styles/mixins';
-import { useBoxUpdater } from '../hooks/useBoxUpdater';
-import { Change, diffJson, diffLines } from 'diff';
 
 const useStyles = createUseStyles({
 	button: {
@@ -90,14 +88,13 @@ const useStyles = createUseStyles({
 });
 
 function Header() {
-	const { requestsStore, schemas, selectSchema, selectedSchemaName, isSchemaValid, boxesStore, fetchSchema } =
+	const { requestsStore, schemas, selectSchema, selectedSchemaName, isSchemaValid, boxesStore } =
 		useSchemaStore();
 	const { requestsExist, saveChanges, preparedRequests, discardChanges } = requestsStore;
 
 	const classes = useStyles();
 
 	const [openModal, setOpenModal] = useState(false);
-	const [difResource, setDifResource] = useState<{key:string, change:Change[]}[]>([]);
 
 	const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
@@ -117,34 +114,10 @@ function Header() {
 			action: discardChanges,
 		},
 	};
-	const boxUpdater = useBoxUpdater();
-
-	const fetchDifference = () => {
-		const schema = fetchSchema(selectedSchemaName);
-		const changes = boxUpdater.changes.slice();
-		if (schema)
-			schema.then(val => {
-				const res = val.resources.filter(resource => changes.filter(change => change.prevName === resource.name).length > 0).slice();
-				setDifResource(res.map(prevVal => {
-					const boxCopy = toJS(boxesStore.boxes.find(box => changes.find(b=>b.prevName===prevVal.name)?.nextName === box.name));
-					if (boxCopy) {
-						const dif = diffJson(boxCopy, prevVal);
-						const before = dif.filter(change=>!change.added).map(change=>change.value).join('');
-						const after = dif.filter(change=>!change.removed).map(change=>change.value).join('');
-						return {key: prevVal.name, change:diffLines(after, before)};
-					}
-					return {key: prevVal.name, change:[]}
-				}));
-			});
-	}
 
 	useEffect(() => {
 		setOpenModal(false);
 	}, [boxesStore.selectedBox]);
-
-	useEffect(() => {
-		openConfirmationModal || setDifResource([]);
-	}, [openConfirmationModal]);
 
 	return (
 		<div className={classes.container}>
@@ -166,7 +139,6 @@ function Header() {
 				disabled={!requestsExist}
 				className={classes.button}
 				onClick={() => {
-					fetchDifference();
 					setOpenConfirmationModal(true);
 					setConfirmationModalType('save');
 				}}>
@@ -186,7 +158,7 @@ function Header() {
 				</button>
 			)}
 			{openConfirmationModal && confirmationModalType && (
-				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} dif={difResource}/>
+				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} />
 			)}
 			{openModal && <InvalidLinksList setOpen={setOpenModal} />}
 			{!isSchemaValid && (
