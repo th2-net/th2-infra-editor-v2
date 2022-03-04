@@ -14,10 +14,16 @@
  * limitations under the License.
  ***************************************************************************** */
 
+
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import classNames from 'classnames';
-import React, { Dispatch, SetStateAction } from 'react';
 import { createUseStyles } from 'react-jss';
 import { modalWindow } from '../../styles/mixins';
+import DifferenceWindow from './DifferenceWindow';
+import { Change, diffJson, diffLines } from 'diff';
+import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { useSchemaStore } from '../../hooks/useSchemaStore';
+import { toJS } from 'mobx';
 import { ModalPortal } from './Portal';
 
 const useStyles = createUseStyles({
@@ -67,6 +73,9 @@ const useStyles = createUseStyles({
 	},
 });
 
+
+
+
 const ModalConfirmation = (props: {
 	setOpen: Dispatch<SetStateAction<boolean>>;
 	isOpen: boolean;
@@ -75,11 +84,42 @@ const ModalConfirmation = (props: {
 	message: string;
 }) => {
 	const classes = useStyles();
+	const boxUpdater = useBoxUpdater();
+	const { selectedSchemaName, boxesStore, fetchSchema } = useSchemaStore();
+	const [changes, setChanges] = React.useState<{key:string, change:Change[]}[]>([]);
+	const [error, setError] = React.useState<undefined | string>(undefined);
+
+	const fetchDifference = () => {
+		const schema = fetchSchema(selectedSchemaName);
+		const changes = boxUpdater.changes.slice();
+		if (schema)
+			schema.then(val => {
+				const res = val.resources.filter(resource => changes.filter(change => change.prevName === resource.name).length > 0).slice();
+				setChanges(res.map(prevVal => {
+					const boxCopy = toJS(boxesStore.boxes.find(box => changes.find(b=>b.prevName===prevVal.name)?.nextName === box.name));
+					if (boxCopy) {
+						const dif = diffJson(boxCopy, prevVal);
+						const before = dif.filter(change=>!change.added).map(change=>change.value).join('');
+						const after = dif.filter(change=>!change.removed).map(change=>change.value).join('');
+						return {key: prevVal.name, change:diffLines(after, before)};
+					}
+					return {key: prevVal.name, change:[]}
+				}));
+			}).catch(err=>{
+				setError(String(err));
+			});
+	}
+	useEffect(()=>fetchDifference());
+	
 	return (
 		<ModalPortal isOpen={props.isOpen}>
 			<div className={classes.modalWindow}>
 				<div className={classes.header}>{props.header}</div>
 				<div className={classes.messageContainer}>{props.message}</div>
+				{error
+					? <div>{error}</div>
+					: <DifferenceWindow changes={changes} />}
+				Are you sure you want  to submit on those changes ?
 				<div className={classes.buttonArea}>
 					<button
 						className={classes.button}

@@ -82,8 +82,9 @@ export class RequestsStore {
 
 	discardChanges = () => {
 		this.preparedRequests = [];
-		this.schemaStore.backupInvalidLinks.forEach(link =>
-			this.schemaStore.boxUpdater.addLink(link.link, false),
-		);
+		this.schemaStore.backupInvalidLinks.forEach(link => {
+			this.schemaStore.boxUpdater.addLink(link.link, false);
+			this.schemaStore.boxUpdater.changes = [];
+		});
 	};
 }
