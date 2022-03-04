@@ -15,6 +15,7 @@
  ***************************************************************************** */
 
 import { action, computed, makeObservable, observable } from 'mobx';
+import { sortByKey } from '../helpers/array';
 import { BoxEntity, isBoxEntity } from '../models/Box';
 import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
 import FileBase from '../models/FileBase';
@@ -27,6 +28,7 @@ export class BoxesStore {
 			boxes: observable,
 			dictionaries: observable,
 			allEntities: computed,
+			types: computed,
 			setBoxes: action,
 			setDictionaries: action,
 			isSelectedBoxValid: observable,
@@ -38,32 +40,32 @@ export class BoxesStore {
 		{
 			title: 'conn',
 			types: ['th2-conn', 'th2-read', 'th2-hand'],
-			color: '#FF9966',
+			color: '#E7F178',
 		},
 		{
 			title: 'codec',
 			types: ['th2-codec'],
-			color: '#66CC91',
+			color: '#78F19A',
 		},
 		{
 			title: 'act',
 			types: ['th2-act'],
-			color: '#666DCC',
+			color: '#7879F1',
 		},
 		{
 			title: 'check',
 			types: ['th2-check1', 'th2-check2-recon'],
-			color: '#C066CC',
+			color: '#EF78F1',
 		},
 		{
 			title: 'script',
 			types: ['th2-script'],
-			color: '#669966',
+			color: '#78BEF1',
 		},
 		{
 			title: 'Th2Resources',
 			types: ['th2-rpt-viewer', 'th2-rpt-provider'],
-			color: '#CACC66',
+			color: '#F1C878',
 		},
 	];
 
@@ -89,6 +91,26 @@ export class BoxesStore {
 
 	public get allEntities() {
 		return [...this.boxes, ...this.dictionaries];
+	}
+
+	public get types() {
+		return this.groupsConfig
+			.map(group => {
+				let boxes: BoxEntity[];
+				if (group.title === 'Th2Resources') {
+					boxes = this.boxes.filter(box =>
+						this.groupsConfig.every(g => !g.types.includes(box.spec.type)),
+					);
+				} else {
+					boxes = this.boxes.filter(box => group.types.some(type => type === box.spec.type));
+				}
+
+				return {
+					...group,
+					boxes: sortByKey(boxes, 'name'),
+				};
+			})
+			.flatMap(group => group.types);
 	}
 
 	setBoxes = (allEntites: FileBase[]) => {

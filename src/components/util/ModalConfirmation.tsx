@@ -14,39 +14,62 @@
  * limitations under the License.
  ***************************************************************************** */
 
+
 import React, { Dispatch, SetStateAction, useEffect } from 'react';
+import classNames from 'classnames';
 import { createUseStyles } from 'react-jss';
-import ModalWindow from './ModalWindow';
 import { modalWindow } from '../../styles/mixins';
 import DifferenceWindow from './DifferenceWindow';
 import { Change, diffJson, diffLines } from 'diff';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { toJS } from 'mobx';
+import { ModalPortal } from './Portal';
 
 const useStyles = createUseStyles({
 	modalWindow: {
 		...modalWindow(),
-		display: 'flex',
-		flexDirection: 'column',
-		gap: 20,
-		width: '90%',
+		width: 325,
+		height: 192,
+	},
+	header: {
+		fontSize: 18,
+		fontWeight: 500,
 	},
 	messageContainer: {
-		fontSize: 20,
-		overflowY: 'auto',
-		height: 30,
+		fontSize: 16,
+		fontWeight: 400,
 	},
 	buttonArea: {
-		height: 50,
 		display: 'flex',
-		flexDirection: 'row',
+		gap: '12px',
 		justifyContent: 'center',
-		'& button': {
-			margin: 5,
-			height: 40,
-			width: 50,
+	},
+	button: {
+		width: '90px',
+		borderRadius: '4px',
+		color: '#fff',
+		padding: '12px 24px',
+		textTransform: 'capitalize',
+		outline: 'none',
+		border: 'none',
+		fontSize: '14px',
+		position: 'relative',
+		cursor: 'pointer',
+		backgroundColor: '#5CBEEF',
+		'&:hover': {
+			backgroundColor: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
 		},
+		'&:active': {
+			backgroundColor: '#0099E5',
+		},
+		'&:disabled': {
+			opacity: '0.4',
+		},
+	},
+	cancel: {
+		backgroundColor: '#4E4E4E',
 	},
 });
 
@@ -55,7 +78,9 @@ const useStyles = createUseStyles({
 
 const ModalConfirmation = (props: {
 	setOpen: Dispatch<SetStateAction<boolean>>;
+	isOpen: boolean;
 	action: () => void;
+	header: string;
 	message: string;
 }) => {
 	const classes = useStyles();
@@ -87,8 +112,9 @@ const ModalConfirmation = (props: {
 	useEffect(()=>fetchDifference());
 	
 	return (
-		<ModalWindow setOpen={props.setOpen}>
+		<ModalPortal isOpen={props.isOpen}>
 			<div className={classes.modalWindow}>
+				<div className={classes.header}>{props.header}</div>
 				<div className={classes.messageContainer}>{props.message}</div>
 				{error
 					? <div>{error}</div>
@@ -96,6 +122,7 @@ const ModalConfirmation = (props: {
 				Are you sure you want  to submit on those changes ?
 				<div className={classes.buttonArea}>
 					<button
+						className={classes.button}
 						onClick={() => {
 							props.action();
 							props.setOpen(false);
@@ -103,6 +130,7 @@ const ModalConfirmation = (props: {
 						Yes
 					</button>
 					<button
+						className={classNames(classes.button, classes.cancel)}
 						onClick={() => {
 							props.setOpen(false);
 						}}>
@@ -110,7 +138,7 @@ const ModalConfirmation = (props: {
 					</button>
 				</div>
 			</div>
-		</ModalWindow>
+		</ModalPortal>
 	);
 };
 

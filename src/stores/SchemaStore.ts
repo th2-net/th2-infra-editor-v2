@@ -30,6 +30,7 @@ import { isBoxEntity } from '../models/Box';
 import SubscriptionStore from './SubscriptionStore';
 import { chain } from 'lodash';
 import { InvalidLink } from '../helpers/pinConnections';
+import AppViewType from '../util/AppViewType';
 
 export class SchemaStore {
 	boxesStore = new BoxesStore();
@@ -210,10 +211,10 @@ export class SchemaStore {
 			if (resource) {
 				if (isBoxEntity(resource)) {
 					this.boxesStore.selectBox(resource);
-					this.rootStore.appViewStore.setViewType('box');
+					this.rootStore.appViewStore.setViewType(AppViewType.BoxView);
 				} else if (isDictionaryEntity(resource)) {
 					this.selectedDictionaryStore.selectDictionary(resource);
-					this.rootStore.appViewStore.setViewType('dictionary');
+					this.rootStore.appViewStore.setViewType(AppViewType.DictionaryView);
 				}
 			}
 		}

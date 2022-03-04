@@ -14,10 +14,9 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import classNames from 'classnames';
 import React from 'react';
 import { createUseStyles } from 'react-jss';
-import Splitter from './Splitter';
-import classNames from 'classnames';
 
 type SplitViewProps = {
 	topComponent: React.ReactNode;
@@ -30,6 +29,7 @@ const useStyles = createUseStyles({
 		height: '100%',
 		overflow: 'hidden',
 		position: 'relative',
+		gridTemplateRows: '1fr 40px 1fr',
 	},
 
 	splitter: {
@@ -39,19 +39,25 @@ const useStyles = createUseStyles({
 	panel: {
 		position: 'relative',
 		overflow: 'hidden',
-		borderRadius: '6px',
+		padding: '3px',
 	},
-
 	preview: {
 		position: 'absolute',
 		top: '0',
 		left: '0',
 		height: '100%',
 		width: '100%',
+		padding: '3px',
 	},
 
-	previewPanel: {
+	previewPanelTop: {
 		background: 'rgba(0, 0, 0, 0.25)',
+		borderRadius: 24,
+		marginBottom: '5px',
+	},
+	previewPanelBottom: {
+		background: 'rgba(0, 0, 0, 0.25)',
+		borderRadius: 24,
 	},
 
 	none: {
@@ -80,11 +86,11 @@ function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 
 	React.useEffect(() => {
 		const calculateHeight = (e: MouseEvent): string => {
-			if (!rootRef.current) return '1fr 15px 1fr';
+			if (!rootRef.current) return '1fr 40px 1fr';
 			const newHeight = lastTopComponentHeight.current - startY.current + e.pageY;
 			const nonNegativeHeight = Math.max(newHeight, 0);
 			const maxHeight = rootRef.current.getBoundingClientRect().height - 15;
-			return `${Math.min(nonNegativeHeight, maxHeight)}px 15px 1fr`;
+			return `${Math.min(nonNegativeHeight, maxHeight)}px 40px 1fr`;
 		};
 
 		const onMouseUp = (e: MouseEvent) => {
@@ -113,7 +119,7 @@ function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 
 	React.useEffect(() => {
 		if (isDragging && rootRefPreview.current) {
-			rootRefPreview.current.style.gridTemplateRows = `${lastTopComponentHeight.current}px 15px 1fr`;
+			rootRefPreview.current.style.gridTemplateRows = `${lastTopComponentHeight.current}px 40px 1fr`;
 		}
 	}, [isDragging]);
 
@@ -122,16 +128,14 @@ function SplitView({ topComponent, bottomComponent }: SplitViewProps) {
 			<div className={classes.panel} ref={topComponentRef}>
 				{topComponent}
 			</div>
-			<div className={classes.splitter} onMouseDown={splitterMouseDown}>
-				<Splitter />
-			</div>
+			<div className={classes.splitter} onMouseDown={splitterMouseDown}></div>
 			<div className={classes.panel}>{bottomComponent}</div>
 
 			{isDragging && (
 				<div className={classNames(classes.container, classes.preview)} ref={rootRefPreview}>
-					<div className={classNames(classes.panel, classes.previewPanel)} />
+					<div className={classNames(classes.panel, classes.previewPanelTop)} />
 					<div className={classes.splitter} />
-					<div className={classNames(classes.panel, classes.previewPanel)} />
+					<div className={classNames(classes.panel, classes.previewPanelBottom)} />
 				</div>
 			)}
 		</div>

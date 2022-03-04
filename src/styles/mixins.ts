@@ -71,36 +71,35 @@ export function buttonReset(): Styles {
 export function button(): Styles {
 	return {
 		...buttonReset(),
-		height: '30px',
-		width: 'auto',
-		borderRadius: '17px',
+		borderRadius: '4px',
 		color: '#fff',
-		padding: '7px 12px',
+		padding: '12px 10px',
 		textTransform: 'capitalize',
 		outline: 'none',
 		border: 'none',
-		margin: '0 15px',
-		boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
-		fontWeight: '600',
-		fontSize: '13px',
+		fontWeight: '500',
+		fontSize: '14px',
 		lineHeight: '16px',
-		position: 'relative',
-		transition: '250ms',
 		userSelect: 'none',
 	};
 }
 
 export function modalWindow(): Styles {
 	return {
-		position: 'relative',
-		borderRadius: '6px',
-		boxShadow:
-			'0 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)',
-		padding: '20px 30px',
-		overflow: 'auto',
-		top: '50px',
-		marginRight: 'auto',
-		marginLeft: 'auto',
+		display: 'grid',
+		gap: '24px',
+		borderRadius: '4px',
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+		padding: '24px',
 		backgroundColor: 'white',
 	};
 }
+
+export const clickable = (): Styles => ({
+	cursor: 'pointer',
+	borderRadius: '2px',
+
+	'&:hover': {
+		backgroundColor: 'rgba(102, 102, 102, 0.15)',
+	},
+});

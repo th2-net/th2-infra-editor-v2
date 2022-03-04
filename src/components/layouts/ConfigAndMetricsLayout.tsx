@@ -23,10 +23,9 @@ const useStyles = createUseStyles({
 	container: {
 		...scrollBar(),
 		display: 'grid',
-		gridTemplateColumns: '1fr 1fr',
-		gap: 8,
+		gridTemplateColumns: '2fr 1fr',
+		gap: 40,
 		height: '100%',
-		overflow: 'auto',
 	},
 });
 

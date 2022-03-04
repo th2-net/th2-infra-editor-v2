@@ -14,17 +14,19 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { observer } from "mobx-react-lite";
-import { useMemo, useRef, useState } from "react";
-import { createUseStyles } from "react-jss";
-import { useBoxesStore } from "../../hooks/useBoxesStore";
-import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
-import useOutsideClickListener from "../../hooks/useOutsideClickListener";
-import { useSelectedDictionaryStore } from "../../hooks/useSelectedDictionaryStore";
-import { DictionaryRelation } from "../../models/Dictionary";
-import Icon from "../Icon";
-import Select from "../util/Select";
-import { useLinksStyles } from "./DictionaryLinksEditor";
+import classNames from 'classnames';
+import { observer } from 'mobx-react-lite';
+import { useMemo, useState } from 'react';
+import { createUseStyles } from 'react-jss';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
+import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
+import { DictionaryRelation } from '../../models/Dictionary';
+import Icon from '../Icon';
+import { ModalPortal } from '../util/Portal';
+import { useLinksStyles } from './DictionaryLinksEditor';
+import { scrollBar } from '../../styles/mixins';
+import Select from '../util/Select';
 
 interface DictionaryLinkProps {
 	link: DictionaryRelation;
@@ -33,64 +35,95 @@ interface DictionaryLinkProps {
 
 const useLinkStyle = createUseStyles({
 	link: {
-		cursor: 'pointer',
-		padding: '0 2px',
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		'&:hover': {
-			backgroundColor: '#e5e5e5'
-		}
 	},
 	title: {
-		display: 'flex',
-		'&>p': {
-			margin: '0 0 0 2px'
-		}
+		width: '100%',
+		backgroundColor: '#EEF2F6',
+		borderRadius: 4,
+		display: 'grid',
+		gridTemplateColumns: 'auto 1fr auto',
+		gap: 14,
+		padding: '8px 10px',
+		fontWeight: 600,
+		alignItems: 'center',
+	},
+	name: {
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+		overflow: 'hidden',
 	},
 	delete: {
 		display: 'inline-flex',
-		padding: '0 2px',
 		verticalAlign: 'middle',
 		backgroundColor: 'transparent',
 		outline: 'none',
 		border: 'none',
 		cursor: 'pointer',
-	}
-})
+		'&:hover': {
+			backgroundColor: '#e5e5e5',
+		},
+	},
+});
 
-const Link = ({link, deleteLink}: DictionaryLinkProps) => {
+const useCurrentStyles = createUseStyles({
+	container: {
+		marginTop: 40,
+		height: 'calc(100% - 40px)',
+		display: 'grid',
+		gridTemplateRows: 'auto 150px auto',
+		width: 'fit-content',
+		backgroundColor: '#FFF',
+		border: 'none',
+		borderRadius: 24,
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+		padding: 16,
+	},
+	linksList: {
+		...scrollBar(),
+		overflowY: 'scroll',
+	},
+});
+
+const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 	const classes = useLinkStyle();
 	return (
 		<div className={classes.link}>
 			<div className={classes.title}>
-				<Icon id='box' stroke='black' />
-				<p>{link.box}</p>
+				<Icon id='dictionary' stroke='black' fill='#333' />
+				<div className={classes.name}>{link.dictionary.name}</div>
+				<button className={classes.delete} onClick={deleteLink}>
+					<Icon id='cross' stroke='black' width={9} height={9} />
+				</button>
 			</div>
-			<button className={classes.delete} onClick={deleteLink}><Icon id='cross' stroke='black' width={8} height={8}/></button>
 		</div>
-	)
-}
+	);
+};
 
 const BoxLinksEditor = () => {
 	const classes = useLinksStyles();
+	const currentClasses = useCurrentStyles();
 	const boxesStore = useBoxesStore();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
 	const dictionaryLinksStore = useDictionaryLinksStore();
 
+	const [openSelect, setOpenSelect] = useState(false);
+
 	const options = useMemo(() => {
 		return boxesStore.boxes
 			.filter(box => !dictionaryLinksStore.linkedBoxes?.some(link => link.box === box.name))
-			.map(box => box.name)
+			.map(box => box.name);
 	}, [boxesStore.boxes, dictionaryLinksStore.linkedBoxes]);
 
 	const [newLinkedBoxName, setNewLinkedBoxName] = useState(options[0]);
 	const [showAddBox, setShowAddBox] = useState(false);
 
-	const ref = useRef<HTMLDivElement>(null);
-	useOutsideClickListener(ref, () => {
-		setShowAddBox(false);
-	});
+	const changeBox = (option: string) => {
+		setNewLinkedBoxName(option);
+		setOpenSelect(false);
+	};
 
 	const applyNewLink = () => {
 		setShowAddBox(false);
@@ -100,40 +133,62 @@ const BoxLinksEditor = () => {
 				box: newLinkedBoxName,
 				dictionary: {
 					name: selectedDictionaryStore.dictionary.name,
-					type: 'MAIN'
-				}
-			}
+					type: 'MAIN',
+				},
+			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
 	};
 
 	return (
-		<div className={classes.links} ref={ref}>
+		<div className={classNames(classes.links, currentClasses.container)}>
 			<p>Linked boxes:</p>
-			{dictionaryLinksStore.linkedBoxes.map((link, i) => (
-				<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
-			))}
-			{showAddBox 
-				? <div>
-						<Select
-							options={options}
-							selected={newLinkedBoxName}
-							onChange={setNewLinkedBoxName}
-						/>
-						<button onClick={applyNewLink}>
-							<Icon id='check' stroke='black' />
-						</button>
+			<div className={currentClasses.linksList}>
+				{dictionaryLinksStore.linkedBoxes.map((link, i) => (
+					<Link
+						link={link}
+						key={`${link.name}-${i}`}
+						deleteLink={() => {
+							dictionaryLinksStore.deleteLinkDictionary(link);
+						}}
+					/>
+				))}
+			</div>
+			<button className={classes.addDictionary} onClick={() => setShowAddBox(true)}>
+				Add Dictionary
+			</button>
+			{showAddBox ? (
+				<ModalPortal isOpen={showAddBox}>
+					<div className={classes.editor}>
+						<div className={classes.header}>
+							<span className={classes.title}>Add Dictionary</span>
+							<span className={classes.closeButton} onClick={() => setShowAddBox(false)}></span>
+						</div>
+						<div className={classes.content}>
+							<Select
+								options={options}
+								selected={newLinkedBoxName}
+								onChange={changeBox}
+								openSelect={openSelect}
+								setOpenSelect={setOpenSelect}
+								width={368}
+							/>
+						</div>
+						<div className={classes.actions}>
+							<button onClick={applyNewLink} className={classNames(classes.button, classes.submit)}>
+								Submit
+							</button>
+							<button
+								onClick={() => setShowAddBox(false)}
+								className={classNames(classes.button, classes.deleteButton)}>
+								Cancel
+							</button>
+						</div>
 					</div>
-				: <button 
-						className={classes.add}
-						onClick={() => setShowAddBox(true)}
-					>
-						+
-					</button>
-			}
+				</ModalPortal>
+			) : null}
 		</div>
 	);
 };
 
 export default observer(BoxLinksEditor);
-	

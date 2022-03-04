@@ -18,27 +18,42 @@ import classNames from 'classnames';
 import { createUseStyles } from 'react-jss';
 import { InputConfig } from '../../hooks/useInput';
 
-const useStyles = createUseStyles(
+type StylesProps = {
+	width: number | undefined;
+};
+
+const useStyles = createUseStyles<string, StylesProps>(
 	{
 		container: {
+			width: '100%',
+			minWidth: ({ width }) => (width ? `${width}px` : '100px'),
 			display: 'flex',
 			flexDirection: 'column',
 		},
 		input: {
-			width: '100%',
-      height: 21,
+			height: 32,
 			backgroundColor: '#fff',
-			border: '1px solid #7a99b8',
+			color: 'rgba(51, 51, 51, 0.6)',
+			border: '1px solid #E5E5E5',
+			boxSizing: 'border-box',
 			borderRadius: 4,
 			padding: '0 10px',
-			fontSize: 13,
+			fontSize: 14,
+			fontWeight: 400,
 			lineHeight: '14px',
-			outlineColor: 'green',
+			outlineColor: '#5CBEEF',
 		},
 		label: {
-			fontSize: 12,
+			fontSize: 14,
 			lineHeight: '14px',
-			marginBottom: '6px',
+			marginBottom: '12px',
+
+			'&.required:after': {
+				content: '"*"',
+				color: 'red',
+				marginLeft: '2px',
+				verticalAlign: 'super',
+			},
 		},
 		invalid: {
 			outline: 'none',
@@ -50,14 +65,19 @@ const useStyles = createUseStyles(
 
 interface InputProps {
 	inputConfig: InputConfig;
+	width?: number;
 }
 
-const Input = ({ inputConfig }: InputProps) => {
-	const classes = useStyles();
+const Input = ({ inputConfig, width }: InputProps) => {
+	const classes = useStyles({ width });
 
 	return (
 		<div className={classes.container}>
-			<label htmlFor={inputConfig.bind.id} className={classes.label}>
+			<label
+				htmlFor={inputConfig.bind.id}
+				className={classNames(classes.label, {
+					required: inputConfig.required,
+				})}>
 				{inputConfig.label}
 			</label>
 			<input

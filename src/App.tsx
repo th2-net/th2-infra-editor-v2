@@ -18,36 +18,39 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
 import Header from './components/Header';
-import Boxes from './components/boxes';
 import DictionaryLayout from './components/layouts/DictionaryLayout';
 import BoxLayout from './components/layouts/BoxLayout';
 import { useSchemaStore } from './hooks/useSchemaStore';
 import { Theme } from './styles/theme';
 import { useRootStore } from './hooks/useRootStore';
-import openSansRegular from './assets/fonts/open-sans-v15-latin-regular.woff';
-import openSansBold from './assets/fonts/open-sans-v15-latin-600.woff';
+import robotoRegular from './assets/fonts/Roboto-Regular.ttf';
+import robotoBold from './assets/fonts/Roboto-Bold.ttf';
 import { useAppViewStore } from './hooks/useAppViewStore';
 import { useURLParamsStore } from './hooks/useURLParamsStore';
 import EmbeddedLayout from './components/embedded/EmbeddedLayout';
 import loader from '@monaco-editor/loader';
+import { useMonaco } from '@monaco-editor/react';
+import ResourcesList from './components/resources/ResourcesList';
+import AppViewType from './util/AppViewType';
+import BoxCreationLayout from './components/layouts/BoxCreationLayout';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
 		{
-			fontFamily: 'Open sans',
+			fontFamily: 'Roboto',
 			fontWeight: 'normal',
-			src: `url(${openSansRegular})`,
+			src: `url(${robotoRegular})`,
 		},
 		{
-			fontFamily: 'Open sans',
+			fontFamily: 'Roboto',
 			fontWeight: 'bold',
-			src: `url(${openSansBold})`,
+			src: `url(${robotoBold})`,
 		},
 	] as any,
 	'@global': {
 		'*': {
 			boxSizing: 'border-box',
-			fontFamily: 'Open Sans',
+			fontFamily: 'Roboto',
 		},
 		body: {
 			height: '100vh',
@@ -59,12 +62,12 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	},
 	app: {
 		display: 'grid',
-		gridTemplateRows: '60px 1fr',
+		gridTemplateRows: '80px 1fr',
 		gridTemplateAreas: `
 			"header"
 			"content"
 		`,
-		gap: 10,
+		gap: 40,
 		height: '100%',
 		backgroundColor: theme.appBackgroundColor,
 		overflow: 'hidden',
@@ -72,10 +75,10 @@ const useStyles = createUseStyles((theme: Theme) => ({
 	content: {
 		gridArea: 'content',
 		display: 'grid',
-		gap: 10,
-		gridTemplateColumns: 'minmax(250px, 350px) 1fr',
+		gap: 40,
+		gridTemplateColumns: '1fr 3.5fr',
 		gridTemplateAreas: '"box-list ."',
-		padding: '0 15px',
+		padding: '0 40px 40px 40px',
 		overflow: 'hidden',
 	},
 	loader: {
@@ -89,11 +92,23 @@ function App() {
 	const classes = useStyles();
 	const { viewType } = useAppViewStore();
 	const { embedded } = useURLParamsStore();
+	const monaco = useMonaco();
 
 	useEffect(() => {
 		rootStore.init();
 		loader.config({ paths: { vs: 'vs' } });
 	}, [rootStore]);
+
+	useEffect(() => {
+		monaco?.editor.defineTheme('my-theme', {
+			base: 'vs',
+			inherit: true,
+			rules: [],
+			colors: {
+				'editor.background': '#F3F3F6',
+			},
+		});
+	}, [monaco]);
 
 	if (embedded) {
 		return <EmbeddedLayout />;
@@ -104,9 +119,10 @@ function App() {
 			<Header />
 			{!schemaStore.isLoading ? (
 				<div className={classes.content}>
-					<Boxes />
-					{viewType === 'dictionary' && <DictionaryLayout />}
-					{viewType === 'box' && <BoxLayout />}
+					<ResourcesList />
+					{viewType === AppViewType.DictionaryView && <DictionaryLayout />}
+					{viewType === AppViewType.BoxView && <BoxLayout />}
+					{viewType === AppViewType.BoxCreate && <BoxCreationLayout />}
 				</div>
 			) : (
 				<div className={classes.loader}>Loading...</div>

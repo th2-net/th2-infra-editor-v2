@@ -18,8 +18,6 @@ import { useRef } from 'react';
 import { createUseStyles } from 'react-jss';
 import classNames from 'classnames';
 import { BoxEntity, BoxStatus } from '../../models/Box';
-import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
-import { computed } from 'mobx';
 import useSubscriptionStore from '../../hooks/useSubscriptionStore';
 
 export function getBoxType(box: BoxEntity) {
@@ -31,28 +29,23 @@ export function getImageNameWithoutDomain(imageName: string): string {
 	return splitedImageName.slice(-(splitedImageName.length - 1)).join('/');
 }
 
-interface StylesProps {
-	boxBodySpacing: number;
-}
-
-const useStyles = createUseStyles<string, StylesProps>(
+const useStyles = createUseStyles(
 	{
 		container: {
 			width: '100%',
 			backgroundColor: '#fff',
-			minHeight: 25,
-			borderRadius: 6,
+			height: 32,
+			borderRadius: 4,
 			overflow: 'hidden',
 			display: 'grid',
-			gridTemplateRows: '23px auto',
+			gridTemplateRows: '24px auto',
 			cursor: 'pointer',
 			boxSizing: 'border-box',
-			padding: '1px',
+			boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.08)',
+			padding: '4px 12px',
 		},
 		header: {
-			height: 23,
 			width: '100%',
-			maxHeight: 23,
 			display: 'grid',
 			alignItems: 'center',
 			gridTemplateAreas: `
@@ -60,32 +53,27 @@ const useStyles = createUseStyles<string, StylesProps>(
 			`,
 			gridTemplateRows: '1fr',
 			gridTemplateColumns:
-				'11px minmax(30px, auto) minmax(100px, max-content) minmax(auto, 1fr) minmax(50px, max-content)',
+				'16px minmax(41px, auto) minmax(100px, max-content) minmax(auto, 1fr) 60px',
 			justifyContent: 'start',
-			padding: '0 10px',
 			backgroundColor: '#fff',
 			color: '#000',
-			gap: 5,
+			fontSize: 12,
+			gap: 8,
 		},
 		name: {
 			margin: '0 0 0 5px',
-			fontSize: 12,
 			textAlign: 'left',
 			whiteSpace: 'nowrap',
 			overflow: 'hidden',
 			minWidth: '100%	',
-			lineHeight: '23px',
+			lineHeight: '24px',
+			fontSize: 12,
 			height: '100%',
 			textOverflow: 'ellipsis',
 			gridArea: 'name',
 		},
-		body: {
-			height: '100%',
-			padding: props => `${props.boxBodySpacing}px`,
-		},
 		bodyValue: {
-			fontSize: '12px',
-			lineHeight: '23px',
+			lineHeight: '24px',
 			fontWeight: 'bold',
 			borderRadius: 9,
 			whiteSpace: 'nowrap',
@@ -97,11 +85,10 @@ const useStyles = createUseStyles<string, StylesProps>(
 		type: {
 			color: '#fff ',
 			backgroundColor: 'rgb(102, 204, 145)',
-			borderRadius: '10px',
+			borderRadius: 8,
 			padding: '0 6px',
-			height: '20px',
-			maxWidth: '80px',
-			lineHeight: '20px',
+			height: '24px',
+			width: '41px',
 			gridArea: 'type',
 		},
 		imageName: {
@@ -111,13 +98,13 @@ const useStyles = createUseStyles<string, StylesProps>(
 		selectable: {
 			cursor: 'pointer',
 			'&:hover': {
-				border: '1px solid',
-				padding: '0',
+				border: '2px solid #0099E6',
+				padding: '2px 12px',
 			},
 		},
 		selected: {
-			border: '1px solid',
-			padding: '0',
+			border: '2px solid #0099E6',
+			padding: '2px 12px',
 		},
 	},
 	{ name: 'Box' },
@@ -125,20 +112,15 @@ const useStyles = createUseStyles<string, StylesProps>(
 
 interface Props {
 	box: BoxEntity;
-	editableDictionaryRelations?: boolean;
 	color?: string;
 	onSelect?: (box: BoxEntity) => void;
 	isSelected?: boolean;
 }
 
 function Box(props: Props) {
-	const { box, color, onSelect, editableDictionaryRelations, isSelected = false } = props;
+	const { box, color, onSelect, isSelected = false } = props;
 
-	const stylesProps = computed(() => {
-		return { boxBodySpacing: editableDictionaryRelations ? 20 : 0 };
-	}).get();
-
-	const classes = useStyles(stylesProps);
+	const classes = useStyles();
 
 	const subscriptionStore = useSubscriptionStore();
 	const status = useRef(subscriptionStore.boxStates.get(box.name) || BoxStatus.PENDING);
@@ -167,7 +149,6 @@ function Box(props: Props) {
 					{slicedImageName}
 				</span>
 			</div>
-			<div className={classes.body}>{editableDictionaryRelations && <DictionaryLinksEditor />}</div>
 		</div>
 	);
 }
@@ -177,20 +158,19 @@ export default Box;
 const useStatusStyles = createUseStyles(
 	{
 		status: {
-			height: 11,
-			width: 11,
+			height: 16,
+			width: 16,
 			borderRadius: '50%',
-			border: '1px solid #777',
 			backgroundColor: '#8b8b8b',
 		},
 		Running: {
-			backgroundColor: '#14d314',
+			backgroundColor: '#4CF53D',
 		},
 		Pending: {
-			backgroundColor: '#e0e013',
+			backgroundColor: '#F5B83D',
 		},
 		Failed: {
-			backgroundColor: '#e61010',
+			backgroundColor: '#F53D3D',
 		},
 	},
 	{ name: 'Status' },

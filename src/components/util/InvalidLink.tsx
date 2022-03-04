@@ -17,7 +17,7 @@
 import { createUseStyles } from 'react-jss';
 import { useSchemaStore } from '../../hooks/useSchemaStore';
 import { BoxEntity } from '../../models/Box';
-import Box from '../boxes/Box';
+import Box from '../resources/Box';
 
 const useStyles = createUseStyles({
 	clicableLink: {
