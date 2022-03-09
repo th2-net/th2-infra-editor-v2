@@ -30,6 +30,7 @@ interface UseInputProps {
 	spellCheck?: boolean;
 	disabled?: boolean;
 	required?: boolean;
+	placeholder?: string;
 }
 
 export interface InputConfig {
@@ -53,6 +54,7 @@ export interface InputConfig {
 		spellCheck: boolean;
 	};
 	required?: boolean;
+	placeholder?: string;
 }
 
 export const useInput = ({
@@ -66,6 +68,7 @@ export const useInput = ({
 	spellCheck = false,
 	disabled = false,
 	required = true,
+	placeholder = '',
 }: UseInputProps): InputConfig => {
 	const [value, setValue] = React.useState(initialValue);
 	const [isValid, setIsValid] = React.useState(true);
@@ -105,5 +108,6 @@ export const useInput = ({
 			spellCheck,
 		},
 		required,
+		placeholder,
 	};
 };

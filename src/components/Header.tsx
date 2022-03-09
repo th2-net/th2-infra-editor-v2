@@ -13,40 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
-
 import { observer } from 'mobx-react-lite';
-import { createUseStyles } from 'react-jss';
+import { createUseStyles, Styles } from 'react-jss';
 import { useSchemaStore } from '../hooks/useSchemaStore';
 import { useEffect, useState } from 'react';
 import warningIcon from '../assets/icons/attention-error.svg';
 import CustomizedTooltip from './util/CustomizedTooltip';
 import ModalConfirmation from './util/ModalConfirmation';
 import InvalidLinksList from './util/InvalidLinksList';
-import { button } from '../styles/mixins';
+import Select from './util/Select';
+import classNames from 'classnames';
+
+const button: Styles = {
+	height: '40px',
+	width: 'auto',
+	borderRadius: '4px',
+	color: '#fff',
+	padding: '12px 24px',
+	textTransform: 'capitalize',
+	outline: 'none',
+	border: 'none',
+	fontWeight: '700',
+	fontSize: '14px',
+	position: 'relative',
+	cursor: 'pointer',
+	backgroundColor: '#0099E5',
+	'&:hover': {
+		backgroundColor: '#EEF2F6',
+		color: 'rgba(51, 51, 51, 0.8)',
+	},
+	'&:active': {
+		backgroundColor: '#0099E5',
+	},
+	'&:disabled': {
+		opacity: '0.4',
+	},
+};
 
 const useStyles = createUseStyles({
-	button: {
-		...button(),
-		color: '#fff',
-		margin: '0 25px',
-		backgroundColor: '#ffa666',
-		'&:hover': {
-			backgroundColor: '#ffb37c',
-		},
-		'&:active': {
-			backgroundColor: '#ffc093',
-		},
-		'&:disabled': {
-			backgroundColor: '#979797',
-		},
-	},
+	button,
 	container: {
 		gridArea: 'header',
-		backgroundColor: '#7a99b8',
-		height: '60px',
+		backgroundColor: '#333333',
+		height: '80px',
 		boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.25)',
-		padding: '15px 60px',
+		padding: '16px 64px',
 		display: 'flex',
+		justifyContent: 'space-between',
 		alignItems: 'center',
 	},
 	badge: {
@@ -64,9 +77,10 @@ const useStyles = createUseStyles({
 		right: '-5px',
 		background: '#ed4300',
 	},
-	disableBadge: {
-		display: 'none',
+	discard: {
+		backgroundColor: '#4E4E4E',
 	},
+	disable: { display: 'none' },
 	invalidSchemaIndicator: {
 		display: 'grid',
 		gridTemplateColumns: '20px auto',
@@ -96,23 +110,34 @@ function Header() {
 
 	const [openModal, setOpenModal] = useState(false);
 
-	const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
+	const [isOpenConfirmationModal, setIsOpenConfirmationModal] = useState(false);
 
 	const [confirmationModalType, setConfirmationModalType] = useState<'save' | 'discard' | null>(
 		null,
 	);
 
+	const [openSelect, setOpenSelect] = useState(false);
+
 	const confirmationModalConfig = {
 		save: {
-			setOpen: setOpenConfirmationModal,
+			isOpen: isOpenConfirmationModal,
+			setOpen: setIsOpenConfirmationModal,
+			header: 'Submit Changes',
 			message: 'Do you want to submit pending changes?',
 			action: saveChanges,
 		},
 		discard: {
-			setOpen: setOpenConfirmationModal,
+			isOpen: isOpenConfirmationModal,
+			setOpen: setIsOpenConfirmationModal,
+			header: 'Discard Changes',
 			message: 'Do you want to discard pending changes?',
 			action: discardChanges,
 		},
+	};
+
+	const changeSchema = (schema: string) => {
+		selectSchema(schema);
+		setOpenSelect(false);
 	};
 
 	useEffect(() => {
@@ -123,41 +148,41 @@ function Header() {
 		<div className={classes.container}>
 			{schemas.length !== 0 && (
 				<CustomizedTooltip title='submit pending changes first' disableCondition={!requestsExist}>
-					<select
-						disabled={requestsExist}
-						onChange={e => selectSchema(e.target.value)}
-						value={selectedSchemaName || undefined}>
-						{schemas.map(schema => (
-							<option key={schema} value={schema}>
-								{schema}
-							</option>
-						))}
-					</select>
+					<Select
+						options={schemas}
+						selected={selectedSchemaName}
+						onChange={changeSchema}
+						openSelect={openSelect}
+						setOpenSelect={setOpenSelect}
+						width={171}
+					/>
 				</CustomizedTooltip>
 			)}
-			<button
-				disabled={!requestsExist}
-				className={classes.button}
-				onClick={() => {
-					setOpenConfirmationModal(true);
-					setConfirmationModalType('save');
-				}}>
-				<span className={requestsExist ? classes.badge : classes.disableBadge}>
-					{preparedRequests.length}
-				</span>
-				Submit changes
-			</button>
-			{requestsExist && (
+			<div style={{ gap: 16, display: 'flex' }}>
 				<button
+					disabled={!requestsExist}
 					className={classes.button}
 					onClick={() => {
-						setOpenConfirmationModal(true);
-						setConfirmationModalType('discard');
+						setIsOpenConfirmationModal(true);
+						setConfirmationModalType('save');
 					}}>
-					Discard changes
+					<span className={requestsExist ? classes.badge : classes.disable}>
+						{preparedRequests.length}
+					</span>
+					Submit Changes
 				</button>
-			)}
-			{openConfirmationModal && confirmationModalType && (
+				{requestsExist && (
+					<button
+						className={classNames(classes.button, classes.discard)}
+						onClick={() => {
+							setIsOpenConfirmationModal(true);
+							setConfirmationModalType('discard');
+						}}>
+						Discard changes
+					</button>
+				)}
+			</div>
+			{isOpenConfirmationModal && confirmationModalType && (
 				<ModalConfirmation {...confirmationModalConfig[confirmationModalType]} />
 			)}
 			{openModal && <InvalidLinksList setOpen={setOpenModal} />}

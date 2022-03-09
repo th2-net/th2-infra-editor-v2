@@ -14,32 +14,32 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
 import { getBoxType, Status } from '../resources/Box';
-import { BoxEntity, BoxStatus, Pin } from '../../models/Box';
-import { getHashCode } from '../../helpers/string';
+import { BoxEntity, BoxStatus } from '../../models/Box';
 import { ellipsis } from '../../styles/mixins';
 import directionIcon from '../../assets/icons/direction-icon.svg';
-import classNames from 'classnames';
 import { ConnectionDirection } from '../../models/LinksDefinition';
 
 const useConnectionBoxStyles = createUseStyles({
+	headerBackground: {
+		backgroundColor: '#5CBEEF',
+		padding: '8px',
+		borderRadius: 4,
+	},
 	header: {
+		borderRadius: 4,
 		minWidth: 100,
 		width: '100%',
-		height: '100%',
-		minHeight: 25,
+		height: '32px',
 		flexShrink: 0,
-		padding: '0 6px',
+		padding: '4px',
 		backgroundColor: '#fff',
-		borderRadius: 6,
 		direction: 'ltr',
 		display: 'grid',
-		gridTemplateColumns: '13px 1fr',
+		gridTemplateColumns: '16px 1fr',
 		alignItems: 'center',
 		cursor: 'pointer',
-		boxShadow: '0 2px 5px rgb(0 0 0 / 25%)',
 	},
 	name: {
 		margin: '0 0 0 5px',
@@ -68,21 +68,20 @@ const useConnectionBoxStyles = createUseStyles({
 		cursor: 'pointer',
 	},
 	box: {
-		display: 'grid',
-		gridTemplateColumns: '30px 1fr',
 		direction: 'rtl',
-		height: '100%',
+		height: '48px',
 	},
 	type: {
 		textAlign: 'center',
 		fontSize: 11,
 		fontWeight: 'bold',
-		borderRadius: 9,
+		height: '24px',
+		borderRadius: 8,
 		padding: '0 4px 2px',
 		color: '#fff',
 		backgroundColor: 'rgb(102, 204, 145)',
-		minWidth: 30,
-		lineHeight: '16px',
+		width: '41px',
+		lineHeight: '24px',
 		...ellipsis(),
 	},
 	values: {
@@ -96,30 +95,12 @@ const useConnectionBoxStyles = createUseStyles({
 interface ConnectionBoxProps {
 	box: BoxEntity;
 	direction: ConnectionDirection;
-	pin: Pin;
 	onBoxSelect: (box: BoxEntity) => void;
-	isEditable: boolean;
-	onClickLink: () => void;
 	status?: BoxStatus;
 }
 
-export default function ConnectedBox({
-	box,
-	direction,
-	pin,
-	onBoxSelect,
-	onClickLink,
-	isEditable,
-	status,
-}: ConnectionBoxProps) {
+export default function ConnectedBox({ box, direction, onBoxSelect, status }: ConnectionBoxProps) {
 	const classes = useConnectionBoxStyles();
-
-	const hueValue = useMemo(() => {
-		const hashCode = getHashCode(pin.name);
-		const HUE_SEGMENTS_COUNT = 120;
-
-		return (hashCode % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
-	}, [pin.name]);
 
 	function handleBoxClick() {
 		onBoxSelect(box);
@@ -128,27 +109,25 @@ export default function ConnectedBox({
 	const type = getBoxType(box);
 
 	return (
-		<div className={classes.box} style={{ direction: direction === 'to' ? 'rtl' : 'ltr' }}>
-			<div className={classes.header} onClick={handleBoxClick}>
-				<Status status={status ?? BoxStatus.PENDING} />
-				<div className={classes.values}>
-					<span className={classes.name} title={box.name}>
-						{box.name}
-					</span>
-					<span className={classes.type} title={type}>
-						{type}
-					</span>
+		<div
+			className={classes.box}
+			style={{
+				direction: direction === 'to' ? 'rtl' : 'ltr',
+				margin: direction === 'to' ? '0 30px 0 0' : '0 0 0 30px',
+			}}>
+			<div className={classes.headerBackground}>
+				<div className={classes.header} onClick={handleBoxClick}>
+					<Status status={status ?? BoxStatus.PENDING} />
+					<div className={classes.values}>
+						<span className={classes.name} title={box.name}>
+							{box.name}
+						</span>
+						<span className={classes.type} title={type}>
+							{type}
+						</span>
+					</div>
 				</div>
 			</div>
-			<span
-				onClick={() => isEditable && onClickLink()}
-				className={classNames(classes.arrowIcon, {
-					[classes.editable]: isEditable,
-				})}
-				style={{
-					filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)`,
-				}}
-			/>
 		</div>
 	);
 }

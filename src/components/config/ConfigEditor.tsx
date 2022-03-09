@@ -25,6 +25,17 @@ import { theme } from '../../styles/theme';
 import { getCountPinsConnections, PinsPositions } from '../../helpers/pinConnections';
 import { IRange } from 'monaco-editor';
 
+const useStyles = createUseStyles({
+	textareaWrapper: {
+		boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.08)',
+		borderRadius: 4,
+		marginBottom: 8,
+	},
+	grayText: {
+		color: `${theme.colorPrimary} !important`,
+	},
+});
+
 interface Props {
 	value: string;
 	setValue: (v: string) => void;
@@ -32,14 +43,8 @@ interface Props {
 	pinsConnectionsLenses?: boolean;
 }
 
-const useStyle = createUseStyles({
-	grayText: {
-		color: `${theme.colorPrimary} !important`,
-	},
-});
-
 const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }: Props) => {
-	const classes = useStyle();
+	const classes = useStyles();
 	const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor>();
 	const monacoRef = React.useRef<Monaco>();
 	const boxesStore = useBoxesStore();
@@ -179,14 +184,15 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }
 		}
 	};
 	return (
-		<div className='textarea-wrapper'>
+		<div className={classes.textareaWrapper}>
 			<Editor
-				height={300}
 				width='auto'
 				path={schema?.path}
 				language={'json'}
+				theme={'my-theme'}
 				options={{
-					fontSize: 12,
+					fontSize: 14,
+					fontWeight: '400',
 					codeLens: pinsConnectionsLenses,
 					lineNumbers: 'off',
 					minimap: {

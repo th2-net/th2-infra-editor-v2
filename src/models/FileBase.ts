@@ -18,7 +18,7 @@ export default interface FileBase {
 	kind: string;
 	name: string;
 	sourceHash?: string;
-	spec: unknown;
+	spec: Object;
 }
 
 export interface RequestModel {

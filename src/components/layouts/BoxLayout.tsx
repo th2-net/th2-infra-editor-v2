@@ -23,7 +23,7 @@ import { observer } from 'mobx-react-lite';
 
 const useStyles = createUseStyles({
 	container: {
-		height: '100%',
+		height: 'calc(100% + 6px)',
 		overflow: 'hidden',
 	},
 	noBoxSelected: {

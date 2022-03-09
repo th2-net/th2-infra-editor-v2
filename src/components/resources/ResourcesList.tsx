@@ -32,38 +32,30 @@ import { BoxFilters } from './ResourcesFilter';
 import ResourcesSearch from './ResourcesSearch';
 import ResourcesListHeader from './ResourcesListHeader';
 import AppViewType from '../../util/AppViewType';
+import Icon from '../Icon';
 
 const useStyles = createUseStyles(
 	{
 		container: {
+			height: 'calc(100% + 6px)',
+			margin: '3px',
 			gridArea: 'box-list',
 			overflow: 'hidden',
 			display: 'flex',
 			flexDirection: 'column',
-			borderRadius: 6,
+			borderRadius: 24,
+			boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.16)',
+			backgroundColor: '#FFFFFF',
 		},
 		boxList: {
-			marginTop: '10px',
 			...scrollBar(),
-		},
-		item: {
-			paddingBottom: '6px',
+			marginBottom: '24px',
 		},
 		groupItem: {
-			background: '#fff',
-			padding: '3px',
-			marginBottom: '6px',
-			borderRadius: '6px',
-		},
-		nextGroupItem: {
-			paddingBottom: '6px',
-			marginBottom: '0',
-			WebkitBorderBottomLeftRadius: '0',
-			WebkitBorderBottomRightRadius: '0',
-		},
-		prevGroupItem: {
-			WebkitBorderTopLeftRadius: '0',
-			WebkitBorderTopRightRadius: '0',
+			background: '#5CBEEF',
+			margin: '0 24px 4px 24px',
+			padding: '16px 12px',
+			borderRadius: 4,
 		},
 	},
 	{ name: 'ResourcesList' },
@@ -79,6 +71,7 @@ function ResourcesList() {
 	const boxesStore = useBoxesStore();
 	const selectedDictionaryStore = useSelectedDictionaryStore();
 	const appViewStore = useAppViewStore();
+	const classes = useStyles();
 
 	const [searchValue, setSearchValue] = useState('');
 	const [filter, setFilter] = useState<BoxFilters>(BoxFilters.all);
@@ -87,10 +80,10 @@ function ResourcesList() {
 	const boxes = useMemo(() => {
 		let allEntities;
 		switch (filter) {
-			case 'box':
+			case 'Boxes':
 				allEntities = boxesStore.boxes;
 				break;
-			case 'dictionary':
+			case 'Dictionaries':
 				allEntities = boxesStore.dictionaries;
 				break;
 			default:
@@ -164,14 +157,7 @@ function ResourcesList() {
 					group.types.includes((box as BoxEntity).spec.type),
 				);
 				return (
-					<div
-						className={classNames(classes.groupItem, {
-							[classes.nextGroupItem]:
-								index + 1 < groupedBoxes.length &&
-								getType(groupedBoxes[index + 1]) === getType(box),
-							[classes.prevGroupItem]:
-								index - 1 >= 0 && getType(groupedBoxes[index - 1]) === getType(box),
-						})}>
+					<div className={classes.groupItem}>
 						<Observer>
 							{() => (
 								<Box
@@ -190,7 +176,7 @@ function ResourcesList() {
 			}
 			if (isDictionaryEntity(box)) {
 				return (
-					<div className={classes.item}>
+					<div className={classes.groupItem}>
 						<Observer>
 							{() => (
 								<Dictionary
@@ -199,6 +185,9 @@ function ResourcesList() {
 										appViewStore.setViewType(AppViewType.DictionaryView);
 										selectedDictionaryStore.selectDictionary(box);
 									}}
+									isSelected={
+										selectedDictionaryStore.dictionary?.name === (box as DictionaryEntity).name
+									}
 								/>
 							)}
 						</Observer>
@@ -212,6 +201,7 @@ function ResourcesList() {
 						<ExpandGroup
 							group={box}
 							isExpand={expandedMap.get(box.name) || false}
+							entitiesCount={boxes.filter(item => getType(item as BoxEntity) === box.name).length}
 							onClick={() => expandGroup(box.name)}
 						/>
 					)}
@@ -221,13 +211,14 @@ function ResourcesList() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[boxesStore, groupedBoxes, appViewStore, selectedDictionaryStore, expandedMap, expandGroup],
 	);
-
-	const classes = useStyles();
-
 	return (
 		<div className={classes.container}>
-			<ResourcesListHeader filter={filter} setFilter={setFilter} setViewType={appViewStore.setViewType} />
-			<ResourcesSearch filter={filter} setValue={setSearchValue} />
+			<ResourcesListHeader
+				filter={filter}
+				setFilter={setFilter}
+				setViewType={appViewStore.setViewType}
+			/>
+			<ResourcesSearch setValue={setSearchValue} />
 			<Virtuoso data={groupedBoxes} itemContent={renderBox} className={classes.boxList} />
 		</div>
 	);
@@ -238,60 +229,44 @@ export default observer(ResourcesList);
 const useExpandGroupStyles = createUseStyles(
 	{
 		expandGroup: {
-			height: '25px',
-			width: '100%',
-			display: 'grid',
-			gridTemplateAreas: `
-				"button name"
-			`,
-			gridTemplateRows: '1fr',
-			gridTemplateColumns: '25px 1fr',
-			gap: '6px',
+			display: 'flex',
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			height: '58px',
+			fontSize: '14px',
+			backgroundColor: '#FFF',
+			borderRadius: 4,
+			boxShadow: '0px 0px 3px rgba(0, 0, 0, 0.16)',
+			margin: '0 24px 4px 24px',
+			padding: '16px',
 			cursor: 'pointer',
-			margin: '10px 0',
+			'&:hover': {
+				backgroundColor: '#EEF2F6',
+			},
 		},
 		expanded: {
-			margin: '10px 0 0 0',
-			background: '#fff',
-			borderRadius: '6px 6px 0 0',
-		},
-		expandButton: {
-			width: '25px',
-			height: '25px',
-			border: 'none',
-			gridArea: 'button',
-			lineHeight: '25px',
-			fontWeight: 'bold',
-			fontSize: '15px',
-			background: '#fff',
-			textAlign: 'center',
-			borderRadius: '50%',
-			transition: '250ms',
-			userSelect: 'none',
+			backgroundColor: '#5CBEEF',
 			'&:hover': {
-				background: 'rgba(255, 255, 255, 0.8)',
-			},
-			'&:active': {
-				background: 'rgba(255, 255, 255, 0.5)',
+				backgroundColor: '#5CBEEF',
 			},
 		},
-		rotateButton: {
-			transform: 'rotate(90deg)',
+		dictionaries: {
+			gap: '18px',
+			justifyContent: 'flex-start',
 		},
 		name: {
-			width: '100%',
 			height: '100%',
-			lineHeight: '25px',
-			gridArea: 'name',
 			background: 'transparent',
-			borderRadius: '7px',
-			padding: '0 15px',
-			'&:hover': {
-				background: 'rgba(0, 0, 0, 0.1)',
-			},
-			'&:active': {
-				background: 'rgba(0, 0, 0, 0.3)',
-			},
+			lineHeight: '26px',
+			width: 'fit-content',
+		},
+		entitiesCount: {
+			color: '#fff',
+			backgroundColor: '#5CBEEF',
+			borderRadius: 12,
+			padding: 6,
+			height: 'fit-content',
 		},
 	},
 	{ name: 'ExpandGroup' },
@@ -300,6 +275,7 @@ interface ExpandGroupProps {
 	group: GroupEntity;
 	isExpand: boolean;
 	onClick: () => void;
+	entitiesCount: number;
 }
 
 function ExpandGroup(props: ExpandGroupProps) {
@@ -309,15 +285,25 @@ function ExpandGroup(props: ExpandGroupProps) {
 		<div
 			onClick={() => props.onClick()}
 			className={classNames(classes.expandGroup, {
-				[classes.expanded]: props.isExpand && props.group.name !== 'dictionaries',
+				[classes.expanded]: props.isExpand,
+				[classes.dictionaries]: props.group.name === 'dictionaries',
 			})}>
-			<div
-				className={classNames(classes.expandButton, {
-					[classes.rotateButton]: props.isExpand,
-				})}>
-				&gt;
+			{props.group.name === 'dictionaries' ? (
+				<Icon id='dictionary' stroke='#333' fill='#333' />
+			) : null}
+			<div style={{ gap: '16px', display: 'flex', alignItems: 'center' }}>
+				<div className={classes.name}>{props.group.name}</div>
+				{props.group.name !== 'dictionaries' ? (
+					<div className={classes.entitiesCount}>{props.entitiesCount}</div>
+				) : null}
 			</div>
-			<div className={classes.name}>{props.group.name}</div>
+			{props.group.name !== 'dictionaries' ? (
+				props.isExpand ? (
+					<Icon id='arrowUp' stroke='#FFF' />
+				) : (
+					<Icon id='arrowDown' stroke='#666' />
+				)
+			) : null}
 		</div>
 	);
 }

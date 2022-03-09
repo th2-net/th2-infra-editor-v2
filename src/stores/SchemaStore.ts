@@ -87,6 +87,11 @@ export class SchemaStore {
 		this.schemaSettings = null;
 	}
 
+	public fetchSchema = (schemaName: string | null) => {
+		if (schemaName === null) return undefined;
+		return this.api.fetchSchemaState(schemaName);
+	}
+
 	public get invalidLinks(): InvalidLink[] {
 		const invalidLinks: InvalidLink[] = [];
 		this.boxUpdater.links.forEach(link => {

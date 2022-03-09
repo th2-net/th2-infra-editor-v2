@@ -17,33 +17,45 @@
 import React from 'react';
 import { capitalize } from 'lodash';
 import { createUseStyles } from 'react-jss';
-import Icon from '../Icon';
 import { visuallyHidden } from '../../styles/mixins';
+import AppViewType from '../../util/AppViewType';
 
 const useBoxFiltersStyles = createUseStyles({
 	filters: {
 		display: 'flex',
+		margin: '24px 12px 12px 24px',
+		lineHeight: '16px',
+		fontSize: '12px',
+		color: '#333333',
+		borderRadius: 4,
+		gap: 12,
 	},
 	filtersInput: {
 		...visuallyHidden(),
 		'&:checked': {
 			'&+label': {
-				backgroundColor: '#fff',
+				backgroundColor: '#5CBEEF',
+				color: '#FFF',
+				border: '1px solid #0099E5',
+				boxSizing: 'border-box',
 			},
 		},
 	},
 	filtersLabel: {
 		display: 'inline-flex',
+		backgroundColor: '#F3F3F6',
 		verticalAlign: 'middle',
-		padding: 6,
+		padding: '8px 12px',
+		border: '1px solid #E5E5E5',
+		borderRadius: 4,
 		cursor: 'pointer',
 	},
 });
 
 export enum BoxFilters {
-	all = 'all',
-	box = 'box',
-	dictionary = 'dictionary',
+	all = 'All',
+	box = 'Boxes',
+	dictionary = 'Dictionaries',
 }
 
 const filterOptions: BoxFilters[] = [BoxFilters.all, BoxFilters.box, BoxFilters.dictionary];
@@ -51,6 +63,7 @@ const filterOptions: BoxFilters[] = [BoxFilters.all, BoxFilters.box, BoxFilters.
 interface BoxFiltersProps {
 	filter: BoxFilters;
 	setFilter: (filter: BoxFilters) => void;
+	setViewType: (viewType: AppViewType) => void;
 }
 
 function ResourcesFilter(props: BoxFiltersProps) {
@@ -72,7 +85,7 @@ function ResourcesFilter(props: BoxFiltersProps) {
 						checked={selectedFilter === filter}
 					/>
 					<label title={capitalize(filter)} htmlFor={filter} className={classes.filtersLabel}>
-						{filter === BoxFilters.all ? filter : <Icon id={filter} stroke='black' />}
+						{filter}
 					</label>
 				</React.Fragment>
 			))}

@@ -19,8 +19,11 @@ import { createUseStyles } from 'react-jss';
 import ConnectedBox from './ConnectedBox';
 import { BoxEntity, Pin } from '../../models/Box';
 import { Theme } from '../../styles/theme';
+import classNames from 'classnames';
+import directionIcon from '../../assets/icons/direction-icon.svg';
 import { ConnectionDirection } from '../../models/LinksDefinition';
 import useSubscriptionStore from '../../hooks/useSubscriptionStore';
+import Icon from '../Icon';
 
 export interface IBoxConnections {
 	box: BoxEntity;
@@ -95,10 +98,7 @@ export default function BoxConnections(props: GroupProps) {
 	const classes = useStyles();
 
 	return (
-		<div style={{ direction: direction === 'to' ? 'rtl' : 'initial' }}>
-			<div className={classes.newLink} onClick={() => editLink(direction)}>
-				New link +
-			</div>
+		<div>
 			{pinConnections
 				.filter(g => g.boxes.length > 0)
 				.map((connection, index) => (
@@ -139,24 +139,45 @@ const usePinConnectionsClasses = createUseStyles({
 		width: '100%',
 		flexShrink: 0,
 		direction: 'initial',
+		fontSize: '14px',
+		fontWeight: '500',
 	},
 	header: {
 		display: 'flex',
+		color: '#FFF',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		height: '32px',
+		backgroundColor: '#5CBEEF',
+		borderRadius: 4,
+		padding: '16px 8px',
 		direction: 'ltr',
-		'&~div': {
-			height: 'calc(100% - 24px)',
-		},
 	},
 	expandButton: {
+		paddingLeft: 2,
 		cursor: 'pointer',
 		border: 'none',
 		borderRadius: '50%',
 		width: 20,
 		height: 20,
 		textAlign: 'center',
-		padding: 0,
+	},
+	arrowIcon: {
+		// TODO: embed icon as component
+		backgroundImage: `url(${directionIcon})`,
+		backgroundSize: '100%',
+		placeSelf: 'center',
+		width: 14,
+		height: 9,
+		marginBottom: 4,
+		backgroundRepeat: 'no-repeat',
+		order: 1,
+		flexShrink: 0,
+		gridRow: 1,
+		gridColumn: 1,
+	},
+	editable: {
+		cursor: 'pointer',
 	},
 });
 
@@ -186,32 +207,40 @@ function PinConnections({
 						style={{
 							display: 'flex',
 							direction: direction === 'to' ? 'rtl' : 'ltr',
-							marginBottom: 5,
+							height: '84px',
+							marginBottom: 12,
 						}}>
 						<div style={{ width: 250, flexShrink: 0 }}>
-							{index === 0 && (
+							<div style={{ display: 'grid', gridTemplateColumns: '30px 1fr' }}>
 								<div
 									className={classes.header}
 									style={{
-										padding: direction === 'to' ? '0 30px 0 0' : '0 0 0 30px',
+										marginBottom: '4px',
 									}}>
 									<span className={classes.pin}>{connections.pin.name}</span>
 									{!isRoot && connections.boxes.length > 1 && (
 										<button
 											className={classes.expandButton}
 											onClick={() => setIsExpanded && setIsExpanded(!isExpanded)}>
-											{isExpanded ? '-' : '+'}
+											{isExpanded ? (
+												<Icon id='arrowUp' stroke='#808080' />
+											) : (
+												<Icon id='arrowDown' stroke='#808080' />
+											)}
 										</button>
 									)}
 								</div>
-							)}
+								<span
+									onClick={() => currentDepth === 0 && editLink(box.box)}
+									className={classNames(classes.arrowIcon, {
+										[classes.editable]: currentDepth === 0,
+									})}
+								/>
+							</div>
 							<ConnectedBox
 								box={box.box}
-								pin={connections.pin}
 								direction={direction}
 								onBoxSelect={onBoxSelect}
-								isEditable={currentDepth === 0}
-								onClickLink={() => editLink(box.box)}
 								status={subscriptionStore.boxStates.get(box.box.name)}
 							/>
 						</div>

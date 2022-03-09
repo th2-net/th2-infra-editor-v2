@@ -235,6 +235,8 @@ export class BoxUpdater {
 		}
 	}
 
+	changes: {prevName: string, nextName: string}[] = [];
+
 	createBox = (box: BoxEntity) => {
 		if (this.boxesStore.boxes.find(b => b.name === box.name)) {
 			alert(`Box "${box.name}" already exists`);
@@ -257,6 +259,13 @@ export class BoxUpdater {
 		const hasChanges = !isEqual(toJS(box), updatedBox);
 
 		if (hasChanges) {
+			const sameBox = this.changes
+				.map((value, index) => { return { value, index } })
+				.filter(b => b.value.nextName === box.name)
+			if (sameBox.length > 0)
+				this.changes[sameBox[0].index].nextName = updatedBox.name
+			else
+				this.changes.push({ prevName: box.name, nextName: updatedBox.name });
 			const boxIndex = this.boxesStore.boxes.findIndex((b) => b.name === box.name);
 
 			if (boxIndex === -1) throw new Error(`Cannot find box with name "${box.name}"`);

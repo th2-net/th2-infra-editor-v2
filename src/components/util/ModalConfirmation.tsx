@@ -14,48 +14,116 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { Dispatch, SetStateAction } from 'react';
+
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
+import classNames from 'classnames';
 import { createUseStyles } from 'react-jss';
-import ModalWindow from './ModalWindow';
 import { modalWindow } from '../../styles/mixins';
+import DifferenceWindow from './DifferenceWindow';
+import { Change, diffJson, diffLines } from 'diff';
+import { useBoxUpdater } from '../../hooks/useBoxUpdater';
+import { useSchemaStore } from '../../hooks/useSchemaStore';
+import { toJS } from 'mobx';
+import { ModalPortal } from './Portal';
 
 const useStyles = createUseStyles({
 	modalWindow: {
 		...modalWindow(),
-		width: 350,
-		height: 150,
+		display: 'flex',
+		flexDirection:'column',
+		width: '95%',
+		height: '90%',
+	},
+	header: {
+		fontSize: 18,
+		fontWeight: 500,
 	},
 	messageContainer: {
-		fontSize: 20,
-		overflowY: 'auto',
-		height: 60,
+		fontSize: 16,
+		fontWeight: 400,
 	},
 	buttonArea: {
-		height: 50,
 		display: 'flex',
-		flexDirection: 'row',
+		gap: '12px',
 		justifyContent: 'center',
-		'& button': {
-			margin: 5,
-			height: 40,
-			width: 50,
+	},
+	button: {
+		width: '90px',
+		borderRadius: '4px',
+		color: '#fff',
+		padding: '12px 24px',
+		textTransform: 'capitalize',
+		outline: 'none',
+		border: 'none',
+		fontSize: '14px',
+		position: 'relative',
+		cursor: 'pointer',
+		backgroundColor: '#5CBEEF',
+		'&:hover': {
+			backgroundColor: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
 		},
+		'&:active': {
+			backgroundColor: '#0099E5',
+		},
+		'&:disabled': {
+			opacity: '0.4',
+		},
+	},
+	cancel: {
+		backgroundColor: '#4E4E4E',
 	},
 });
 
+
+
+
 const ModalConfirmation = (props: {
 	setOpen: Dispatch<SetStateAction<boolean>>;
+	isOpen: boolean;
 	action: () => void;
+	header: string;
 	message: string;
 }) => {
 	const classes = useStyles();
-	return (
-		<ModalWindow setOpen={props.setOpen}>
-			<div className={classes.modalWindow}>
-				<div className={classes.messageContainer}>{props.message}</div>
+	const boxUpdater = useBoxUpdater();
+	const { selectedSchemaName, boxesStore, fetchSchema } = useSchemaStore();
+	const [changes, setChanges] = React.useState<{key:string, change:Change[]}[]>([]);
+	const [error, setError] = React.useState<undefined | string>(undefined);
 
+	const fetchDifference = () => {
+		const schema = fetchSchema(selectedSchemaName);
+		const changes = boxUpdater.changes.slice();
+		if (schema)
+			schema.then(val => {
+				const res = val.resources.filter(resource => changes.filter(change => change.prevName === resource.name).length > 0).slice();
+				setChanges(res.map(prevVal => {
+					const boxCopy = toJS(boxesStore.boxes.find(box => changes.find(b=>b.prevName===prevVal.name)?.nextName === box.name));
+					if (boxCopy) {
+						const dif = diffJson(boxCopy, prevVal);
+						const before = dif.filter(change=>!change.added).map(change=>change.value).join('');
+						const after = dif.filter(change=>!change.removed).map(change=>change.value).join('');
+						return {key: prevVal.name, change:diffLines(after, before)};
+					}
+					return {key: prevVal.name, change:[]}
+				}));
+			}).catch(err=>{
+				setError(String(err));
+			});
+	}
+
+	useEffect(()=>fetchDifference(), []);
+	
+	return (
+		<ModalPortal isOpen={props.isOpen}>
+			<div className={classes.modalWindow}>
+				<div className={classes.header}>{props.header}</div>
+				<div className={classes.messageContainer}>{error ? error : props.message}</div>
+				{!error && <DifferenceWindow changes={changes} />}
 				<div className={classes.buttonArea}>
 					<button
+						disabled={!!error}
+						className={classes.button}
 						onClick={() => {
 							props.action();
 							props.setOpen(false);
@@ -63,6 +131,7 @@ const ModalConfirmation = (props: {
 						Yes
 					</button>
 					<button
+						className={classNames(classes.button, classes.cancel)}
 						onClick={() => {
 							props.setOpen(false);
 						}}>
@@ -70,7 +139,7 @@ const ModalConfirmation = (props: {
 					</button>
 				</div>
 			</div>
-		</ModalWindow>
+		</ModalPortal>
 	);
 };
 

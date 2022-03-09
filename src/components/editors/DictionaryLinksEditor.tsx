@@ -14,57 +14,40 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { observer } from "mobx-react-lite";
-import { useMemo, useRef, useState } from "react";
-import { createUseStyles } from "react-jss";
-import { useBoxesStore } from "../../hooks/useBoxesStore";
-import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
-import useOutsideClickListener from "../../hooks/useOutsideClickListener";
-import { DictionaryRelation } from "../../models/Dictionary";
-import Icon from "../Icon";
-import Select from "../util/Select";
-
-export const useLinksStyles = createUseStyles({
-		links: {
-			width: '100%',
-			fontSize: 12,
-		},
-		add: {
-			cursor: 'pointer',
-			backgroundColor: 'transparent',
-			margin: '10px 0 0',
-			border: '1px grey solid',
-			outline: 'none',
-			borderRadius: '50%',
-			padding: 0,
-			width: 24,
-			height: 24,
-			'&:hover': {
-				backgroundColor: '#e5e5e5'
-			}
-		}
-});
-
-interface DictionaryLinkProps {
-	link: DictionaryRelation;
-	deleteLink: () => void;
-}
+import { observer } from 'mobx-react-lite';
+import { useMemo, useState } from 'react';
+import { createUseStyles } from 'react-jss';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
+import { DictionaryRelation } from '../../models/Dictionary';
+import Icon from '../Icon';
+import { ModalPortal } from '../util/Portal';
+import Select from '../util/Select';
+import closeIcon from '../../assets/icons/close-icon.svg';
+import { button, scrollBar } from '../../styles/mixins';
+import classNames from 'classnames';
 
 const useLinkStyle = createUseStyles({
 	link: {
-		padding: '0 2px',
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		'&:hover': {
-			backgroundColor: '#e5e5e5'
-		}
 	},
 	title: {
-		display: 'flex',
-		'&>p': {
-			margin: '0 0 0 2px'
-		}
+		width: '100%',
+		backgroundColor: '#EEF2F6',
+		borderRadius: 4,
+		display: 'grid',
+		gridTemplateColumns: 'auto 1fr auto',
+		gap: 14,
+		padding: '8px 10px',
+		fontWeight: 600,
+		alignItems: 'center',
+	},
+	name: {
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+		overflow: 'hidden',
 	},
 	delete: {
 		display: 'inline-flex',
@@ -74,40 +57,180 @@ const useLinkStyle = createUseStyles({
 		outline: 'none',
 		border: 'none',
 		cursor: 'pointer',
-	}
-})
+		'&:hover': {
+			backgroundColor: '#e5e5e5',
+		},
+	},
+});
 
-const Link = ({link, deleteLink}: DictionaryLinkProps) => {
+interface DictionaryLinkProps {
+	link: DictionaryRelation;
+	deleteLink: () => void;
+}
+
+const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 	const classes = useLinkStyle();
 	return (
 		<div className={classes.link}>
 			<div className={classes.title}>
-				<Icon id='dictionary' stroke='black' />
-				<p>{link.dictionary.name}</p>
+				<Icon id='dictionary' stroke='black' fill='#333' />
+				<div className={classes.name}>{link.dictionary.name}</div>
+				<button className={classes.delete} onClick={deleteLink}>
+					<Icon id='cross' stroke='black' width={9} height={9} />
+				</button>
 			</div>
-			<button className={classes.delete} onClick={deleteLink}><Icon id='cross' stroke='black' width={8} height={8}/></button>
 		</div>
-	)
+	);
+};
+
+export const useLinksStyles = createUseStyles({
+	links: {
+		width: '100%',
+		fontSize: 12,
+		color: '#666666',
+		fontWeight: 400,
+	},
+	add: {
+		cursor: 'pointer',
+		backgroundColor: 'transparent',
+		margin: '10px 0 0',
+		border: '1px grey solid',
+		outline: 'none',
+		borderRadius: '50%',
+		padding: 0,
+		width: 24,
+		height: 24,
+		'&:hover': {
+			backgroundColor: '#e5e5e5',
+		},
+	},
+	editor: {
+		display: 'grid',
+		gridTemplateRows: 'auto 1fr auto',
+		borderRadius: 4,
+		background: '#fff',
+		border: 'none',
+		boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
+		direction: 'ltr',
+		boxSizing: 'border-box',
+		height: '306px',
+		width: '496px',
+		position: 'absolute',
+		overflow: 'hidden',
+	},
+	header: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		padding: '8px 16px',
+		backgroundColor: '#E5E5E5',
+	},
+	title: {
+		cursor: 'default',
+		height: '100%',
+		lineHeight: '24px',
+	},
+	closeButton: {
+		cursor: 'pointer',
+		height: '12px',
+		width: '12px',
+		userSelect: 'none',
+		backgroundImage: `url(${closeIcon})`,
+		'&:hover': {
+			backgroundColor: 'rgba(0, 0, 0, 0.05)',
+		},
+		'&:active': {
+			backgroundColor: 'rgba(0, 0, 0, 0.1)',
+		},
+	},
+	content: {
+		...scrollBar(),
+		padding: 24,
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+
+		width: '100%',
+	},
+	actions: {
+		paddingBottom: 24,
+		gap: 12,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		overflow: 'hidden',
+	},
+	button: {
+		...button(),
+	},
+	submit: {
+		background: '#5CBEEF',
+		'&:hover': {
+			background: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
+		},
+		'&:active': {
+			background: '#0099E5',
+			color: '#FFF',
+		},
+	},
+	deleteButton: {
+		background: '#4E4E4E',
+		'&:hover': {
+			background: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
+		},
+		'&:active': {
+			background: '#0099E5',
+			color: '#FFF',
+		},
+	},
+	disable: {
+		display: 'none',
+	},
+	addDictionary: {
+		marginTop: 24,
+		width: 'fit-content',
+		...button(),
+		backgroundColor: '#0099E5',
+		'&:hover': {
+			backgroundColor: '#EEF2F6',
+			color: 'rgba(51, 51, 51, 0.8)',
+		},
+		'&:active': {
+			backgroundColor: '#0099E5',
+			color: '#FFF',
+		},
+	},
+});
+
+interface DictionaryLinksEditorProps {
+	showAddDictionary: boolean;
+	setShowAddDictionary: (prop: boolean) => void;
 }
 
-const DictionaryLinksEditor = () => {
+const DictionaryLinksEditor = ({
+	showAddDictionary,
+	setShowAddDictionary,
+}: DictionaryLinksEditorProps) => {
 	const classes = useLinksStyles();
 	const boxesStore = useBoxesStore();
 	const dictionaryLinksStore = useDictionaryLinksStore();
 
 	const options = useMemo(() => {
 		return boxesStore.dictionaries
-			.filter(dict => !dictionaryLinksStore.linkedDictionaries?.some(link => link.dictionary.name === dict.name))
-			.map(dict => dict.name)
-	}, [boxesStore.dictionaries, dictionaryLinksStore.linkedDictionaries])
+			.filter(
+				dict =>
+					!dictionaryLinksStore.linkedDictionaries?.some(
+						link => link.dictionary.name === dict.name,
+					),
+			)
+			.map(dict => dict.name);
+	}, [boxesStore.dictionaries, dictionaryLinksStore.linkedDictionaries]);
 
-	const [showAddDictionary, setShowAddDictionary] = useState(false);
 	const [newLinkedDictionaryName, setNewLinkedDictionaryName] = useState(options[0]);
 
-	const ref = useRef<HTMLDivElement>(null);
-	useOutsideClickListener(ref, () => {
-		setShowAddDictionary(false);
-	});
+	const [openSelect, setOpenSelect] = useState(false);
 
 	const applyNewLink = () => {
 		setShowAddDictionary(false);
@@ -117,40 +240,64 @@ const DictionaryLinksEditor = () => {
 				box: boxesStore.selectedBox.name,
 				dictionary: {
 					name: newLinkedDictionaryName,
-					type: 'MAIN'
-				}
-			}
+					type: 'MAIN',
+				},
+			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
 	};
 
+	const changeDictionary = (option: string) => {
+		setNewLinkedDictionaryName(option);
+		setOpenSelect(false);
+	};
+
 	return (
-		<div className={classes.links} ref={ref}>
-				<p>Linked dictionaries:</p>
-				{dictionaryLinksStore.linkedDictionaries.map((link, i) => (
-					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
-				))}
-				{showAddDictionary 
-					? <div>
+		<div className={classes.links}>
+			<p>Linked dictionaries:</p>
+			{dictionaryLinksStore.linkedDictionaries.map((link, i) => (
+				<Link
+					link={link}
+					key={`${link.name}-${i}`}
+					deleteLink={() => {
+						dictionaryLinksStore.deleteLinkDictionary(link);
+					}}
+				/>
+			))}
+			{showAddDictionary ? (
+				<ModalPortal isOpen={showAddDictionary}>
+					<div className={classes.editor}>
+						<div className={classes.header}>
+							<span className={classes.title}>Add Dictionary</span>
+							<span
+								className={classes.closeButton}
+								onClick={() => setShowAddDictionary(false)}></span>
+						</div>
+						<div className={classes.content}>
 							<Select
 								options={options}
 								selected={newLinkedDictionaryName}
-								onChange={setNewLinkedDictionaryName}
+								onChange={changeDictionary}
+								openSelect={openSelect}
+								setOpenSelect={setOpenSelect}
+								width={368}
 							/>
-							<button onClick={applyNewLink}><Icon id='check' stroke='black' /></button>
 						</div>
-					: options.length 
-						? <button 
-								className={classes.add}
-								onClick={() => setShowAddDictionary(true)}
-							>
-								+
+						<div className={classes.actions}>
+							<button onClick={applyNewLink} className={classNames(classes.button, classes.submit)}>
+								Submit
 							</button>
-						: null
-				}
-			</div>
+							<button
+								onClick={() => setShowAddDictionary(false)}
+								className={classNames(classes.button, classes.deleteButton)}>
+								Cancel
+							</button>
+						</div>
+					</div>
+				</ModalPortal>
+			) : null}
+		</div>
 	);
 };
 
 export default observer(DictionaryLinksEditor);
-	

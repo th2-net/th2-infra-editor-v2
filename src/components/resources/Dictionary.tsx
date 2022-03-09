@@ -18,54 +18,84 @@ import { createUseStyles } from 'react-jss';
 import { Theme } from '../../styles/theme';
 import Icon from '../Icon';
 import { DictionaryEntity } from '../../models/Dictionary';
+import classNames from 'classnames';
 
 const useStyles = createUseStyles(
-    (theme: Theme) => ({
-        container: {
-            width: '100%',
-            backgroundColor: '#fff',
-            minHeight: 70,
-            borderRadius: 6,
-            overflow: 'hidden',
-            display: 'grid',
-            gridTemplateRows: '25px 1fr',
-            cursor: 'pointer',
-        },
-        header: {
-            height: 25,
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 10px',
-            backgroundColor: '#7a99b8',
-            color: '#fff'
-        },
-        name: {
-            margin: '0 0 0 5px',
-            fontSize: 12,
-        },
-    }),
-    { name: 'Dictionary' },
+	(theme: Theme) => ({
+		container: {
+			width: '100%',
+			backgroundColor: '#fff',
+			height: 32,
+			borderRadius: 4,
+			overflow: 'hidden',
+			display: 'grid',
+			gridTemplateRows: '24px auto',
+			cursor: 'pointer',
+			boxSizing: 'border-box',
+			boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.08)',
+			padding: '4px 12px',
+		},
+		header: {
+			width: '100%',
+			display: 'grid',
+			alignItems: 'center',
+			gridTemplateRows: '1fr',
+			gridTemplateColumns: '16px minmax(41px, auto) ',
+			justifyContent: 'start',
+			backgroundColor: '#fff',
+			color: '#000',
+			fontSize: 12,
+			gap: 8,
+		},
+		name: {
+			margin: '0 0 0 5px',
+			textAlign: 'left',
+			whiteSpace: 'nowrap',
+			overflow: 'hidden',
+			lineHeight: '24px',
+			fontSize: 12,
+			height: '100%',
+			textOverflow: 'ellipsis',
+		},
+		selectable: {
+			cursor: 'pointer',
+			'&:hover': {
+				border: '2px solid #0099E6',
+				padding: '2px 12px',
+			},
+		},
+		selected: {
+			border: '2px solid #0099E6',
+			padding: '2px 12px',
+		},
+	}),
+	{ name: 'Dictionary' },
 );
 
 interface Props {
-    dictionary: DictionaryEntity;
-		onClick: () => void;
-    color?: string;
+	dictionary: DictionaryEntity;
+	onClick: () => void;
+	isSelected?: boolean;
+	color?: string;
 }
 
 function Dictionary(props: Props) {
-const { dictionary, color, onClick } = props;
-const classes = useStyles();
+	const { dictionary, color, onClick, isSelected = false } = props;
+	const classes = useStyles();
 
-return (
-    <div className={classes.container} onClick={onClick}>
-        <div className={classes.header} style={{ backgroundColor: color }}>
-            <Icon id='dictionary'/>
-            <h5 className={classes.name}>{dictionary.name}</h5>
-        </div>
-    </div>
-);
+	return (
+		<div
+			className={classNames(classes.container, {
+				[classes.selectable]: typeof onClick === 'function',
+				[classes.selected]: isSelected,
+			})}
+			onClick={onClick}>
+			<div className={classes.header} style={{ backgroundColor: color }}>
+				<Icon id='dictionary' stroke='#333' fill='#333' />{' '}
+				<h5 className={classes.name}>{dictionary.name}</h5>
+			</div>
+		</div>
+	);
 }
 
 export default Dictionary;

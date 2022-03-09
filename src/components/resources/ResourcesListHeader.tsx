@@ -15,16 +15,15 @@
  ***************************************************************************** */
 
 import { createUseStyles } from 'react-jss';
-import Icon from '../Icon';
 import ResourcesFilter, { BoxFilters } from './ResourcesFilter';
-import { buttonReset, clickable } from '../../styles/mixins';
 import AppViewType from '../../util/AppViewType';
+import { buttonReset, clickable } from '../../styles/mixins';
+import Icon from '../Icon';
 
 const useStyles = createUseStyles(
 	{
 		header: {
 			display: 'flex',
-			justifyContent: 'space-between',
 			alignItems: 'center',
 		},
 		addButton: {
@@ -32,6 +31,7 @@ const useStyles = createUseStyles(
 			...clickable(),
 			padding: 3,
 			borderRadius: 4,
+			marginTop: 12,
 			display: 'flex',
 			justifyContent: 'center',
 			alignItems: 'center',

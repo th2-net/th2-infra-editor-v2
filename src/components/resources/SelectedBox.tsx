@@ -22,6 +22,7 @@ import { Theme } from '../../styles/theme';
 import DictionaryLinksEditor from '../editors/DictionaryLinksEditor';
 import { getBoxType, getImageNameWithoutDomain, Status } from './Box';
 import { button, scrollBar } from '../../styles/mixins';
+import { useState } from 'react';
 
 interface StylesProps {
 	headerBgColor?: string;
@@ -33,7 +34,8 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 			width: '100%',
 			backgroundColor: '#fff',
 			minHeight: 70,
-			borderRadius: 6,
+			borderRadius: 4,
+			boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.12)',
 			overflow: 'hidden',
 			display: 'grid',
 			gridTemplateRows: '25px 1fr',
@@ -53,21 +55,29 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		},
 		body: {
 			...scrollBar(),
+			overflow: 'scroll',
 			height: '100%',
 			padding: '20px',
-			overflow: 'auto',
+			display: 'grid',
+			gridTemplateRows: 'auto 1fr auto',
 		},
-		row: {
+		info: {
 			width: '100%',
 			display: 'flex',
 			justifyContent: 'space-between',
+			height: 'fit-content',
+		},
+		actions: {
+			display: 'flex',
+			gap: 24,
+			justifyContent: 'center',
 		},
 		bodyValue: {
 			fontSize: '12px',
-			lineHeight: '15px',
 			fontWeight: 'bold',
 			borderRadius: 9,
-			padding: '0 4px 2px',
+			padding: '4px 8px',
+			height: 'fit-content',
 		},
 		type: {
 			color: '#fff',
@@ -83,17 +93,34 @@ const useStyles = createUseStyles<string, StylesProps, Theme>(
 		selected: {
 			border: '2px solid',
 		},
-		addButton: {
+		addLink: {
 			...button(),
-			margin: '10px',
-			marginLeft: 'calc(100% - 100px)',
-
-			backgroundColor: '#ffba66',
+			height: '40px',
+			whiteSpace: 'nowrap',
+			padding: '12px 30px',
+			backgroundColor: '#0099E5',
 			'&:hover': {
-				backgroundColor: '#ffc47d',
+				backgroundColor: '#EEF2F6',
+				color: 'rgba(51, 51, 51, 0.8)',
 			},
 			'&:active': {
-				backgroundColor: '#ffcf94',
+				backgroundColor: '#0099E5',
+				color: '#FFF',
+			},
+		},
+		addDictionary: {
+			...button(),
+			height: '40px',
+			whiteSpace: 'nowrap',
+			padding: '12px 10px',
+			backgroundColor: '#4E4E4E',
+			'&:hover': {
+				backgroundColor: '#EEF2F6',
+				color: 'rgba(51, 51, 51, 0.8)',
+			},
+			'&:active': {
+				backgroundColor: '#0099E5',
+				color: '#FFF',
 			},
 		},
 	}),
@@ -110,6 +137,8 @@ function SelectedBox(props: Props) {
 	const { box, createNewLink, color } = props;
 	const classes = useStyles({ headerBgColor: color });
 
+	const [showAddDictionary, setShowAddDictionary] = useState(false);
+
 	// TODO: fix status
 	const status = useMemo(() => Object.values(BoxStatus)[box.name.length % 2], [box.name.length]);
 
@@ -122,14 +151,20 @@ function SelectedBox(props: Props) {
 				<h5 className={classes.name}>{box.name}</h5>
 			</div>
 			<div className={classes.body}>
-				<div className={classes.row}>
+				<div className={classes.info}>
 					<span className={classNames(classes.bodyValue, classes.type)}>{getBoxType(box)}</span>
 					<span className={classes.bodyValue}>{slicedImageName}</span>
 				</div>
-				<DictionaryLinksEditor />
-				<div className={classes.row}>
-					<button className={classes.addButton} onClick={createNewLink}>
+				<DictionaryLinksEditor
+					showAddDictionary={showAddDictionary}
+					setShowAddDictionary={setShowAddDictionary}
+				/>
+				<div className={classes.actions}>
+					<button className={classes.addLink} onClick={createNewLink}>
 						Add link
+					</button>
+					<button className={classes.addDictionary} onClick={() => setShowAddDictionary(true)}>
+						Add Dictionary
 					</button>
 				</div>
 			</div>
