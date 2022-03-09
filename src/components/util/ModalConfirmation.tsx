@@ -29,8 +29,10 @@ import { ModalPortal } from './Portal';
 const useStyles = createUseStyles({
 	modalWindow: {
 		...modalWindow(),
-		width: 325,
-		height: 192,
+		display: 'flex',
+		flexDirection:'column',
+		width: '95%',
+		height: '90%',
 	},
 	header: {
 		fontSize: 18,
@@ -109,19 +111,18 @@ const ModalConfirmation = (props: {
 				setError(String(err));
 			});
 	}
-	useEffect(()=>fetchDifference());
+
+	useEffect(()=>fetchDifference(), []);
 	
 	return (
 		<ModalPortal isOpen={props.isOpen}>
 			<div className={classes.modalWindow}>
 				<div className={classes.header}>{props.header}</div>
-				<div className={classes.messageContainer}>{props.message}</div>
-				{error
-					? <div>{error}</div>
-					: <DifferenceWindow changes={changes} />}
-				Are you sure you want  to submit on those changes ?
+				<div className={classes.messageContainer}>{error ? error : props.message}</div>
+				{!error && <DifferenceWindow changes={changes} />}
 				<div className={classes.buttonArea}>
 					<button
+						disabled={!!error}
 						className={classes.button}
 						onClick={() => {
 							props.action();

@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, flowResult, makeObservable, observable, computed, toJS } from 'mobx';
+import { action, flow, flowResult, makeObservable, observable, computed } from 'mobx';
 import { CancellablePromise } from 'mobx/dist/internal';
 import Api from '../api/api';
 import { isSettingsEntity, Schema, SchemaSettings } from '../models/Schema';

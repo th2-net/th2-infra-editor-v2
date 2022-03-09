@@ -89,8 +89,9 @@ const Input = ({ inputConfig, width }: InputProps) => {
 				})}
 				list={inputConfig.autocomplete?.datalistKey}
 				autoComplete='off'
+				placeholder={inputConfig.placeholder}
 			/>
-			{inputConfig.autocomplete && inputConfig.value.length > 0 && (
+			{inputConfig.autocomplete && (
 				<datalist id={inputConfig.autocomplete.datalistKey}>
 					{inputConfig.autocomplete.variants.map((variant, index) => (
 						<option key={index} value={variant} />
