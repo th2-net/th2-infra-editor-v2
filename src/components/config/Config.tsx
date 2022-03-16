@@ -27,8 +27,10 @@ import Input from '../util/Input';
 import { BoxEntity } from '../../models/Box';
 import { cloneDeep } from 'lodash';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Validator } from '@cfworker/json-schema';
 import { extenedSchema, pinSchema } from '../../models/Schemas';
+import classNames from 'classnames';
 
 const useStyles = createUseStyles((t: Theme) => ({
 	container: {
@@ -69,6 +71,9 @@ const useStyles = createUseStyles((t: Theme) => ({
 		fontSize: '14px',
 		fontWeight: 500,
 		cursor: 'pointer',
+		'&:disabled':{
+			backgroundColor: 'red',
+		}
 	},
 }));
 
@@ -76,8 +81,10 @@ function Config() {
 	const [filter, setFilter] = useState<ConfigFilters>('customConfig');
 	const classes = useStyles();
 
-	const { selectedBox, isSelectedBoxValid } = useBoxesStore();
+	const { selectedBox } = useBoxesStore();
 	const boxUpdater = useBoxUpdater();
+	const [isSelectedBoxValid, setIsSelectedBoxValid] = useState(true);
+	const [validBoxes, setValidBoxes] = useState({pins:true, extendedSettings: true, customConfig:true});
 
 	const customConfig = useInput({
 		initialValue: selectedBox?.spec['custom-config']
@@ -126,11 +133,10 @@ function Config() {
 
 	function saveChanges() {
 		const isConfigValid =
-			[customConfig, pinsConfig, imageName, imageVersion, name, type].every(
+			isSelectedBoxValid && 
+			[imageName, imageVersion, name, type].every(
 				input => input.isValid,
-			) &&
-			isValidJSONArray(pinsConfig.value) &&
-			isValidJSONObject(customConfig.value);
+			);
 
 		const originalBox = toJS(selectedBox);
 		if (isConfigValid && originalBox) {
@@ -143,12 +149,30 @@ function Config() {
 					'image-name': imageName.value,
 					'image-version': imageVersion.value,
 					'extended-settings': extendedSettings.value ? JSON.parse(extendedSettings.value) : '',
-					pins: JSON.parse(pinsConfig.value),
+					pins: pinsConfig.value ? JSON.parse(pinsConfig.value) : '',
 				},
 			});
 			boxUpdater.saveBoxChanges(originalBox, updatedBox);
 		}
 	}
+
+	useEffect(() => {
+		const validatePin = new Validator(pinSchema.schema);
+		const validateExtended = new Validator(extenedSchema.schema);
+		const pinsVal =
+			pinsConfig.value === '' ||
+			(isValidJSONArray(pinsConfig.value) && validatePin.validate(JSON.parse(pinsConfig.value)).valid);
+		const extendedSettingsVal =
+			extendedSettings.value === '' ||
+			(isValidJSONObject(extendedSettings.value) && validateExtended.validate(JSON.parse(extendedSettings.value)).valid);
+		const customConfigVal = isValidJSONObject(customConfig.value);
+		setValidBoxes({
+			pins: pinsVal,
+			extendedSettings: extendedSettingsVal,
+			customConfig: customConfigVal,
+		});
+		setIsSelectedBoxValid(pinsVal && extendedSettingsVal && customConfigVal)
+	}, [pinsConfig.value, extendedSettings.value, customConfig.value])
 
 	return (
 		<div className={classes.container}>
@@ -159,7 +183,7 @@ function Config() {
 				<Input inputConfig={name} />
 				<Input inputConfig={type} />
 			</div>
-			<ConfigFilter filter={filter} setFilter={setFilter} />
+			<ConfigFilter filter={filter} setFilter={setFilter} validBoxes={validBoxes}/>
 			{filter === 'customConfig' ? (
 				<ConfigEditor value={customConfig.value} setValue={customConfig.setValue} />
 			) : filter === 'pins' ? (
@@ -216,6 +240,11 @@ type ConfigFilters = 'customConfig' | 'pins' | 'extendedSettings';
 interface FiltersProps {
 	filter: ConfigFilters;
 	setFilter: (filter: ConfigFilters) => void;
+	validBoxes: {
+		pins: boolean;
+		extendedSettings: boolean;
+		customConfig: boolean;
+	}
 }
 
 const useConfigFiltersStyles = createUseStyles({
@@ -238,6 +267,17 @@ const useConfigFiltersStyles = createUseStyles({
 			},
 		},
 	},
+	nonValid: {
+		'&:checked': {
+			'&+label': {
+				backgroundColor: '#ea2e4e',
+				border: '1px solid #e50026',
+			},
+		},
+		'&+label': {
+			backgroundColor: '#f5a6ac',
+		},
+	},
 	filtersLabel: {
 		display: 'inline-flex',
 		backgroundColor: '#F3F3F6',
@@ -249,12 +289,14 @@ const useConfigFiltersStyles = createUseStyles({
 	},
 });
 
-function ConfigFilter({ filter, setFilter }: FiltersProps) {
+function ConfigFilter({ filter, setFilter, validBoxes }: FiltersProps) {
 	const classes = useConfigFiltersStyles();
 	return (
 		<div className={classes.filters}>
 			<input
-				className={classes.filtersInput}
+				className={classNames(classes.filtersInput, {
+					[classes.nonValid]: !validBoxes.customConfig,
+				})}
 				type='radio'
 				name='configFilter'
 				onChange={() => {
@@ -263,11 +305,16 @@ function ConfigFilter({ filter, setFilter }: FiltersProps) {
 				id='customConfig'
 				checked={filter === 'customConfig'}
 			/>
-			<label title='Custom Config' htmlFor='customConfig' className={classes.filtersLabel}>
-				Custom Config
+			<label
+				title={`${!validBoxes.customConfig?'Not Valid ':''}Custom Config`}
+				htmlFor='customConfig'
+				className={classes.filtersLabel}>
+				 Custom Config
 			</label>
 			<input
-				className={classes.filtersInput}
+				className={classNames(classes.filtersInput, {
+					[classes.nonValid]: !validBoxes.pins,
+				})}
 				type='radio'
 				name='configFilter'
 				id='pins'
@@ -276,11 +323,16 @@ function ConfigFilter({ filter, setFilter }: FiltersProps) {
 				}}
 				checked={filter === 'pins'}
 			/>
-			<label title='Pins' htmlFor='pins' className={classes.filtersLabel}>
+			<label
+				title={`${!validBoxes.pins?'Not Valid ':''}Pins`}
+				htmlFor='pins'
+				className={classes.filtersLabel}>
 				Pins
 			</label>
 			<input
-				className={classes.filtersInput}
+				className={classNames(classes.filtersInput, {
+					[classes.nonValid]: !validBoxes.extendedSettings,
+				})}
 				type='radio'
 				name='configFilter'
 				id='extendedSettings'
@@ -289,7 +341,10 @@ function ConfigFilter({ filter, setFilter }: FiltersProps) {
 				}}
 				checked={filter === 'extendedSettings'}
 			/>
-			<label title='Extended Settings' htmlFor='extendedSettings' className={classes.filtersLabel}>
+			<label
+				title={`${!validBoxes.extendedSettings?'Not Valid ':''}Extended Settings`}
+				htmlFor='extendedSettings'
+				className={classes.filtersLabel}>
 				Extended Settings
 			</label>
 		</div>
