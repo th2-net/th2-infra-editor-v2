@@ -145,7 +145,10 @@ function ResourcesList() {
 			}
 		}
 
-		result = [...result, ...singleEntities];
+		result = [
+			...result.sort((entityA, entityB) => entityA.name.localeCompare(entityB.name)),
+			...singleEntities.sort((entityA, entityB) => entityA.name.localeCompare(entityB.name)),
+		];
 
 		return result;
 	}, [boxes, expandedMap]);
