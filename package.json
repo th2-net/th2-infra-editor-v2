@@ -4,7 +4,9 @@
 	"version": "2.0.15",
 	"private": true,
 	"dependencies": {
-		"@monaco-editor/react": "^4.2.1",
+		"@codingame/monaco-jsonrpc": "^0.3.1",
+		"@monaco-editor/loader": "^1.3.0",
+		"@monaco-editor/react": "^4.4.1",
 		"@testing-library/jest-dom": "^5.11.4",
 		"@testing-library/react": "^11.1.0",
 		"@testing-library/user-event": "^12.1.10",
@@ -18,26 +20,30 @@
 		"material-ui-modal": "^1.0.0",
 		"mobx": "^6.3.2",
 		"mobx-react-lite": "^3.2.0",
-		"monaco-editor": "^0.25.2",
+		"monaco-editor": "^0.33.0",
+		"monaco-editor-core": "^0.33.0",
+		"monaco-languageclient": "^0.18.1",
 		"nanoid": "^3.1.23",
 		"normalize.css": "^8.0.1",
 		"react": "^17.0.2",
+		"react-app-rewired": "^2.2.1",
 		"react-dom": "^17.0.2",
 		"react-error-boundary": "^3.1.3",
 		"react-hook-form": "^7.7.1",
 		"react-jss": "^10.6.0",
 		"react-scripts": "4.0.3",
 		"react-virtuoso": "^1.9.1",
+		"reconnecting-websocket": "^4.4.0",
 		"typescript": "^4.1.2",
 		"use-debounce": "^6.0.1",
 		"web-vitals": "^1.0.1"
 	},
 	"scripts": {
-		"start": "react-scripts start",
-		"build": "npm ci && npm run validate && npm run initEditor && react-scripts build",
+		"start": "react-app-rewired start",
+		"build": "npm ci && npm run validate && npm run initEditor && react-app-rewired build",
 		"postinstall": "npm run initEditor",
 		"initEditor": "node initEditor.js",
-		"test": "react-scripts test",
+		"test": "react-app-rewired test",
 		"eject": "react-scripts eject",
 		"validate": "tsc && eslint . --ext .js,.js,.ts,.tsx",
 		"lint:fix": "eslint --fix './src/**/*.{ts,tsx}' && prettier --write src/**",
@@ -46,7 +52,8 @@
 	},
 	"eslintConfig": {
 		"ignorePatterns": [
-			"**/public/**"
+			"**/public/**",
+			"**/node_modules/**"
 		],
 		"extends": [
 			"react-app",
@@ -68,6 +75,10 @@
 	"devDependencies": {
 		"@types/lodash": "^4.14.170",
 		"fs-extra": "^10.0.0",
+		"normalize-url": "^7.0.3",
 		"prettier": "^2.3.1"
+	},
+	"engines": {
+		"vscode": "^1.52.0"
 	}
 }

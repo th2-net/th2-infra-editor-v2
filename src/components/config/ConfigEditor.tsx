@@ -20,10 +20,15 @@ import { createUseStyles } from 'react-jss';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { extenedSchema, pinSchema, schemaTemplate } from '../../models/Schemas';
-import * as monacoEditor from 'monaco-editor';
+import * as monacoEditor from 'monaco-editor-core';
+import * as monaco from 'monaco-editor';
 import { theme } from '../../styles/theme';
 import { getCountPinsConnections, PinsPositions } from '../../helpers/pinConnections';
 import { IRange } from 'monaco-editor';
+import { listen } from '@codingame/monaco-jsonrpc';
+import { MonacoServices } from 'monaco-languageclient';
+import { tokens, themeData } from '../../helpers/monacoJsonThemeSettings';
+import { createUrl, createWebSocket, createLanguageClient } from '../../helpers/languageClient';
 
 interface Props {
 	value: string;
@@ -40,7 +45,7 @@ const useStyle = createUseStyles({
 
 const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }: Props) => {
 	const classes = useStyle();
-	const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor>();
+	const editorRef = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 	const monacoRef = React.useRef<Monaco>();
 	const boxesStore = useBoxesStore();
 	const boxUpdater = useBoxUpdater();
@@ -147,13 +152,38 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }
 
 	const lensRegistrator = () => {
 		setLensesDisposer(
-			monacoRef.current?.languages.registerCodeLensProvider('json', { provideCodeLenses }),
+			monacoRef.current?.languages.registerCodeLensProvider('jsonLSP', { provideCodeLenses }),
 		);
+	};
+
+	const handleEditorBeforeMount = (monaco: Monaco) => {
+		monaco.languages.register({
+			id: 'jsonLSP',
+			extensions: ['.json', '.bowerrc', '.jshintrc', '.jscsrc', '.eslintrc', '.babelrc'],
+		});
+
+		monaco.languages.setMonarchTokensProvider('jsonLSP', tokens);
+		monaco.editor.defineTheme('jsonEditor', themeData);
+
+		MonacoServices.install(monaco as typeof monacoEditor);
+
+		const url = createUrl('ws://localhost:3000/json');
+		const webSocket = createWebSocket(url);
+
+		listen({
+			webSocket,
+			onConnection: connection => {
+				const languageClient = createLanguageClient(connection);
+				const disposable = languageClient.start();
+				connection.onClose(() => disposable.dispose());
+			},
+		});
 	};
 
 	const handleEditorDidMount: OnMount = (editor, monaco) => {
 		editorRef.current = editor;
 		monacoRef.current = monaco;
+
 		monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 			schemaValidation: 'error',
 			enableSchemaRequest: true,
@@ -183,8 +213,9 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }
 			<Editor
 				height={300}
 				width='auto'
+				theme={'jsonEditor'}
 				path={schema?.path}
-				language={'json'}
+				language={'jsonLSP'}
 				options={{
 					fontSize: 12,
 					codeLens: pinsConnectionsLenses,
@@ -203,6 +234,7 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }
 				value={value}
 				onChange={v => setValue(v || '')}
 				onMount={handleEditorDidMount}
+				beforeMount={handleEditorBeforeMount}
 			/>
 		</div>
 	);
