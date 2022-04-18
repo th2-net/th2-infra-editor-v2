@@ -15,7 +15,6 @@
  ***************************************************************************** */
 
 import { action, makeObservable, observable } from 'mobx';
-import { nanoid } from 'nanoid';
 import { AppearanceTypes } from 'react-toast-notifications';
 
 interface BaseNotification {

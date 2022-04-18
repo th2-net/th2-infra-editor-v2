@@ -16,6 +16,7 @@
 
 import { isEqual } from 'lodash';
 import { action, computed, makeObservable, observable } from 'mobx';
+import { nanoid } from 'nanoid';
 import Api from '../api/api';
 import { BoxEntity } from '../models/Box';
 import { DictionaryEntity, DictionaryLinksEntity } from '../models/Dictionary';
@@ -77,7 +78,7 @@ export class RequestsStore {
 					this.schemaStore.addMessage({
 						type: 'error',
 						notificationType: 'linkErrorMessage',
-						id: linkError.linkName,
+						id: nanoid(),
 						linkName: linkError.linkName,
 						message: linkError.message,
 						from: linkError.from,
@@ -88,7 +89,7 @@ export class RequestsStore {
 					this.schemaStore.addMessage({
 						type: 'error',
 						notificationType: 'boxResourceErrorMessage',
-						id: linkError.box,
+						id: nanoid(),
 						box: linkError.box,
 						message: linkError.message,
 					})
@@ -97,7 +98,7 @@ export class RequestsStore {
 					this.schemaStore.addMessage({
 						type: 'error',
 						notificationType: 'exceptionMessage',
-						id: linkError,
+						id: nanoid(),
 						message: linkError,
 					})
 				});
