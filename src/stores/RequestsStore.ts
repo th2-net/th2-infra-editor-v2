@@ -71,7 +71,37 @@ export class RequestsStore {
 		if (!this.selectedSchemaName || this.preparedRequests.length === 0) return;
 		try {
 			this.isSaving = true;
-			await this.api.sendSchemaRequest(this.selectedSchemaName, this.preparedRequests);
+			const response = await this.api.sendSchemaRequest(this.selectedSchemaName, this.preparedRequests);
+			if (!response.commitRef && response.validationErrors) {
+				response.validationErrors.linkErrorMessages.links.forEach(linkError => {
+					this.schemaStore.addMessage({
+						type: 'error',
+						notificationType: 'linkErrorMessage',
+						id: linkError.linkName,
+						linkName: linkError.linkName,
+						message: linkError.message,
+						from: linkError.from,
+						to: linkError.to,
+					})
+				});
+				response.validationErrors.boxResourceErrorMessages.forEach(linkError => {
+					this.schemaStore.addMessage({
+						type: 'error',
+						notificationType: 'boxResourceErrorMessage',
+						id: linkError.box,
+						box: linkError.box,
+						message: linkError.message,
+					})
+				});
+				response.validationErrors.exceptionMessages.forEach(linkError => {
+					this.schemaStore.addMessage({
+						type: 'error',
+						notificationType: 'exceptionMessage',
+						id: linkError,
+						message: linkError,
+					})
+				});
+			}
 			this.preparedRequests = [];
 		} catch (error) {
 			alert("Couldn't save changes");

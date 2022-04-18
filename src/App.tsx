@@ -17,6 +17,7 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { createUseStyles } from 'react-jss';
+import { ToastProvider } from 'react-toast-notifications';
 import Header from './components/Header';
 import DictionaryLayout from './components/layouts/DictionaryLayout';
 import BoxLayout from './components/layouts/BoxLayout';
@@ -32,6 +33,9 @@ import loader from '@monaco-editor/loader';
 import ResourcesList from './components/resources/ResourcesList';
 import AppViewType from './util/AppViewType';
 import BoxCreationLayout from './components/layouts/BoxCreationLayout';
+import Toast from './components/notifications/Toast';
+import ToastContainer from './components/notifications/ToastContainer';
+import Notifier from './components/notifications/Notifier';
 
 const useStyles = createUseStyles((theme: Theme) => ({
 	'@font-face': [
@@ -103,17 +107,23 @@ function App() {
 
 	return (
 		<div className={classes.app}>
-			<Header />
-			{!schemaStore.isLoading ? (
-				<div className={classes.content}>
-					<ResourcesList />
-					{viewType === AppViewType.DictionaryView && <DictionaryLayout />}
-					{viewType === AppViewType.BoxView && <BoxLayout />}
-					{viewType === AppViewType.BoxCreate && <BoxCreationLayout />}
-				</div>
-			) : (
-				<div className={classes.loader}>Loading...</div>
-			)}
+			<ToastProvider
+				placement='top-right'
+				components={{ Toast, ToastContainer }}
+				transitionDuration={400}>
+				<Header />
+				{!schemaStore.isLoading ? (
+					<div className={classes.content}>
+						<ResourcesList />
+						{viewType === AppViewType.DictionaryView && <DictionaryLayout />}
+						{viewType === AppViewType.BoxView && <BoxLayout />}
+						{viewType === AppViewType.BoxCreate && <BoxCreationLayout />}
+					</div>
+				) : (
+					<div className={classes.loader}>Loading...</div>
+				)}
+				<Notifier />
+			</ToastProvider>
 		</div>
 	);
 }

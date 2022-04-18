@@ -19,3 +19,7 @@ export function sortByKey<T, K extends keyof T>(arr: T[], key: K): T[] {
 	copy.sort((a, b) => (a[key] > b[key] ? 1 : -1));
 	return copy;
 }
+
+export function complement<T>(arr1: T[], arr2: T[]): T[] {
+	return arr1.filter(item => !arr2.includes(item));
+}
