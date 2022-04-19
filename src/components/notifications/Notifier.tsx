@@ -58,26 +58,38 @@ function Notifier() {
 
 				const registerId = (id: string) => (idsMap.current[notification.id] = id);
 				if (isLinkErrorMessage(notification)) {
-					addToast(<MessageBase
-						title={notification.linkName}
-						message={notification.message}
-						objectToCopy={notification}
-						notificationType={notification.notificationType}
-					/>, options, registerId);
+					addToast(
+						<MessageBase
+							title={notification.linkName}
+							message={notification.message}
+							objectToCopy={notification}
+							notificationType={notification.notificationType}
+						/>,
+						options,
+						registerId,
+					);
 				} else if (isBoxResourceErrorMessage(notification)) {
-					addToast(<MessageBase
-						title={notification.box}
-						message={notification.message}
-						objectToCopy={notification}
-						notificationType={notification.notificationType}
-					/>, options, registerId);
+					addToast(
+						<MessageBase
+							title={notification.box}
+							message={notification.message}
+							objectToCopy={notification}
+							notificationType={notification.notificationType}
+						/>,
+						options,
+						registerId,
+					);
 				} else if (isExceptionMessage(notification)) {
-					addToast(<MessageBase
-						title={notification.id}
-						message={notification.message}
-						objectToCopy={notification}
-						notificationType={notification.notificationType}
-					/>, options, registerId);
+					addToast(
+						<MessageBase
+							title={notification.id}
+							message={notification.message}
+							objectToCopy={notification}
+							notificationType={notification.notificationType}
+						/>,
+						options,
+						registerId,
+					);
 				}
 			});
 			prevResponseErrors.current = notifications;
