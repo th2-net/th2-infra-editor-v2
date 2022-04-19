@@ -26,9 +26,7 @@ import {
 } from '../../helpers/notifications';
 import { useNotificationsStore } from '../../hooks/useNotificationsStore';
 import { Notification } from '../../stores/NotificationsStore';
-import LinkErrorMessage from './LinkErrorMessage';
-import BoxResourceErrorMessage from './BoxResourceErrorMessage';
-import ExceptionMessage from './ExceptionMessage';
+import MessageBase from './MessageBase';
 
 function Notifier() {
 	const { addToast, removeToast } = useToasts();
@@ -60,11 +58,26 @@ function Notifier() {
 
 				const registerId = (id: string) => (idsMap.current[notification.id] = id);
 				if (isLinkErrorMessage(notification)) {
-					addToast(<LinkErrorMessage {...notification} />, options, registerId);
+					addToast(<MessageBase
+						title={notification.linkName}
+						message={notification.message}
+						objectToCopy={notification}
+						notificationType={notification.notificationType}
+					/>, options, registerId);
 				} else if (isBoxResourceErrorMessage(notification)) {
-					addToast(<BoxResourceErrorMessage {...notification} />, options, registerId);
+					addToast(<MessageBase
+						title={notification.box}
+						message={notification.message}
+						objectToCopy={notification}
+						notificationType={notification.notificationType}
+					/>, options, registerId);
 				} else if (isExceptionMessage(notification)) {
-					addToast(<ExceptionMessage {...notification} />, options, registerId);
+					addToast(<MessageBase
+						title={notification.id}
+						message={notification.message}
+						objectToCopy={notification}
+						notificationType={notification.notificationType}
+					/>, options, registerId);
 				}
 			});
 			prevResponseErrors.current = notifications;

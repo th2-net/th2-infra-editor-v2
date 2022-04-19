@@ -5,7 +5,7 @@ module.exports = function (app) {
 		.use(
 			'/backend',
 			createProxyMiddleware({
-				target: 'http://th2-qa:30000/editor/',
+				target: 'http://th2-schema-test:30000/editor/',
 				changeOrigin: true,
 				secure: false,
 			}),
