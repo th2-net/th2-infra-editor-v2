@@ -14,7 +14,7 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { useRootStore } from './useRootStore'
+import { useRootStore } from './useRootStore';
 
 export const useSchemaStore = () => {
 	const rootStore = useRootStore();

@@ -20,35 +20,35 @@ import { copyTextToClipboard } from '../../helpers/copyHandler';
 import toastCopy from '../../assets/icons/toast-copy.svg';
 
 interface BoxResourceErrorMessageProps {
-    notificationType: "boxResourceErrorMessage";
-    id: string;
-    box: string;
-    message: string;
-    type: string;
+	notificationType: 'boxResourceErrorMessage';
+	id: string;
+	box: string;
+	message: string;
+	type: string;
 }
 
 const useStyles = createUseStyles({
-    content:{
-        color: '#fff',
-    },
-    header:{
+	content: {
+		color: '#fff',
+	},
+	header: {
 		display: 'flex',
 		justifyContent: 'space-between',
 		fontSize: '14px',
 		fontWeight: 'bold',
 		gap: '4px',
-        '$body':{
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-            whiteApace: 'nowrap',
-        }
-    },
-    middle:{
+		$body: {
+			textOverflow: 'ellipsis',
+			overflow: 'hidden',
+			whiteApace: 'nowrap',
+		},
+	},
+	middle: {
 		wordBreak: 'break-all',
 		fontSize: '12px',
-    },
-    body: {},
-    code: {},
+	},
+	body: {},
+	code: {},
 	action: {
 		margin: '4px 0 0',
 		display: 'flex',
@@ -56,31 +56,31 @@ const useStyles = createUseStyles({
 		color: '#fff',
 		cursor: 'pointer',
 		border: 'none',
-    },
-    actionIcon: {
+	},
+	actionIcon: {
 		margin: '0 4px 0 0',
-        height: '16px',
-        width: '17px',
-        background: {
-            image: `url(${toastCopy})`,
-            repeat: 'no-repeat',
-            size: '100%',
-            position: 'center',
-        }
-    },
-    text: (props: { copied:boolean }) => ({
-        color: props.copied ? 'gray': 'default',
-    }),
-    bottom: {
+		height: '16px',
+		width: '17px',
+		background: {
+			image: `url(${toastCopy})`,
+			repeat: 'no-repeat',
+			size: '100%',
+			position: 'center',
+		},
+	},
+	text: (props: { copied: boolean }) => ({
+		color: props.copied ? 'gray' : 'default',
+	}),
+	bottom: {
 		display: 'flex',
 		justifyContent: 'flex-end',
-    }
+	},
 });
 
 export default function BoxResourceErrorMessage(props: BoxResourceErrorMessageProps) {
-    const { id, box, message, notificationType } = props;
+	const { id, box, message, notificationType } = props;
 	const [copied, setCopied] = useState(false);
-    const styles = useStyles({copied});
+	const styles = useStyles({ copied });
 
 	const copy = () => {
 		const value = JSON.stringify({ box, message, notificationType }, null, ' ');
@@ -88,21 +88,21 @@ export default function BoxResourceErrorMessage(props: BoxResourceErrorMessagePr
 		setCopied(true);
 	};
 
-    return (
-        <div className={styles.content}>
-            <div className={styles.header}>
-                <p className={styles.body} title={id}>
-                    {box}
-                </p>
-                <p className={styles.code}>{notificationType}</p>
-            </div>
-            <div className={styles.middle}>{message}</div>
-            <div className={styles.bottom}>
-            <button className={styles.action} disabled={copied} onClick={copy}>
-                {!copied && <span className={styles.actionIcon} />}
-				<span className={''}>{copied ? 'Copied' : ' Copy details'}</span>
-            </button>
-            </div>
-        </div>
-    );
+	return (
+		<div className={styles.content}>
+			<div className={styles.header}>
+				<p className={styles.body} title={id}>
+					{box}
+				</p>
+				<p className={styles.code}>{notificationType}</p>
+			</div>
+			<div className={styles.middle}>{message}</div>
+			<div className={styles.bottom}>
+				<button className={styles.action} disabled={copied} onClick={copy}>
+					{!copied && <span className={styles.actionIcon} />}
+					<span className={''}>{copied ? 'Copied' : ' Copy details'}</span>
+				</button>
+			</div>
+		</div>
+	);
 }

@@ -14,11 +14,11 @@
  * limitations under the License.
  ***************************************************************************** */
 
- import {
+import {
 	Notification,
 	LinkErrorMessage,
 	BoxResourceErrorMessage,
-	ExceptionMessage
+	ExceptionMessage,
 } from '../stores/NotificationsStore';
 
 export function isLinkErrorMessage(error: Notification): error is LinkErrorMessage {

@@ -14,15 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
- import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
- export function usePrevious<T>(value: T) {
-	 const valueRef = useRef<T>();
- 
-	 useEffect(() => {
-		 valueRef.current = value;
-	 }, [value]);
- 
-	 return valueRef.current;
- }
- 
+export function usePrevious<T>(value: T) {
+	const valueRef = useRef<T>();
+
+	useEffect(() => {
+		valueRef.current = value;
+	}, [value]);
+
+	return valueRef.current;
+}

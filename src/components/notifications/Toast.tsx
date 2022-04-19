@@ -4,7 +4,7 @@ import { createUseStyles } from 'react-jss';
 import closeIcon from '../../assets/icons/close-icon.svg';
 
 const styleTransform = (transitionState: TransitionState) => {
-	switch(transitionState) {
+	switch (transitionState) {
 		case 'entering':
 		case 'exiting':
 		case 'exited':
@@ -13,19 +13,19 @@ const styleTransform = (transitionState: TransitionState) => {
 		default:
 			return 'translate3d(0, 0, 0) scale(1)';
 	}
-}
+};
 
 const styleBackground = (appearance: AppearanceTypes) => {
-	switch(appearance) {
-		case 'info': 
+	switch (appearance) {
+		case 'info':
 		case 'success':
 		case 'warning':
-			return '#4db26f'
-		case 'error': 
-		default: 
+			return '#4db26f';
+		case 'error':
+		default:
 			return '#ff6666';
 	}
-}
+};
 
 const useStyles = createUseStyles({
 	message: (props: ToastProps) => ({
@@ -45,13 +45,13 @@ const useStyles = createUseStyles({
 		cursor: 'pointer',
 		height: '20px',
 		width: '20px',
-	
+
 		background: {
 			image: `url(${closeIcon})`,
 			repeat: 'no-repeat',
 			size: '100%',
 			position: 'center',
-		}
+		},
 	},
 	content: {
 		flexGrow: 1,
@@ -69,7 +69,7 @@ const useStyles = createUseStyles({
 			backgroundColor: '#fff',
 		},
 	},
-})
+});
 
 export default function Toast(props: ToastProps) {
 	const { children, onDismiss } = props;

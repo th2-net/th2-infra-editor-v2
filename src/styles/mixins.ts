@@ -94,8 +94,8 @@ export function button(): Styles {
 
 		'&:disabled': {
 			backgroundColor: '#979797',
-		}
-	}
+		},
+	};
 }
 
 export function modalWindow(): Styles {
@@ -113,12 +113,11 @@ export function modalWindow(): Styles {
 	};
 }
 
-export const clickable = (): Styles => (
-	{
+export const clickable = (): Styles => ({
 	cursor: 'pointer',
 	borderRadius: '2px',
 
 	'&:hover': {
 		backgroundColor: 'rgba(102, 102, 102, 0.15)',
-	}
+	},
 });

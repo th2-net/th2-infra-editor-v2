@@ -59,13 +59,13 @@ function Notifier() {
 				};
 
 				const registerId = (id: string) => (idsMap.current[notification.id] = id);
-                    if (isLinkErrorMessage(notification)) {
-                        addToast(<LinkErrorMessage {...notification} />, options, registerId);
-                    } else if (isBoxResourceErrorMessage(notification)) {
-                        addToast(<BoxResourceErrorMessage {...notification} />, options, registerId);
-                    } else if (isExceptionMessage(notification)) {
-                        addToast(<ExceptionMessage {...notification} />, options, registerId);
-                    }
+				if (isLinkErrorMessage(notification)) {
+					addToast(<LinkErrorMessage {...notification} />, options, registerId);
+				} else if (isBoxResourceErrorMessage(notification)) {
+					addToast(<BoxResourceErrorMessage {...notification} />, options, registerId);
+				} else if (isExceptionMessage(notification)) {
+					addToast(<ExceptionMessage {...notification} />, options, registerId);
+				}
 			});
 			prevResponseErrors.current = notifications;
 		}

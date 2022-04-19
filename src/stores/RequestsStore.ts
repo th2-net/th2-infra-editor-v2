@@ -72,7 +72,10 @@ export class RequestsStore {
 		if (!this.selectedSchemaName || this.preparedRequests.length === 0) return;
 		try {
 			this.isSaving = true;
-			const response = await this.api.sendSchemaRequest(this.selectedSchemaName, this.preparedRequests);
+			const response = await this.api.sendSchemaRequest(
+				this.selectedSchemaName,
+				this.preparedRequests,
+			);
 			if (!response.commitRef && response.validationErrors) {
 				response.validationErrors.linkErrorMessages.links.forEach(linkError => {
 					this.schemaStore.addMessage({
@@ -83,7 +86,7 @@ export class RequestsStore {
 						message: linkError.message,
 						from: linkError.from,
 						to: linkError.to,
-					})
+					});
 				});
 				response.validationErrors.boxResourceErrorMessages.forEach(linkError => {
 					this.schemaStore.addMessage({
@@ -92,7 +95,7 @@ export class RequestsStore {
 						id: nanoid(),
 						box: linkError.box,
 						message: linkError.message,
-					})
+					});
 				});
 				response.validationErrors.exceptionMessages.forEach(linkError => {
 					this.schemaStore.addMessage({
@@ -100,7 +103,7 @@ export class RequestsStore {
 						notificationType: 'exceptionMessage',
 						id: nanoid(),
 						message: linkError,
-					})
+					});
 				});
 			}
 			this.preparedRequests = [];

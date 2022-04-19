@@ -18,61 +18,59 @@ import { action, makeObservable, observable } from 'mobx';
 import { AppearanceTypes } from 'react-toast-notifications';
 
 interface BaseNotification {
-    type: AppearanceTypes;
-    notificationType: 'linkErrorMessage' | 'boxResourceErrorMessage' | 'exceptionMessage';
-    id: string;
+	type: AppearanceTypes;
+	notificationType: 'linkErrorMessage' | 'boxResourceErrorMessage' | 'exceptionMessage';
+	id: string;
 }
 
 export interface LinkErrorMessage extends BaseNotification {
-    notificationType: 'linkErrorMessage';
-    linkName: string;
-    message: string;
-    from: string;
-    to: string;
+	notificationType: 'linkErrorMessage';
+	linkName: string;
+	message: string;
+	from: string;
+	to: string;
 }
 
 export interface BoxResourceErrorMessage extends BaseNotification {
-    notificationType: 'boxResourceErrorMessage';
-    box: string;
-    message: string;
+	notificationType: 'boxResourceErrorMessage';
+	box: string;
+	message: string;
 }
 
 export interface ExceptionMessage extends BaseNotification {
-    notificationType: 'exceptionMessage';
-    message: string;
+	notificationType: 'exceptionMessage';
+	message: string;
 }
 
 export type Notification = LinkErrorMessage | BoxResourceErrorMessage | ExceptionMessage;
 
 export class NotificationsStore {
+	constructor() {
+		makeObservable(this, {
+			errors: observable,
+			addMessage: action,
+			deleteMessage: action,
+			clearAll: action,
+		});
+	}
 
+	public errors: Notification[] = [];
 
-    constructor() {
-        makeObservable(this, {
-            errors: observable,
-            addMessage: action,
-            deleteMessage: action,
-            clearAll: action
-        });
-    }
+	public addMessage = (error: Notification) => {
+		this.errors = [...this.errors, error];
+	};
 
-    public errors: Notification[] = [];
+	public deleteMessage = (error: Notification | string) => {
+		if (typeof error === 'string') {
+			this.errors = this.errors.filter(e => e.id !== error);
+		} else {
+			this.errors = this.errors.filter(e => e !== error);
+		}
+	};
 
-    public addMessage = (error: Notification) => {
-        this.errors = [...this.errors, error];
-    };
-
-    public deleteMessage = (error: Notification | string) => {
-        if (typeof error === 'string') {
-            this.errors = this.errors.filter(e => e.id !== error);
-        } else {
-            this.errors = this.errors.filter(e => e !== error);
-        }
-    };
-
-    public clearAll = () => {
-        this.errors = [];
-    };
+	public clearAll = () => {
+		this.errors = [];
+	};
 }
 
 const notificationsStore = new NotificationsStore();

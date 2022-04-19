@@ -18,23 +18,23 @@ import { RequestModel } from '../models/FileBase';
 import { Schema } from '../models/Schema';
 
 export interface SchemaRequest {
-	commitRef: null | string,
-	resources: null | Array<Object>,
+	commitRef: null | string;
+	resources: null | Array<Object>;
 	validationErrors: null | {
 		linkErrorMessages: {
 			links: Array<{
-				linkName: string,
-				message: string,
-				from: string,
-				to: string
-			}>,
-		}
+				linkName: string;
+				message: string;
+				from: string;
+				to: string;
+			}>;
+		};
 		boxResourceErrorMessages: Array<{
-			box: string,
-			message: string,
-		}>,
-		exceptionMessages: Array<string>,
-	},
+			box: string;
+			message: string;
+		}>;
+		exceptionMessages: Array<string>;
+	};
 }
 
 export default interface ApiSchema {

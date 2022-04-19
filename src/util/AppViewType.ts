@@ -17,7 +17,7 @@
 enum AppViewType {
 	BoxView = 'boxView',
 	DictionaryView = 'dictionaryView',
-	BoxCreate = 'boxCreate'
+	BoxCreate = 'boxCreate',
 }
 
 export default AppViewType;

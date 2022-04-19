@@ -14,10 +14,9 @@
  *  limitations under the License.
  ***************************************************************************** */
 
- import { useRootStore } from './useRootStore';
+import { useRootStore } from './useRootStore';
 
- export const useNotificationsStore = () => {
-     const rootStore = useRootStore();
-     return rootStore.notificationsStore;
- };
- 
+export const useNotificationsStore = () => {
+	const rootStore = useRootStore();
+	return rootStore.notificationsStore;
+};

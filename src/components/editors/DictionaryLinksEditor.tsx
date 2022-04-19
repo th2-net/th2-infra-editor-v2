@@ -14,35 +14,35 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { observer } from "mobx-react-lite";
-import { useMemo, useRef, useState } from "react";
-import { createUseStyles } from "react-jss";
-import { useBoxesStore } from "../../hooks/useBoxesStore";
-import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
-import useOutsideClickListener from "../../hooks/useOutsideClickListener";
-import { DictionaryRelation } from "../../models/Dictionary";
-import Icon from "../Icon";
-import Select from "../util/Select";
+import { observer } from 'mobx-react-lite';
+import { useMemo, useRef, useState } from 'react';
+import { createUseStyles } from 'react-jss';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
+import useOutsideClickListener from '../../hooks/useOutsideClickListener';
+import { DictionaryRelation } from '../../models/Dictionary';
+import Icon from '../Icon';
+import Select from '../util/Select';
 
 export const useLinksStyles = createUseStyles({
-		links: {
-			width: '100%',
-			fontSize: 12,
+	links: {
+		width: '100%',
+		fontSize: 12,
+	},
+	add: {
+		cursor: 'pointer',
+		backgroundColor: 'transparent',
+		margin: '10px 0 0',
+		border: '1px grey solid',
+		outline: 'none',
+		borderRadius: '50%',
+		padding: 0,
+		width: 24,
+		height: 24,
+		'&:hover': {
+			backgroundColor: '#e5e5e5',
 		},
-		add: {
-			cursor: 'pointer',
-			backgroundColor: 'transparent',
-			margin: '10px 0 0',
-			border: '1px grey solid',
-			outline: 'none',
-			borderRadius: '50%',
-			padding: 0,
-			width: 24,
-			height: 24,
-			'&:hover': {
-				backgroundColor: '#e5e5e5'
-			}
-		}
+	},
 });
 
 interface DictionaryLinkProps {
@@ -57,14 +57,14 @@ const useLinkStyle = createUseStyles({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		'&:hover': {
-			backgroundColor: '#e5e5e5'
-		}
+			backgroundColor: '#e5e5e5',
+		},
 	},
 	title: {
 		display: 'flex',
 		'&>p': {
-			margin: '0 0 0 2px'
-		}
+			margin: '0 0 0 2px',
+		},
 	},
 	delete: {
 		display: 'inline-flex',
@@ -74,10 +74,10 @@ const useLinkStyle = createUseStyles({
 		outline: 'none',
 		border: 'none',
 		cursor: 'pointer',
-	}
-})
+	},
+});
 
-const Link = ({link, deleteLink}: DictionaryLinkProps) => {
+const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 	const classes = useLinkStyle();
 	return (
 		<div className={classes.link}>
@@ -85,10 +85,12 @@ const Link = ({link, deleteLink}: DictionaryLinkProps) => {
 				<Icon id='dictionary' stroke='black' />
 				<p>{link.dictionary.name}</p>
 			</div>
-			<button className={classes.delete} onClick={deleteLink}><Icon id='cross' stroke='black' width={8} height={8}/></button>
+			<button className={classes.delete} onClick={deleteLink}>
+				<Icon id='cross' stroke='black' width={8} height={8} />
+			</button>
 		</div>
-	)
-}
+	);
+};
 
 const DictionaryLinksEditor = () => {
 	const classes = useLinksStyles();
@@ -97,9 +99,14 @@ const DictionaryLinksEditor = () => {
 
 	const options = useMemo(() => {
 		return boxesStore.dictionaries
-			.filter(dict => !dictionaryLinksStore.linkedDictionaries?.some(link => link.dictionary.name === dict.name))
-			.map(dict => dict.name)
-	}, [boxesStore.dictionaries, dictionaryLinksStore.linkedDictionaries])
+			.filter(
+				dict =>
+					!dictionaryLinksStore.linkedDictionaries?.some(
+						link => link.dictionary.name === dict.name,
+					),
+			)
+			.map(dict => dict.name);
+	}, [boxesStore.dictionaries, dictionaryLinksStore.linkedDictionaries]);
 
 	const [showAddDictionary, setShowAddDictionary] = useState(false);
 	const [newLinkedDictionaryName, setNewLinkedDictionaryName] = useState(options[0]);
@@ -117,40 +124,43 @@ const DictionaryLinksEditor = () => {
 				box: boxesStore.selectedBox.name,
 				dictionary: {
 					name: newLinkedDictionaryName,
-					type: 'MAIN'
-				}
-			}
+					type: 'MAIN',
+				},
+			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
 	};
 
 	return (
 		<div className={classes.links} ref={ref}>
-				<p>Linked dictionaries:</p>
-				{dictionaryLinksStore.linkedDictionaries.map((link, i) => (
-					<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
-				))}
-				{showAddDictionary 
-					? <div>
-							<Select
-								options={options}
-								selected={newLinkedDictionaryName}
-								onChange={setNewLinkedDictionaryName}
-							/>
-							<button onClick={applyNewLink}><Icon id='check' stroke='black' /></button>
-						</div>
-					: options.length 
-						? <button 
-								className={classes.add}
-								onClick={() => setShowAddDictionary(true)}
-							>
-								+
-							</button>
-						: null
-				}
-			</div>
+			<p>Linked dictionaries:</p>
+			{dictionaryLinksStore.linkedDictionaries.map((link, i) => (
+				<Link
+					link={link}
+					key={`${link.name}-${i}`}
+					deleteLink={() => {
+						dictionaryLinksStore.deleteLinkDictionary(link);
+					}}
+				/>
+			))}
+			{showAddDictionary ? (
+				<div>
+					<Select
+						options={options}
+						selected={newLinkedDictionaryName}
+						onChange={setNewLinkedDictionaryName}
+					/>
+					<button onClick={applyNewLink}>
+						<Icon id='check' stroke='black' />
+					</button>
+				</div>
+			) : options.length ? (
+				<button className={classes.add} onClick={() => setShowAddDictionary(true)}>
+					+
+				</button>
+			) : null}
+		</div>
 	);
 };
 
 export default observer(DictionaryLinksEditor);
-	

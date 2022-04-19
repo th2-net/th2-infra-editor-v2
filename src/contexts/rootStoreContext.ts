@@ -14,16 +14,16 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import React from "react";
-import Api from "../api/api";
-import { RootStore } from "../stores/RootStore";
+import React from 'react';
+import Api from '../api/api';
+import { RootStore } from '../stores/RootStore';
 
 const RootStoreContext = React.createContext<RootStore | null>(null);
 
 export function createRootStore(api: Api): RootStore {
-  const rootStore = new RootStore(api);
+	const rootStore = new RootStore(api);
 
-  return rootStore;
+	return rootStore;
 }
 
 export default RootStoreContext;
