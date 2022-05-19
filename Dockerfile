@@ -4,7 +4,7 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends make build-essential
 WORKDIR /home/node
 COPY ./ .
-RUN npm run build
+RUN npm ci && npm run build
 
 FROM nginx:1.17.10-alpine
 COPY --from=build /home/node/build/out /usr/share/nginx/html
