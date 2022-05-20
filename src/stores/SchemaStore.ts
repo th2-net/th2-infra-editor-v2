@@ -31,6 +31,7 @@ import SubscriptionStore from './SubscriptionStore';
 import { chain } from 'lodash';
 import { InvalidLink } from '../helpers/pinConnections';
 import AppViewType from '../util/AppViewType';
+import { Notification } from './NotificationsStore';
 
 export class SchemaStore {
 	boxesStore = new BoxesStore();
@@ -86,6 +87,10 @@ export class SchemaStore {
 
 		this.schemaSettings = null;
 	}
+
+	public addMessage = (error: Notification) => {
+		this.rootStore.notificationsStore.addMessage(error);
+	};
 
 	public get invalidLinks(): InvalidLink[] {
 		const invalidLinks: InvalidLink[] = [];

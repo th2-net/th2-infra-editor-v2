@@ -26,7 +26,7 @@ const _pinSchema = {
 		type: 'object',
 		properties: {
 			name: { type: 'string' },
-			['connection-type']: { enum: ['mq', 'grpc'] },
+			'connection-type': { enum: ['mq', 'grpc'] },
 			filters: {
 				type: 'array',
 				items: {
@@ -37,9 +37,9 @@ const _pinSchema = {
 							items: {
 								type: 'object',
 								properties: {
-									['field-name']: { type: 'string' },
-									['expected-value']: { type: 'string' },
-									['operation']: { type: 'string' },
+									'field-name': { type: 'string' },
+									'expected-value': { type: 'string' },
+									operation: { type: 'string' },
 								},
 								additionalProperties: false,
 								required: ['field-name', 'expected-value', 'operation'],

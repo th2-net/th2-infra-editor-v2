@@ -20,52 +20,52 @@ import Icon from '../Icon';
 import { DictionaryEntity } from '../../models/Dictionary';
 
 const useStyles = createUseStyles(
-    (theme: Theme) => ({
-        container: {
-            width: '100%',
-            backgroundColor: '#fff',
-            minHeight: 70,
-            borderRadius: 6,
-            overflow: 'hidden',
-            display: 'grid',
-            gridTemplateRows: '25px 1fr',
-            cursor: 'pointer',
-        },
-        header: {
-            height: 25,
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 10px',
-            backgroundColor: '#7a99b8',
-            color: '#fff'
-        },
-        name: {
-            margin: '0 0 0 5px',
-            fontSize: 12,
-        },
-    }),
-    { name: 'Dictionary' },
+	(theme: Theme) => ({
+		container: {
+			width: '100%',
+			backgroundColor: '#fff',
+			minHeight: 70,
+			borderRadius: 6,
+			overflow: 'hidden',
+			display: 'grid',
+			gridTemplateRows: '25px 1fr',
+			cursor: 'pointer',
+		},
+		header: {
+			height: 25,
+			width: '100%',
+			display: 'flex',
+			alignItems: 'center',
+			padding: '0 10px',
+			backgroundColor: '#7a99b8',
+			color: '#fff',
+		},
+		name: {
+			margin: '0 0 0 5px',
+			fontSize: 12,
+		},
+	}),
+	{ name: 'Dictionary' },
 );
 
 interface Props {
-    dictionary: DictionaryEntity;
-		onClick: () => void;
-    color?: string;
+	dictionary: DictionaryEntity;
+	onClick: () => void;
+	color?: string;
 }
 
 function Dictionary(props: Props) {
-const { dictionary, color, onClick } = props;
-const classes = useStyles();
+	const { dictionary, color, onClick } = props;
+	const classes = useStyles();
 
-return (
-    <div className={classes.container} onClick={onClick}>
-        <div className={classes.header} style={{ backgroundColor: color }}>
-            <Icon id='dictionary'/>
-            <h5 className={classes.name}>{dictionary.name}</h5>
-        </div>
-    </div>
-);
+	return (
+		<div className={classes.container} onClick={onClick}>
+			<div className={classes.header} style={{ backgroundColor: color }}>
+				<Icon id='dictionary' />
+				<h5 className={classes.name}>{dictionary.name}</h5>
+			</div>
+		</div>
+	);
 }
 
 export default Dictionary;

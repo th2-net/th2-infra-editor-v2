@@ -14,17 +14,17 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { observer } from "mobx-react-lite";
-import { useMemo, useRef, useState } from "react";
-import { createUseStyles } from "react-jss";
-import { useBoxesStore } from "../../hooks/useBoxesStore";
-import { useDictionaryLinksStore } from "../../hooks/useDictionaryLinksStore";
-import useOutsideClickListener from "../../hooks/useOutsideClickListener";
-import { useSelectedDictionaryStore } from "../../hooks/useSelectedDictionaryStore";
-import { DictionaryRelation } from "../../models/Dictionary";
-import Icon from "../Icon";
-import Select from "../util/Select";
-import { useLinksStyles } from "./DictionaryLinksEditor";
+import { observer } from 'mobx-react-lite';
+import { useMemo, useRef, useState } from 'react';
+import { createUseStyles } from 'react-jss';
+import { useBoxesStore } from '../../hooks/useBoxesStore';
+import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
+import useOutsideClickListener from '../../hooks/useOutsideClickListener';
+import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
+import { DictionaryRelation } from '../../models/Dictionary';
+import Icon from '../Icon';
+import Select from '../util/Select';
+import { useLinksStyles } from './DictionaryLinksEditor';
 
 interface DictionaryLinkProps {
 	link: DictionaryRelation;
@@ -39,14 +39,14 @@ const useLinkStyle = createUseStyles({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		'&:hover': {
-			backgroundColor: '#e5e5e5'
-		}
+			backgroundColor: '#e5e5e5',
+		},
 	},
 	title: {
 		display: 'flex',
 		'&>p': {
-			margin: '0 0 0 2px'
-		}
+			margin: '0 0 0 2px',
+		},
 	},
 	delete: {
 		display: 'inline-flex',
@@ -56,10 +56,10 @@ const useLinkStyle = createUseStyles({
 		outline: 'none',
 		border: 'none',
 		cursor: 'pointer',
-	}
-})
+	},
+});
 
-const Link = ({link, deleteLink}: DictionaryLinkProps) => {
+const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 	const classes = useLinkStyle();
 	return (
 		<div className={classes.link}>
@@ -67,10 +67,12 @@ const Link = ({link, deleteLink}: DictionaryLinkProps) => {
 				<Icon id='box' stroke='black' />
 				<p>{link.box}</p>
 			</div>
-			<button className={classes.delete} onClick={deleteLink}><Icon id='cross' stroke='black' width={8} height={8}/></button>
+			<button className={classes.delete} onClick={deleteLink}>
+				<Icon id='cross' stroke='black' width={8} height={8} />
+			</button>
 		</div>
-	)
-}
+	);
+};
 
 const BoxLinksEditor = () => {
 	const classes = useLinksStyles();
@@ -81,7 +83,7 @@ const BoxLinksEditor = () => {
 	const options = useMemo(() => {
 		return boxesStore.boxes
 			.filter(box => !dictionaryLinksStore.linkedBoxes?.some(link => link.box === box.name))
-			.map(box => box.name)
+			.map(box => box.name);
 	}, [boxesStore.boxes, dictionaryLinksStore.linkedBoxes]);
 
 	const [newLinkedBoxName, setNewLinkedBoxName] = useState(options[0]);
@@ -100,9 +102,9 @@ const BoxLinksEditor = () => {
 				box: newLinkedBoxName,
 				dictionary: {
 					name: selectedDictionaryStore.dictionary.name,
-					type: 'MAIN'
-				}
-			}
+					type: 'MAIN',
+				},
+			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
 	};
@@ -111,29 +113,28 @@ const BoxLinksEditor = () => {
 		<div className={classes.links} ref={ref}>
 			<p>Linked boxes:</p>
 			{dictionaryLinksStore.linkedBoxes.map((link, i) => (
-				<Link link={link} key={`${link.name}-${i}`} deleteLink={() => {dictionaryLinksStore.deleteLinkDictionary(link)}}/>
+				<Link
+					link={link}
+					key={`${link.name}-${i}`}
+					deleteLink={() => {
+						dictionaryLinksStore.deleteLinkDictionary(link);
+					}}
+				/>
 			))}
-			{showAddBox 
-				? <div>
-						<Select
-							options={options}
-							selected={newLinkedBoxName}
-							onChange={setNewLinkedBoxName}
-						/>
-						<button onClick={applyNewLink}>
-							<Icon id='check' stroke='black' />
-						</button>
-					</div>
-				: <button 
-						className={classes.add}
-						onClick={() => setShowAddBox(true)}
-					>
-						+
+			{showAddBox ? (
+				<div>
+					<Select options={options} selected={newLinkedBoxName} onChange={setNewLinkedBoxName} />
+					<button onClick={applyNewLink}>
+						<Icon id='check' stroke='black' />
 					</button>
-			}
+				</div>
+			) : (
+				<button className={classes.add} onClick={() => setShowAddBox(true)}>
+					+
+				</button>
+			)}
 		</div>
 	);
 };
 
 export default observer(BoxLinksEditor);
-	

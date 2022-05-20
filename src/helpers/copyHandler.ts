@@ -1,4 +1,4 @@
-/** *****************************************************************************
+/** ****************************************************************************
  * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,20 @@
  * limitations under the License.
  ***************************************************************************** */
 
-enum AppViewType {
-	BoxView = 'boxView',
-	DictionaryView = 'dictionaryView',
-	BoxCreate = 'boxCreate',
-}
+export function copyTextToClipboard(str: string) {
+	// dirty hack here - we create new invisible element, select it and copy text to the clipboard
+	const element = document.createElement('textarea');
 
-export default AppViewType;
+	element.value = str;
+	element.setAttribute('readonly', '');
+	element.style.position = 'absolute';
+	element.style.left = '-9000px';
+
+	document.body.appendChild(element);
+
+	// using select API, copy inner text to clipboard
+	element.select();
+
+	document.execCommand('copy');
+	document.body.removeChild(element);
+}
