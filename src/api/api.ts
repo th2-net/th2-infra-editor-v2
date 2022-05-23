@@ -16,7 +16,7 @@
 
 import { RequestModel } from '../models/FileBase';
 import { Schema } from '../models/Schema';
-import ApiSchema from './ApiSchema';
+import ApiSchema, { SchemaRequest } from './ApiSchema';
 
 export default class Api implements ApiSchema {
 	async fetchSchemasList(): Promise<string[]> {
@@ -54,7 +54,7 @@ export default class Api implements ApiSchema {
 		return {} as Schema;
 	}
 
-	async sendSchemaRequest(schemaName: string, schema: RequestModel[]): Promise<boolean> {
+	async sendSchemaRequest(schemaName: string, schema: RequestModel[]): Promise<SchemaRequest> {
 		const res = await fetch(`backend/schema/${schemaName}`, {
 			method: 'POST',
 			headers: {
@@ -67,7 +67,7 @@ export default class Api implements ApiSchema {
 			console.error(res);
 		}
 
-		return res.ok;
+		return res.json();
 	}
 
 	subscribeOnChanges(schemaName: string): EventSource {

@@ -18,8 +18,11 @@ import Api from '../api/api';
 import { SchemaStore } from './SchemaStore';
 import URLParamsStore from './URLParamsStore';
 import AppViewStore from './AppViewStore';
+import notificationStoreInstance from './NotificationsStore';
 
 export class RootStore {
+	notificationsStore = notificationStoreInstance;
+
 	schemaStore: SchemaStore;
 
 	readonly urlParamsStore = new URLParamsStore();

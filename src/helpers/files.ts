@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { isArray, isPlainObject } from "lodash";
+import { isArray, isPlainObject } from 'lodash';
 
 export function downloadFile(content: string, filename: string, extension: string) {
 	const file = new Blob([content], { type: extension });

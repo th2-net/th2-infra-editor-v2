@@ -14,11 +14,10 @@
  *  limitations under the License.
  ***************************************************************************** */
 
- import { useSchemaStore } from "./useSchemaStore";
+import { useSchemaStore } from './useSchemaStore';
 
- export const useBoxesStore = () => {
-	 const schemaStore = useSchemaStore();
- 
-	 return schemaStore.boxesStore;
- };
- 
+export const useBoxesStore = () => {
+	const schemaStore = useSchemaStore();
+
+	return schemaStore.boxesStore;
+};

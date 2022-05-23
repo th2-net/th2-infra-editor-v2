@@ -23,11 +23,14 @@ import { useSchemaStore } from '../../hooks/useSchemaStore';
 const EmbeddedDictionaryEditor = () => {
 	const { dictionary, editDictionary } = useSelectedDictionaryStore();
 	const { requestsStore } = useSchemaStore();
-	
-	const saveChanges = React.useCallback((data: string) => {
-		editDictionary(data);
-		requestsStore.saveChanges();
-	}, [editDictionary, requestsStore]);
+
+	const saveChanges = React.useCallback(
+		(data: string) => {
+			editDictionary(data);
+			requestsStore.saveChanges();
+		},
+		[editDictionary, requestsStore],
+	);
 
 	if (!dictionary) {
 		return <div>Dictionary not found</div>;

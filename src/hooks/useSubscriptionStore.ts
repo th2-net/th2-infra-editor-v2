@@ -14,7 +14,7 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { useSchemaStore } from "./useSchemaStore";
+import { useSchemaStore } from './useSchemaStore';
 
 export default function useSubscriptionStore() {
 	const schemasStore = useSchemaStore();

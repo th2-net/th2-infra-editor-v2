@@ -226,7 +226,11 @@ function ResourcesList() {
 
 	return (
 		<div className={classes.container}>
-			<ResourcesListHeader filter={filter} setFilter={setFilter} setViewType={appViewStore.setViewType} />
+			<ResourcesListHeader
+				filter={filter}
+				setFilter={setFilter}
+				setViewType={appViewStore.setViewType}
+			/>
 			<ResourcesSearch filter={filter} setValue={setSearchValue} />
 			<Virtuoso data={groupedBoxes} itemContent={renderBox} className={classes.boxList} />
 		</div>

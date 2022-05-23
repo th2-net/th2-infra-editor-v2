@@ -23,17 +23,22 @@ import {
 	uniqBy,
 	cloneDeep,
 	remove,
-	isEqual
-} from "lodash";
-import { action, computed, makeObservable, observable, toJS } from "mobx";
-import { IBoxConnections, IPinConnections } from "../components/links/BoxConnections";
-import { convertToExtendedLink } from "../helpers/link";
-import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from "../models/Box";
-import FileBase from "../models/FileBase";
-import { ConnectionDirection, isBoxLinksDefinition, Link, LinksDefinition } from "../models/LinksDefinition";
-import { BoxesStore } from "./BoxesStore";
-import HistoryStore from "./HistoryStore";
-import { RequestsStore } from "./RequestsStore";
+	isEqual,
+} from 'lodash';
+import { action, computed, makeObservable, observable, toJS } from 'mobx';
+import { IBoxConnections, IPinConnections } from '../components/links/BoxConnections';
+import { convertToExtendedLink } from '../helpers/link';
+import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
+import FileBase from '../models/FileBase';
+import {
+	ConnectionDirection,
+	isBoxLinksDefinition,
+	Link,
+	LinksDefinition,
+} from '../models/LinksDefinition';
+import { BoxesStore } from './BoxesStore';
+import HistoryStore from './HistoryStore';
+import { RequestsStore } from './RequestsStore';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
 
 const editorLink: Readonly<LinksDefinition> = {
@@ -54,7 +59,7 @@ export class BoxUpdater {
 		private requestsStore: RequestsStore,
 		private boxesStore: BoxesStore,
 		private history: HistoryStore,
-		private dictionaryLinksStore: DictionaryLinksStore
+		private dictionaryLinksStore: DictionaryLinksStore,
 	) {
 		makeObservable(this, {
 			linkDefinitions: observable,
@@ -177,10 +182,7 @@ export class BoxUpdater {
 			});
 	};
 
-	changeLink = (
-		link: Link<ExtendedConnectionOwner>,
-		newLink: Link<ExtendedConnectionOwner>,
-	) => {
+	changeLink = (link: Link<ExtendedConnectionOwner>, newLink: Link<ExtendedConnectionOwner>) => {
 		this.deleteLink(link, false);
 		this.addLink(newLink, false);
 
@@ -243,7 +245,7 @@ export class BoxUpdater {
 
 		this.boxesStore.boxes.push(box);
 		this.requestsStore.saveEntityChanges(box, 'add');
-	}
+	};
 
 	saveBoxChanges = (box: BoxEntity, updatedBox: BoxEntity) => {
 		if (
@@ -257,7 +259,7 @@ export class BoxUpdater {
 		const hasChanges = !isEqual(toJS(box), updatedBox);
 
 		if (hasChanges) {
-			const boxIndex = this.boxesStore.boxes.findIndex((b) => b.name === box.name);
+			const boxIndex = this.boxesStore.boxes.findIndex(b => b.name === box.name);
 
 			if (boxIndex === -1) throw new Error(`Cannot find box with name "${box.name}"`);
 

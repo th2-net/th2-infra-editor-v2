@@ -76,9 +76,7 @@ export const useInput = ({
 	}, [initialValue]);
 
 	React.useEffect(() => {
-		setIsValid(
-			(!isDirty || (!required || value.trim().length > 0))
-			&& (validate?.(value) ?? true));
+		setIsValid((!isDirty || !required || value.trim().length > 0) && (validate?.(value) ?? true));
 	}, [value, validate, isDirty, required]);
 
 	const onValueChange = (newValue: string) => {

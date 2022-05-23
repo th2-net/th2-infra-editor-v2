@@ -89,8 +89,7 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 	const boxesStore = useBoxesStore();
 
 	const boxValidate = useCallback(
-		(name: string): boolean =>
-			boxesStore.boxes.filter(box => name === box.name).length === 1,
+		(name: string): boolean => boxesStore.boxes.filter(box => name === box.name).length === 1,
 		[boxesStore.boxes],
 	);
 
@@ -122,10 +121,7 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 		return box.spec.pins ?? [];
 	}, [box]);
 
-	const pinValidate = useCallback(
-		pin => pins.map(pin => pin.name).includes(pin),
-		[pins],
-	);
+	const pinValidate = useCallback(pin => pins.map(pin => pin.name).includes(pin), [pins]);
 
 	const pinInput = useInput({
 		initialValue: owner?.pin || '',

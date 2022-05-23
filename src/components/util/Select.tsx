@@ -14,8 +14,7 @@
  *  limitations under the License.
  ***************************************************************************** */
 
-import { createUseStyles } from "react-jss";
-
+import { createUseStyles } from 'react-jss';
 
 interface Props<T> {
 	options: Array<T>;
@@ -33,10 +32,10 @@ const useStyles = createUseStyles({
 		color: '#4d4d4d',
 		'&>option': {
 			fontWeight: 'bold',
-			height: 30
-		}
-	}
-})
+			height: 30,
+		},
+	},
+});
 
 export default function Select<T extends string>({
 	options,
@@ -45,14 +44,14 @@ export default function Select<T extends string>({
 	onSelect,
 }: Props<T>) {
 	const classes = useStyles();
-	
+
 	return (
 		<select
-		className={classes.options_select}
-		value={selected}
-		onChange={e => {
-			onChange(e.target.value as T);
-			if (onSelect) {
+			className={classes.options_select}
+			value={selected}
+			onChange={e => {
+				onChange(e.target.value as T);
+				if (onSelect) {
 					onSelect();
 				}
 			}}>

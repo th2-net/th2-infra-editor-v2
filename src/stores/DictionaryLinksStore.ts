@@ -15,18 +15,21 @@
  ***************************************************************************** */
 
 import { action, computed, makeObservable, observable, toJS } from 'mobx';
-import { DictionaryLinksEntity, DictionaryRelation, isDictionaryLinksEntity } from "../models/Dictionary";
-import FileBase from "../models/FileBase";
-import { BoxesStore } from "./BoxesStore";
-import { RequestsStore } from "./RequestsStore";
-import { SelectedDictionaryStore } from "./SelectedDictionaryStore";
+import {
+	DictionaryLinksEntity,
+	DictionaryRelation,
+	isDictionaryLinksEntity,
+} from '../models/Dictionary';
+import FileBase from '../models/FileBase';
+import { BoxesStore } from './BoxesStore';
+import { RequestsStore } from './RequestsStore';
+import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 
 export class DictionaryLinksStore {
-
 	constructor(
 		private requestsStore: RequestsStore,
 		private selectedDictionaryStore: SelectedDictionaryStore,
-		private boxesStore: BoxesStore
+		private boxesStore: BoxesStore,
 	) {
 		makeObservable(this, {
 			dictionaryLinksEntity: observable,
@@ -35,7 +38,7 @@ export class DictionaryLinksStore {
 			linkedDictionaries: computed,
 			addLinkDictionary: action,
 			deleteLinkDictionary: action,
-			setLinkDictionaries: action
+			setLinkDictionaries: action,
 		});
 	}
 
@@ -49,7 +52,9 @@ export class DictionaryLinksStore {
 	}
 
 	public get linkedBoxes(): DictionaryRelation[] {
-		return this.dictionaryRelations.filter(rel => rel.dictionary.name === this.selectedDictionaryStore.dictionary?.name);
+		return this.dictionaryRelations.filter(
+			rel => rel.dictionary.name === this.selectedDictionaryStore.dictionary?.name,
+		);
 	}
 
 	public get linkedDictionaries(): DictionaryRelation[] {
@@ -61,7 +66,7 @@ export class DictionaryLinksStore {
 			.filter(link => link.box === boxName)
 			.map(link => {
 				const updatedLink = toJS(link);
-				updatedLink.box = updatedBoxName
+				updatedLink.box = updatedBoxName;
 				return [link, updatedLink];
 			})
 			.forEach(([link, updatedLink]) => {
@@ -72,39 +77,47 @@ export class DictionaryLinksStore {
 	changeLinkDictionary = (link: DictionaryRelation, newLink: DictionaryRelation) => {
 		this.deleteLinkDictionary(link);
 		this.addLinkDictionary(newLink);
-	}
+	};
 
 	addLinkDictionary = (link: DictionaryRelation) => {
 		if (
-			this.dictionaryLinksEntity && 
-			this.dictionaryRelations.findIndex(existedLink => link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name) === -1
+			this.dictionaryLinksEntity &&
+			this.dictionaryRelations.findIndex(
+				existedLink =>
+					link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name,
+			) === -1
 		) {
 			this.dictionaryLinksEntity = {
 				...this.dictionaryLinksEntity,
 				spec: {
-					"dictionaries-relation": [...this.dictionaryLinksEntity.spec['dictionaries-relation'], link]
-				}
-			}
+					'dictionaries-relation': [
+						...this.dictionaryLinksEntity.spec['dictionaries-relation'],
+						link,
+					],
+				},
+			};
 			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
 		}
-	}
+	};
 
 	deleteLinkDictionary = (link: DictionaryRelation) => {
 		if (this.dictionaryLinksEntity) {
 			this.dictionaryLinksEntity = {
 				...this.dictionaryLinksEntity,
 				spec: {
-					"dictionaries-relation": this.dictionaryLinksEntity.spec['dictionaries-relation'].filter(existedLink => link !== existedLink)
-				}
-			}
+					'dictionaries-relation': this.dictionaryLinksEntity.spec['dictionaries-relation'].filter(
+						existedLink => link !== existedLink,
+					),
+				},
+			};
 			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
 		}
-	}
+	};
 
 	setLinkDictionaries = (allEntities: FileBase[]) => {
 		const dictionaryLinksEntity = allEntities.filter(isDictionaryLinksEntity);
 		if (dictionaryLinksEntity.length > 0) {
 			this.dictionaryLinksEntity = dictionaryLinksEntity[0];
 		}
-	}
+	};
 }
