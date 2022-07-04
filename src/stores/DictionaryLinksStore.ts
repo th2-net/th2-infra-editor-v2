@@ -53,7 +53,7 @@ export class DictionaryLinksStore {
 
 	public get linkedBoxes(): DictionaryRelation[] {
 		return this.dictionaryRelations.filter(
-			rel => rel.dictionary.name === this.selectedDictionaryStore.dictionary?.name,
+			rel => rel.dictionaries.find(relDictionary => relDictionary.name === this.selectedDictionaryStore.dictionary?.name),
 		);
 	}
 
@@ -84,16 +84,23 @@ export class DictionaryLinksStore {
 			this.dictionaryLinksEntity &&
 			this.dictionaryRelations.findIndex(
 				existedLink =>
-					link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name,
+					link.box === existedLink.box && link.name === existedLink.name,
 			) === -1
 		) {
 			this.dictionaryLinksEntity = {
 				...this.dictionaryLinksEntity,
 				spec: {
-					'dictionaries-relation': [
-						...this.dictionaryLinksEntity.spec['dictionaries-relation'],
-						link,
-					],
+					'dictionaries-relation':
+						this.dictionaryLinksEntity.spec['dictionaries-relation'].map(existedLink => {
+							if (existedLink.box === link.box && existedLink.name === link.name) {
+								return {
+									box: existedLink.box,
+									name: existedLink.name,
+									dictionaries: [...existedLink.dictionaries, ...link.dictionaries],
+								};
+							}
+							return existedLink;
+						}),
 				},
 			};
 			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
@@ -105,10 +112,20 @@ export class DictionaryLinksStore {
 			this.dictionaryLinksEntity = {
 				...this.dictionaryLinksEntity,
 				spec: {
-					'dictionaries-relation': this.dictionaryLinksEntity.spec['dictionaries-relation'].filter(
-						existedLink => link !== existedLink,
-					),
-				},
+					'dictionaries-relation': this.dictionaryLinksEntity.spec['dictionaries-relation'].map(
+						existedLink => {
+							if (link.box === existedLink.box)
+								return {
+									name: existedLink.name,
+									box: existedLink.box,
+									dictionaries: existedLink.dictionaries.filter(
+										exLinkDict => !link.dictionaries.find(linkDict => linkDict.name === exLinkDict.name &&
+											linkDict.alias === exLinkDict.alias,
+										))
+								};
+							return link;
+						})
+				}
 			};
 			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
 		}

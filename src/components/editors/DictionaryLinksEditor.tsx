@@ -46,7 +46,10 @@ export const useLinksStyles = createUseStyles({
 });
 
 interface DictionaryLinkProps {
-	link: DictionaryRelation;
+	link: {
+		name: string;
+		alias: string;
+	};
 	deleteLink: () => void;
 }
 
@@ -83,7 +86,7 @@ const Link = ({ link, deleteLink }: DictionaryLinkProps) => {
 		<div className={classes.link}>
 			<div className={classes.title}>
 				<Icon id='dictionary' stroke='black' />
-				<p>{link.dictionary.name}</p>
+				<p>{link.name}</p>
 			</div>
 			<button className={classes.delete} onClick={deleteLink}>
 				<Icon id='cross' stroke='black' width={8} height={8} />
@@ -102,7 +105,8 @@ const DictionaryLinksEditor = () => {
 			.filter(
 				dict =>
 					!dictionaryLinksStore.linkedDictionaries?.some(
-						link => link.dictionary.name === dict.name,
+						link => link.dictionary ? link.dictionary.name === dict.name
+						: link.dictionaries.find(linkDictionary => linkDictionary.name === dict.name),
 					),
 			)
 			.map(dict => dict.name);
@@ -122,10 +126,10 @@ const DictionaryLinksEditor = () => {
 			const newLinkDictionary: DictionaryRelation = {
 				name: `${boxesStore.selectedBox.name}-dictionary`,
 				box: boxesStore.selectedBox.name,
-				dictionary: {
+				dictionaries: [{
 					name: newLinkedDictionaryName,
-					type: 'MAIN',
-				},
+					alias: `${newLinkedDictionaryName}-alias`,
+				}],
 			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
@@ -134,15 +138,15 @@ const DictionaryLinksEditor = () => {
 	return (
 		<div className={classes.links} ref={ref}>
 			<p>Linked dictionaries:</p>
-			{dictionaryLinksStore.linkedDictionaries.map((link, i) => (
+			{dictionaryLinksStore.linkedDictionaries.map((link, i) => link.dictionaries.map((linkDictionary, j) =>(
 				<Link
-					link={link}
-					key={`${link.name}-${i}`}
+					link={linkDictionary}
+					key={`${link.name}-${i}-${j}`}
 					deleteLink={() => {
 						dictionaryLinksStore.deleteLinkDictionary(link);
 					}}
 				/>
-			))}
+			)))}
 			{showAddDictionary ? (
 				<div>
 					<Select
