@@ -19,7 +19,11 @@ import FileBase from './FileBase';
 export interface DictionaryRelation {
 	name: string;
 	box: string;
-	dictionary: {
+	dictionaries: {
+		name: string;
+		alias: string;
+	}[];
+	dictionary?: {
 		name: string;
 		type: string;
 	};
