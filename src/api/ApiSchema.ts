@@ -17,17 +17,22 @@
 import { RequestModel } from '../models/FileBase';
 import { Schema } from '../models/Schema';
 
+interface Link {
+	linkName: string;
+	message: string;
+	from: string;
+	to: string;
+}
+
 export interface SchemaRequest {
 	commitRef: null | string;
 	resources: null | Array<Object>;
 	validationErrors: null | {
 		linkErrorMessages: {
-			links: Array<{
-				linkName: string;
-				message: string;
-				from: string;
-				to: string;
-			}>;
+			'codec-links': Array<Link>;
+			'dictionary-links': Array<Link>;
+			'editor-generated-links': Array<Link>;
+			'links-live': Array<Link>;
 		};
 		boxResourceErrorMessages: Array<{
 			box: string;
