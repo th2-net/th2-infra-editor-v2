@@ -26,7 +26,8 @@ const ModalWindow = (props: {
 			open={true}
 			BackdropProps={{ style: { backgroundColor: 'transparent' } }}
 			disableBackdropClick={false}
-			onClose={() => props.setOpen(false)}>
+			onClose={() => props.setOpen(false)}
+		>
 			{props.children}
 		</Modal>
 	);

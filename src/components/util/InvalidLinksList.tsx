@@ -83,7 +83,8 @@ const InvalidLinksList = (props: { setOpen: Dispatch<SetStateAction<boolean>> })
 								boxUpdater.deleteLink(link.link);
 							});
 							props.setOpen(false);
-						}}>
+						}}
+					>
 						Delete invalid links
 					</button>
 				</div>

@@ -187,19 +187,22 @@ function PinConnections({
 							display: 'flex',
 							direction: direction === 'to' ? 'rtl' : 'ltr',
 							marginBottom: 5,
-						}}>
+						}}
+					>
 						<div style={{ width: 250, flexShrink: 0 }}>
 							{index === 0 && (
 								<div
 									className={classes.header}
 									style={{
 										padding: direction === 'to' ? '0 30px 0 0' : '0 0 0 30px',
-									}}>
+									}}
+								>
 									<span className={classes.pin}>{connections.pin.name}</span>
 									{!isRoot && connections.boxes.length > 1 && (
 										<button
 											className={classes.expandButton}
-											onClick={() => setIsExpanded && setIsExpanded(!isExpanded)}>
+											onClick={() => setIsExpanded && setIsExpanded(!isExpanded)}
+										>
 											{isExpanded ? '-' : '+'}
 										</button>
 									)}

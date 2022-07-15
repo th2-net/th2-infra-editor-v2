@@ -54,7 +54,8 @@ export default function Select<T extends string>({
 				if (onSelect) {
 					onSelect();
 				}
-			}}>
+			}}
+		>
 			{options.map((opt, index) => (
 				<option key={index}>{opt}</option>
 			))}

@@ -141,7 +141,8 @@ const BoxCreationLayout = () => {
 			<button
 				disabled={inputs.some(input => !input.isValid)}
 				className={classes.submitButton}
-				onClick={createNewBox}>
+				onClick={createNewBox}
+			>
 				Create
 			</button>
 		</div>

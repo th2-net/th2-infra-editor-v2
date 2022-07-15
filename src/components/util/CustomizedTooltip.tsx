@@ -43,7 +43,8 @@ const CustomizedTooltip = (props: {
 				disableHoverListener={props.disableCondition}
 				disableTouchListener={true}
 				disableFocusListener={true}
-				title={<span>{props.title}</span>}>
+				title={<span>{props.title}</span>}
+			>
 				{props.children}
 			</Tooltip>
 		</ThemeProvider>

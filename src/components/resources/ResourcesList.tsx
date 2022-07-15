@@ -171,7 +171,8 @@ function ResourcesList() {
 								getType(groupedBoxes[index + 1]) === getType(box),
 							[classes.prevGroupItem]:
 								index - 1 >= 0 && getType(groupedBoxes[index - 1]) === getType(box),
-						})}>
+						})}
+					>
 						<Observer>
 							{() => (
 								<Box
@@ -314,11 +315,13 @@ function ExpandGroup(props: ExpandGroupProps) {
 			onClick={() => props.onClick()}
 			className={classNames(classes.expandGroup, {
 				[classes.expanded]: props.isExpand && props.group.name !== 'dictionaries',
-			})}>
+			})}
+		>
 			<div
 				className={classNames(classes.expandButton, {
 					[classes.rotateButton]: props.isExpand,
-				})}>
+				})}
+			>
 				&gt;
 			</div>
 			<div className={classes.name}>{props.group.name}</div>
