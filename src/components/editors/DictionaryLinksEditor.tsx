@@ -46,10 +46,7 @@ export const useLinksStyles = createUseStyles({
 });
 
 interface DictionaryLinkProps {
-	link: {
-		name: string;
-		alias: string;
-	};
+	link: DictionaryRelation | { name: string; alias: string };
 	deleteLink: () => void;
 }
 
@@ -105,8 +102,7 @@ const DictionaryLinksEditor = () => {
 			.filter(
 				dict =>
 					!dictionaryLinksStore.linkedDictionaries?.some(
-						link => link.dictionary ? link.dictionary.name === dict.name
-						: link.dictionaries.find(linkDictionary => linkDictionary.name === dict.name),
+						link => link.dictionary.name === dict.name,
 					),
 			)
 			.map(dict => dict.name);
@@ -126,27 +122,50 @@ const DictionaryLinksEditor = () => {
 			const newLinkDictionary: DictionaryRelation = {
 				name: `${boxesStore.selectedBox.name}-dictionary`,
 				box: boxesStore.selectedBox.name,
-				dictionaries: [{
+				dictionary: {
 					name: newLinkedDictionaryName,
-					alias: `${newLinkedDictionaryName}-alias`,
-				}],
+					type: 'MAIN',
+				},
 			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
 	};
+	const relatedDictionaryRelations =
+		boxesStore.selectedBox &&
+		dictionaryLinksStore.relatedDictionaryRelations(boxesStore.selectedBox.name);
 
 	return (
 		<div className={classes.links} ref={ref}>
 			<p>Linked dictionaries:</p>
-			{dictionaryLinksStore.linkedDictionaries.map((link, i) => link.dictionaries.map((linkDictionary, j) =>(
-				<Link
-					link={linkDictionary}
-					key={`${link.name}-${i}-${j}`}
-					deleteLink={() => {
-						dictionaryLinksStore.deleteLinkDictionary(link);
-					}}
-				/>
-			)))}
+			{relatedDictionaryRelations &&
+				relatedDictionaryRelations.dictionaries.map((link, i) => (
+					<Link
+						link={link}
+						key={`${link.name}-multi-${i}`}
+						deleteLink={() => {
+							dictionaryLinksStore.deleteMultiLinkDictionary({
+								...relatedDictionaryRelations,
+								dictionaries: [link],
+							});
+						}}
+					/>
+				))}
+			{dictionaryLinksStore.linkedDictionaries
+				.filter(
+					link =>
+						!relatedDictionaryRelations?.dictionaries.find(
+							relatedDict => relatedDict.name === link.dictionary.name,
+						),
+				)
+				.map((link, i) => (
+					<Link
+						link={link}
+						key={`${link.name}-${i}`}
+						deleteLink={() => {
+							dictionaryLinksStore.deleteLinkDictionary(link);
+						}}
+					/>
+				))}
 			{showAddDictionary ? (
 				<div>
 					<Select

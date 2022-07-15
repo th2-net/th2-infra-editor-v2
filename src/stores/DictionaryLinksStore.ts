@@ -19,6 +19,7 @@ import {
 	DictionaryLinksEntity,
 	DictionaryRelation,
 	isDictionaryLinksEntity,
+	MultiDictionaryRelation,
 } from '../models/Dictionary';
 import FileBase from '../models/FileBase';
 import { BoxesStore } from './BoxesStore';
@@ -37,7 +38,9 @@ export class DictionaryLinksStore {
 			linkedBoxes: computed,
 			linkedDictionaries: computed,
 			addLinkDictionary: action,
+			addMultiLinkDictionary: action,
 			deleteLinkDictionary: action,
+			deleteMultiLinkDictionary: action,
 			setLinkDictionaries: action,
 		});
 	}
@@ -51,9 +54,30 @@ export class DictionaryLinksStore {
 		return this.dictionaryLinksEntity.spec['dictionaries-relation'];
 	}
 
+	public get multiDictionaryRelations(): MultiDictionaryRelation[] {
+		if (
+			!this.dictionaryLinksEntity ||
+			!this.dictionaryLinksEntity.spec['multi-dictionaries-relation']
+		) {
+			return [];
+		}
+		return this.dictionaryLinksEntity.spec['multi-dictionaries-relation'];
+	}
+
+	public relatedDictionaryRelations = (box: string): MultiDictionaryRelation | undefined => {
+		if (
+			!this.dictionaryLinksEntity ||
+			!this.dictionaryLinksEntity.spec['multi-dictionaries-relation']
+		) {
+			return undefined;
+		}
+		return this.dictionaryLinksEntity.spec['multi-dictionaries-relation'].find(
+			relation => relation.box === box,
+		);
+	};
 	public get linkedBoxes(): DictionaryRelation[] {
 		return this.dictionaryRelations.filter(
-			rel => rel.dictionaries.find(relDictionary => relDictionary.name === this.selectedDictionaryStore.dictionary?.name),
+			rel => rel.dictionary.name === this.selectedDictionaryStore.dictionary?.name,
 		);
 	}
 
@@ -72,35 +96,139 @@ export class DictionaryLinksStore {
 			.forEach(([link, updatedLink]) => {
 				this.changeLinkDictionary(link, updatedLink);
 			});
+		const relatedLink = this.multiDictionaryRelations.find(link => link.box === boxName);
+		relatedLink && this.changeLinkDictionary(relatedLink, { ...relatedLink, box: updatedBoxName });
 	};
 
-	changeLinkDictionary = (link: DictionaryRelation, newLink: DictionaryRelation) => {
-		this.deleteLinkDictionary(link);
-		this.addLinkDictionary(newLink);
+	changeLinkDictionary = (
+		link: DictionaryRelation | MultiDictionaryRelation,
+		newLink: DictionaryRelation | MultiDictionaryRelation,
+	) => {
+		if ('dictionaries' in link) this.deleteMultiLinkDictionary(link);
+		else this.deleteLinkDictionary(link);
+
+		if ('dictionaries' in newLink) this.addMultiLinkDictionary(newLink);
+		else this.addLinkDictionary(newLink);
 	};
 
 	addLinkDictionary = (link: DictionaryRelation) => {
+		const relatedMultiLink = this.relatedDictionaryRelations(link.box);
 		if (
 			this.dictionaryLinksEntity &&
 			this.dictionaryRelations.findIndex(
 				existedLink =>
-					link.box === existedLink.box && link.name === existedLink.name,
-			) === -1
+					link.dictionary.name === existedLink.dictionary.name && link.name === existedLink.name,
+			) === -1 &&
+			(!relatedMultiLink ||
+				relatedMultiLink.dictionaries.findIndex(
+					dictionary => dictionary.name === link.dictionary.name,
+				) === -1)
 		) {
+			console.log(relatedMultiLink, this.dictionaryLinksEntity.spec['multi-dictionaries-relation']);
 			this.dictionaryLinksEntity = {
 				...this.dictionaryLinksEntity,
 				spec: {
-					'dictionaries-relation':
-						this.dictionaryLinksEntity.spec['dictionaries-relation'].map(existedLink => {
-							if (existedLink.box === link.box && existedLink.name === link.name) {
-								return {
-									box: existedLink.box,
-									name: existedLink.name,
-									dictionaries: [...existedLink.dictionaries, ...link.dictionaries],
-								};
-							}
-							return existedLink;
+					'dictionaries-relation': [
+						...this.dictionaryLinksEntity.spec['dictionaries-relation'],
+						link,
+					],
+					'multi-dictionaries-relation': relatedMultiLink
+						? [
+								...this.dictionaryLinksEntity.spec['multi-dictionaries-relation'].filter(
+									relation => relation.box !== relatedMultiLink.box,
+								),
+								{
+									...relatedMultiLink,
+									dictionaries: relatedMultiLink.dictionaries.find(
+										dictionary => dictionary.name === link.dictionary.name,
+									)
+										? relatedMultiLink.dictionaries
+										: [
+												...relatedMultiLink?.dictionaries,
+												{
+													name: link.dictionary.name,
+													alias: link.dictionary.type,
+												},
+										  ],
+								},
+						  ]
+						: this.dictionaryLinksEntity.spec['multi-dictionaries-relation']
+						? [
+								...this.dictionaryLinksEntity.spec['multi-dictionaries-relation'].filter(
+									relation => relation.box !== link.box,
+								),
+								{
+									box: link.box,
+									name: link.name,
+									dictionaries: [
+										{
+											name: link.dictionary.name,
+											alias: link.dictionary.type,
+										},
+									],
+								},
+						  ]
+						: [
+								{
+									box: link.box,
+									name: link.name,
+									dictionaries: [
+										{
+											name: link.dictionary.name,
+											alias: link.dictionary.type,
+										},
+									],
+								},
+						  ],
+				},
+			};
+			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
+		}
+	};
+
+	addMultiLinkDictionary = (link: MultiDictionaryRelation) => {
+		if (this.dictionaryLinksEntity) {
+			const relatedMultiLink = this.relatedDictionaryRelations(link.box);
+			if (
+				!relatedMultiLink ||
+				(relatedMultiLink.dictionaries.length === link.dictionaries.length &&
+					relatedMultiLink.dictionaries.filter(dictionary =>
+						link.dictionaries.find(linkDictionary => linkDictionary.name === dictionary.name),
+					).length === link.dictionaries.length)
+			)
+				return;
+			this.dictionaryLinksEntity = {
+				...this.dictionaryLinksEntity,
+				spec: {
+					'dictionaries-relation': [
+						...this.dictionaryLinksEntity.spec['dictionaries-relation'],
+						...link.dictionaries.map(dictionary => {
+							return {
+								name: link.name,
+								box: link.box,
+								dictionary: {
+									name: dictionary.name,
+									type: dictionary.alias,
+								},
+							};
 						}),
+					],
+					'multi-dictionaries-relation': relatedMultiLink
+						? [
+								...this.dictionaryLinksEntity.spec['multi-dictionaries-relation'].filter(
+									relation => relation.box !== link.box,
+								),
+								{
+									...relatedMultiLink,
+									dictionaries: link.dictionaries,
+								},
+						  ]
+						: [
+								...this.dictionaryLinksEntity.spec['multi-dictionaries-relation'].filter(
+									relation => relation.box !== link.box,
+								),
+								link,
+						  ],
 				},
 			};
 			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
@@ -109,23 +237,62 @@ export class DictionaryLinksStore {
 
 	deleteLinkDictionary = (link: DictionaryRelation) => {
 		if (this.dictionaryLinksEntity) {
+			const relatedMultiLink = this.relatedDictionaryRelations(link.box);
 			this.dictionaryLinksEntity = {
 				...this.dictionaryLinksEntity,
 				spec: {
-					'dictionaries-relation': this.dictionaryLinksEntity.spec['dictionaries-relation'].map(
-						existedLink => {
-							if (link.box === existedLink.box)
-								return {
-									name: existedLink.name,
-									box: existedLink.box,
-									dictionaries: existedLink.dictionaries.filter(
-										exLinkDict => !link.dictionaries.find(linkDict => linkDict.name === exLinkDict.name &&
-											linkDict.alias === exLinkDict.alias,
-										))
-								};
-							return link;
-						})
-				}
+					'dictionaries-relation': this.dictionaryLinksEntity.spec['dictionaries-relation'].filter(
+						existedLink => link !== existedLink,
+					),
+					'multi-dictionaries-relation': relatedMultiLink
+						? [
+								...this.dictionaryLinksEntity.spec['multi-dictionaries-relation'].filter(
+									relation => relation.box !== link.box,
+								),
+								{
+									...relatedMultiLink,
+									dictionaries: relatedMultiLink.dictionaries.filter(
+										dictionary => dictionary.name !== link.dictionary.name,
+									),
+								},
+						  ]
+						: this.dictionaryLinksEntity.spec['multi-dictionaries-relation'],
+				},
+			};
+			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
+		}
+	};
+
+	deleteMultiLinkDictionary = (link: MultiDictionaryRelation) => {
+		if (this.dictionaryLinksEntity) {
+			const relatedMultiLink = this.relatedDictionaryRelations(link.box);
+			this.dictionaryLinksEntity = {
+				...this.dictionaryLinksEntity,
+				spec: {
+					'dictionaries-relation': this.dictionaryLinksEntity.spec['dictionaries-relation'].filter(
+						existedLink =>
+							existedLink.box !== link.box ||
+							!link.dictionaries.find(
+								linkDictionary => linkDictionary.name === existedLink.dictionary.name,
+							),
+					),
+					'multi-dictionaries-relation': relatedMultiLink
+						? [
+								...this.dictionaryLinksEntity.spec['multi-dictionaries-relation'].filter(
+									relation => relation.box !== link.box,
+								),
+								{
+									...relatedMultiLink,
+									dictionaries: relatedMultiLink.dictionaries.filter(
+										dictionary =>
+											!link.dictionaries.find(
+												linkDictionary => linkDictionary.name === dictionary.name,
+											),
+									),
+								},
+						  ]
+						: this.dictionaryLinksEntity.spec['multi-dictionaries-relation'],
+				},
 			};
 			this.requestsStore.saveEntityChanges(this.dictionaryLinksEntity, 'update');
 		}

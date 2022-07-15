@@ -100,10 +100,10 @@ const BoxLinksEditor = () => {
 			const newLinkDictionary: DictionaryRelation = {
 				name: `${newLinkedBoxName}-dictionary`,
 				box: newLinkedBoxName,
-				dictionaries: [{
+				dictionary: {
 					name: selectedDictionaryStore.dictionary.name,
-					alias: `${selectedDictionaryStore.dictionary.name}-alias`,
-				}],
+					type: 'MAIN',
+				},
 			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
