@@ -321,7 +321,8 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 			<div className={classes.actions}>
 				<button
 					onClick={cancelOrDelete}
-					className={classNames(classes.button, classes.deleteButton)}>
+					className={classNames(classes.button, classes.deleteButton)}
+				>
 					{editableLink ? 'Delete' : 'Cancel'}
 				</button>
 				<button onClick={submit} className={submitButtonClassName}>

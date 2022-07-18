@@ -25,6 +25,7 @@ export interface LinksDefinition extends FileBase {
 			['router-grpc']: Link<ConnectionOwner>[];
 		};
 		['dictionaries-relation']?: DictionaryRelation[];
+		['multi-dictionaries-relation']?: DictionaryRelation[];
 	};
 }
 

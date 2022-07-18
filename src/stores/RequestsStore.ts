@@ -18,6 +18,7 @@ import { isEqual } from 'lodash';
 import { action, computed, makeObservable, observable } from 'mobx';
 import { nanoid } from 'nanoid';
 import Api from '../api/api';
+import { getObjectKeys } from '../helpers/object';
 import { BoxEntity } from '../models/Box';
 import { DictionaryEntity, DictionaryLinksEntity } from '../models/Dictionary';
 import { RequestModel } from '../models/FileBase';
@@ -76,28 +77,31 @@ export class RequestsStore {
 				this.selectedSchemaName,
 				this.preparedRequests,
 			);
-			if (!response.commitRef && response.validationErrors) {
-				response.validationErrors.linkErrorMessages.links.forEach(linkError => {
-					this.schemaStore.addMessage({
-						type: 'error',
-						notificationType: 'linkErrorMessage',
-						id: nanoid(),
-						linkName: linkError.linkName,
-						message: linkError.message,
-						from: linkError.from,
-						to: linkError.to,
-					});
-				});
-				response.validationErrors.boxResourceErrorMessages.forEach(linkError => {
+			const validationErrors = response.validationErrors;
+			if (!response.commitRef && validationErrors) {
+				getObjectKeys(validationErrors.linkErrorMessages).forEach(links =>
+					validationErrors.linkErrorMessages[links].forEach(linkError => {
+						this.schemaStore.addMessage({
+							type: 'error',
+							notificationType: 'linkErrorMessage',
+							id: nanoid(),
+							linkName: linkError.linkName,
+							message: linkError.message,
+							from: linkError.from,
+							to: linkError.to,
+						});
+					}),
+				);
+				validationErrors.boxResourceErrorMessages.forEach(boxResourceError => {
 					this.schemaStore.addMessage({
 						type: 'error',
 						notificationType: 'boxResourceErrorMessage',
 						id: nanoid(),
-						box: linkError.box,
-						message: linkError.message,
+						box: boxResourceError.box,
+						message: boxResourceError.message,
 					});
 				});
-				response.validationErrors.exceptionMessages.forEach(linkError => {
+				validationErrors.exceptionMessages.forEach(linkError => {
 					this.schemaStore.addMessage({
 						type: 'error',
 						notificationType: 'exceptionMessage',

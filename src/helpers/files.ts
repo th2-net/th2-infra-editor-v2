@@ -18,7 +18,7 @@ import { isArray, isPlainObject } from 'lodash';
 
 export function downloadFile(content: string, filename: string, extension: string) {
 	const file = new Blob([content], { type: extension });
-	const navigator = (window.navigator as any);
+	const navigator = window.navigator as any;
 	if ('msSaveOrOpenBlob' in navigator) {
 		navigator.msSaveOrOpenBlob(file);
 	} else {

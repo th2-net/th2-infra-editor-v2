@@ -1,5 +1,5 @@
 /** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2022-2022 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,10 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { Dispatch, SetStateAction } from 'react';
-import Modal from '@material-ui/core/Modal';
-
-const ModalWindow = (props: {
-	children: React.ReactElement<any, any>;
-	setOpen: Dispatch<SetStateAction<boolean>>;
-}) => {
-	return (
-		<Modal
-			open={true}
-			BackdropProps={{ style: { backgroundColor: 'transparent' } }}
-			disableBackdropClick={false}
-			onClose={() => props.setOpen(false)}
-		>
-			{props.children}
-		</Modal>
-	);
-};
-
-export default ModalWindow;
+/**
+ * Returns typed object keys
+ * @param obj
+ */
+export function getObjectKeys<O extends object>(obj: O) {
+	return Object.keys(obj) as Array<keyof O>;
+}

@@ -68,7 +68,8 @@ const Input = ({ inputConfig }: InputProps) => {
 				htmlFor={inputConfig.bind.id}
 				className={classNames(classes.label, {
 					required: inputConfig.required,
-				})}>
+				})}
+			>
 				{inputConfig.label}
 			</label>
 			<input

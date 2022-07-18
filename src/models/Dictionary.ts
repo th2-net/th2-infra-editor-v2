@@ -16,14 +16,18 @@
 
 import FileBase from './FileBase';
 
-export interface DictionaryRelation {
+export interface MultiDictionaryRelation {
 	name: string;
 	box: string;
 	dictionaries: {
 		name: string;
 		alias: string;
 	}[];
-	dictionary?: {
+}
+export interface DictionaryRelation {
+	name: string;
+	box: string;
+	dictionary: {
 		name: string;
 		type: string;
 	};
@@ -42,6 +46,7 @@ export interface DictionaryLinksEntity extends FileBase {
 	kind: string;
 	spec: {
 		['dictionaries-relation']: DictionaryRelation[];
+		['multi-dictionaries-relation']: MultiDictionaryRelation[];
 	};
 }
 

@@ -110,7 +110,8 @@ function App() {
 			<ToastProvider
 				placement='top-right'
 				components={{ Toast, ToastContainer }}
-				transitionDuration={400}>
+				transitionDuration={400}
+			>
 				<Header />
 				{!schemaStore.isLoading ? (
 					<div className={classes.content}>

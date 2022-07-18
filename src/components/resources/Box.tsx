@@ -151,13 +151,15 @@ function Box(props: Props) {
 				[classes.selectable]: typeof onSelect === 'function',
 				[classes.selected]: isSelected,
 			})}
-			onClick={() => onSelect && onSelect(box)}>
+			onClick={() => onSelect && onSelect(box)}
+		>
 			<div className={classes.header}>
 				<Status status={status.current} />
 				<span
 					style={{ backgroundColor: color }}
 					className={classNames(classes.bodyValue, classes.type)}
-					title={getBoxType(box)}>
+					title={getBoxType(box)}
+				>
 					{getBoxType(box)}
 				</span>
 				<h5 className={classes.name} title={box.name}>

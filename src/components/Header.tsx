@@ -126,7 +126,8 @@ function Header() {
 					<select
 						disabled={requestsExist}
 						onChange={e => selectSchema(e.target.value)}
-						value={selectedSchemaName || undefined}>
+						value={selectedSchemaName || undefined}
+					>
 						{schemas.map(schema => (
 							<option key={schema} value={schema}>
 								{schema}
@@ -141,7 +142,8 @@ function Header() {
 				onClick={() => {
 					setOpenConfirmationModal(true);
 					setConfirmationModalType('save');
-				}}>
+				}}
+			>
 				<span className={requestsExist ? classes.badge : classes.disableBadge}>
 					{preparedRequests.length}
 				</span>
@@ -153,7 +155,8 @@ function Header() {
 					onClick={() => {
 						setOpenConfirmationModal(true);
 						setConfirmationModalType('discard');
-					}}>
+					}}
+				>
 					Discard changes
 				</button>
 			)}

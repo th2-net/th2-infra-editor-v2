@@ -59,13 +59,15 @@ const ModalConfirmation = (props: {
 						onClick={() => {
 							props.action();
 							props.setOpen(false);
-						}}>
+						}}
+					>
 						Yes
 					</button>
 					<button
 						onClick={() => {
 							props.setOpen(false);
-						}}>
+						}}
+					>
 						No
 					</button>
 				</div>

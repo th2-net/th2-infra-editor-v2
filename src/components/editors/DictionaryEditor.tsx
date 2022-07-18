@@ -98,7 +98,8 @@ const DictionaryEditor = ({ dictionary, editDictionary }: DictionaryEditorProps)
 						if (dictionaryInputConfig.isValid) {
 							editDictionary(dictionaryInputConfig.value);
 						}
-					}}>
+					}}
+				>
 					Apply changes
 				</button>
 				<label className={classes.upload} htmlFor='dictionary-file-input' title='Upload'>
