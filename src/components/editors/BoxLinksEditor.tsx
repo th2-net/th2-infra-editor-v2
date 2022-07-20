@@ -21,13 +21,13 @@ import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
 import useOutsideClickListener from '../../hooks/useOutsideClickListener';
 import { useSelectedDictionaryStore } from '../../hooks/useSelectedDictionaryStore';
-import { DictionaryRelation } from '../../models/Dictionary';
+import { MultiDictionaryRelation } from '../../models/Dictionary';
 import Icon from '../Icon';
 import Select from '../util/Select';
 import { useLinksStyles } from './DictionaryLinksEditor';
 
 interface DictionaryLinkProps {
-	link: DictionaryRelation;
+	link: {box: string};
 	deleteLink: () => void;
 }
 
@@ -97,13 +97,13 @@ const BoxLinksEditor = () => {
 	const applyNewLink = () => {
 		setShowAddBox(false);
 		if (selectedDictionaryStore.dictionary && newLinkedBoxName) {
-			const newLinkDictionary: DictionaryRelation = {
+			const newLinkDictionary: MultiDictionaryRelation = {
 				name: `${newLinkedBoxName}-dictionary`,
 				box: newLinkedBoxName,
-				dictionary: {
+				dictionaries: [{
 					name: selectedDictionaryStore.dictionary.name,
-					type: 'MAIN',
-				},
+					alias: 'MAIN',
+				}],
 			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
@@ -112,15 +112,26 @@ const BoxLinksEditor = () => {
 	return (
 		<div className={classes.links} ref={ref}>
 			<p>Linked boxes:</p>
-			{dictionaryLinksStore.linkedBoxes.map((link, i) => (
+			{dictionaryLinksStore.linkedMultiBoxes.map((link, i) => (
 				<Link
 					link={link}
 					key={`${link.name}-${i}`}
 					deleteLink={() => {
-						dictionaryLinksStore.deleteLinkDictionary(link);
+						dictionaryLinksStore.deleteMultiLinkDictionary(link);
 					}}
 				/>
 			))}
+			{dictionaryLinksStore.linkedBoxes
+				.filter(link => !dictionaryLinksStore.linkedMultiBoxes.find(relation => relation.box === link.box))
+				.map((link, i) => (
+					<Link
+						link={link}
+						key={`${link.name}-${i}`}
+						deleteLink={() => {
+							dictionaryLinksStore.deleteLinkDictionary(link);
+						}}
+					/>
+				))}
 			{showAddBox ? (
 				<div>
 					<Select options={options} selected={newLinkedBoxName} onChange={setNewLinkedBoxName} />

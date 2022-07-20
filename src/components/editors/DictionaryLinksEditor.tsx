@@ -20,7 +20,7 @@ import { createUseStyles } from 'react-jss';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { useDictionaryLinksStore } from '../../hooks/useDictionaryLinksStore';
 import useOutsideClickListener from '../../hooks/useOutsideClickListener';
-import { DictionaryRelation } from '../../models/Dictionary';
+import { DictionaryRelation, MultiDictionaryRelation } from '../../models/Dictionary';
 import Icon from '../Icon';
 import Select from '../util/Select';
 
@@ -119,13 +119,13 @@ const DictionaryLinksEditor = () => {
 	const applyNewLink = () => {
 		setShowAddDictionary(false);
 		if (boxesStore.selectedBox && newLinkedDictionaryName) {
-			const newLinkDictionary: DictionaryRelation = {
+			const newLinkDictionary: MultiDictionaryRelation = {
 				name: `${boxesStore.selectedBox.name}-dictionary`,
 				box: boxesStore.selectedBox.name,
-				dictionary: {
+				dictionaries: [{
 					name: newLinkedDictionaryName,
-					type: 'MAIN',
-				},
+					alias: 'MAIN',
+				}],
 			};
 			dictionaryLinksStore.addLinkDictionary(newLinkDictionary);
 		}
