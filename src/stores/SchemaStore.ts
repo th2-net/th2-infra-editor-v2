@@ -92,6 +92,34 @@ export class SchemaStore {
 		this.rootStore.notificationsStore.addMessage(error);
 	};
 
+	
+	public checkBoxExistingByName = (boxName: string) => {
+		return this.boxesStore.boxes.find(_box => _box.name === boxName) !== undefined;
+	};
+
+	public clearNonExistingLinks = () => {
+		if (!this.dictionaryLinksStore.dictionaryLinksEntity) return;
+		this.dictionaryLinksStore.dictionaryLinksEntity = {
+			...this.dictionaryLinksStore.dictionaryLinksEntity,
+			spec: {
+				...this.dictionaryLinksStore.dictionaryLinksEntity.spec,
+				'multi-dictionaries-relation': this.dictionaryLinksStore.dictionaryLinksEntity.spec['multi-dictionaries-relation']
+					.filter(relation => this.checkBoxExistingByName(relation.box))
+					.map(link => {
+						return {
+							...link,
+							dictionaries: link.dictionaries.filter(linkDictionary =>
+								this.boxesStore.dictionaries.find(
+									dictionary => dictionary.name === linkDictionary.name,
+								),
+							),
+						};
+					}),
+			},
+		};
+		this.requestsStore.saveEntityChanges(this.dictionaryLinksStore.dictionaryLinksEntity, 'update');
+	}
+
 	public get invalidLinks(): InvalidLink[] {
 		const invalidLinks: InvalidLink[] = [];
 		this.boxUpdater.links.forEach(link => {

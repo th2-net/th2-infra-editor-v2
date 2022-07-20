@@ -62,14 +62,19 @@ export class RequestsStore {
 					isEqual(request.payload, entity),
 			)
 		) {
-			this.preparedRequests.push({
-				operation,
-				payload: entity,
-			});
+			this.preparedRequests = [
+				...this.preparedRequests.filter(request => request.payload.name !== entity.name),
+				{
+					operation,
+					payload: entity,
+				}
+			]
 		}
 	};
 
 	saveChanges = async () => {
+		this.schemaStore.dictionaryLinksStore.updateDictionariesRelationsToMulti();
+		this.schemaStore.clearNonExistingLinks();
 		if (!this.selectedSchemaName || this.preparedRequests.length === 0) return;
 		try {
 			this.isSaving = true;
