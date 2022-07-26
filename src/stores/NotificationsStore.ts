@@ -57,7 +57,22 @@ export class NotificationsStore {
 	public errors: Notification[] = [];
 
 	public addMessage = (error: Notification) => {
-		this.errors = [...this.errors, error];
+		switch(error.notificationType) {
+			case 'boxResourceErrorMessage':
+				if (!this.errors.find(err => err.notificationType === error.notificationType && err.box === error.box && err.message === error.message))
+					this.errors = [...this.errors, error]; break;
+			case 'exceptionMessage':
+				if (!this.errors.find(err => err.notificationType === error.notificationType && err.message === error.message))
+					this.errors = [...this.errors, error]; break;
+			case 'linkErrorMessage':
+				if (!this.errors.find(err => 
+					err.notificationType === error.notificationType && 
+					err.linkName === error.linkName && 
+					err.from === error.from && 
+					err.to === error.to && 
+					err.message === error.message))
+					this.errors = [...this.errors, error]; break;
+		}
 	};
 
 	public deleteMessage = (error: Notification | string) => {
