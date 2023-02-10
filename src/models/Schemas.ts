@@ -183,40 +183,57 @@ const _pinSchema = {
 const _extenedSettingsSchema = {
 	type: 'object',
 	properties: {
+		nodeName: { type: 'string' },
+		sharedMemory: {
+			type: 'object',
+			properties: {
+				enabled: { type: 'boolean' },
+			},
+			additionalProperties: false,
+			required: ['enabled'],
+		},
+		replicas: { type: 'string' },
+		k8sProbes: { type: 'boolean' },
 		service: {
 			type: 'object',
 			properties: {
 				enabled: { type: 'boolean' },
-				type: { type: 'string' },
-				endpoints: {
+				nodePort: {
 					type: 'array',
 					items: {
 						type: 'object',
 						properties: {
 							name: { type: 'string' },
-							targetPort: { type: 'number' },
-							nodePort: { type: 'number' },
+							exposedPort: { type: 'number' },
+							containerPort: { type: 'number' },
 						},
 						additionalProperties: false,
-						required: ['name', 'targetPort', 'nodePort'],
+						required: ['name', 'exposedPort'],
+					},
+				},
+				clusterIP: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: { name: { type: 'string' }, containerPort: { type: 'number' } },
+						additionalProperties: false,
+						required: ['name'],
 					},
 				},
 				ingress: {
 					type: 'object',
 					properties: {
-						urlPathes: {
+						urlPaths: {
 							type: 'array',
 							items: {
 								type: 'string',
 							},
 						},
 					},
-					additionalProperties: false,
-					required: ['urlPathes'],
 				},
 			},
 			additionalProperties: false,
-			required: ['enabled', 'type', 'endpoints', 'ingress'],
+			required: ['enabled'],
 		},
 		envVariables: {
 			type: 'object',
@@ -238,7 +255,6 @@ const _extenedSettingsSchema = {
 						cpu: { type: 'string' },
 					},
 					additionalProperties: false,
-					required: ['cpu', 'memory'],
 				},
 				requests: {
 					type: 'object',
@@ -247,15 +263,56 @@ const _extenedSettingsSchema = {
 						cpu: { type: 'string' },
 					},
 					additionalProperties: false,
-					required: ['cpu', 'memory'],
 				},
 			},
 			additionalProperties: false,
-			required: ['limits', 'requests'],
+		},
+		externalBox: {
+			type: 'object',
+			properties: {
+				enabled: { type: 'boolean' },
+				address: { type: 'string' },
+				endpoints: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							targetPort: { type: 'string' },
+							port: { type: 'string' },
+						},
+						additionalProperties: false,
+						required: ['name', 'targetPort'],
+					},
+				},
+			},
+			additionalProperties: false,
+		},
+		hostAliases: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					ip: { type: 'boolean' },
+					hostnames: { type: 'array', items: { type: 'string' } },
+				},
+				additionalProperties: false,
+			},
+		},
+		hostNetwork: { type: 'boolean' },
+		mounting: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					path: { type: 'string' },
+					pvcName: { type: 'string' },
+				},
+				additionalProperties: false,
+			},
 		},
 	},
 	additionalProperties: false,
-	required: ['service', 'envVariables', 'resources'],
 };
 
 const getSchemaURI = (schema: any): string => {
