@@ -28,7 +28,7 @@ import {
 import { action, computed, makeObservable, observable, toJS } from 'mobx';
 import { IBoxConnections, IPinConnections } from '../components/links/BoxConnections';
 import { convertToExtendedLink } from '../helpers/link';
-import { BoxEntity, ExtendedConnectionOwner, isBoxEntity } from '../models/Box';
+import { BoxEntity, ExtendedConnectionOwner, getPins, isBoxEntity } from '../models/Box';
 import FileBase from '../models/FileBase';
 import {
 	ConnectionDirection,
@@ -126,7 +126,7 @@ export class BoxUpdater {
 			link => link[direction]?.box === box.name && boxesMap[link[oppositeDirection]?.box || ''],
 		);
 		const connectedPins = connectedLinks.map(link => link[direction]?.pin);
-		const pins = (box.spec.pins || []).filter(pin => connectedPins.includes(pin.name));
+		const pins = getPins(box.spec.pins).filter(pin => connectedPins.includes(pin.name));
 
 		let boxes: IPinConnections[] =
 			currentDepth === depth

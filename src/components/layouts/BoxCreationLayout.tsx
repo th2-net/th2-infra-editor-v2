@@ -71,21 +71,21 @@ const BoxCreationLayout = () => {
 	});
 
 	const imageName = useInput({
-		id: 'box-image-name',
-		name: 'box-image-name',
+		id: 'boxImageName',
+		name: 'boxImageName',
 		label: 'Image name',
 	});
 
 	const imageVersion = useInput({
-		id: 'box-image-version',
-		name: 'box-image-version',
+		id: 'boxImageVersion',
+		name: 'boxImageVersion',
 		label: 'Image version',
 	});
 
 	const nodePort = useInput({
 		label: 'Node port',
-		id: 'node-port',
-		name: 'node-port',
+		id: 'nodePort',
+		name: 'nodePort',
 		validate: (value: string) =>
 			value.trim().length > 0 ? /^\d+$/.test(value) && parseInt(value) <= 65535 : true,
 		required: false,
@@ -100,11 +100,11 @@ const BoxCreationLayout = () => {
 			let nodePort = parseInt(nodePortString) || null;
 
 			const spec: BoxEntity['spec'] = {
-				pins: [],
-				'image-name': imageName,
-				'image-version': imageVersion,
+				pins: {},
+				imageName: imageName,
+				imageVersion: imageVersion,
 				type,
-				'extended-settings': {
+				extendedSettings: {
 					service: {
 						enabled: false,
 					},
@@ -141,8 +141,7 @@ const BoxCreationLayout = () => {
 			<button
 				disabled={inputs.some(input => !input.isValid)}
 				className={classes.submitButton}
-				onClick={createNewBox}
-			>
+				onClick={createNewBox}>
 				Create
 			</button>
 		</div>

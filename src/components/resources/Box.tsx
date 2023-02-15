@@ -143,7 +143,7 @@ function Box(props: Props) {
 	const subscriptionStore = useSubscriptionStore();
 	const status = useRef(subscriptionStore.boxStates.get(box.name) || BoxStatus.PENDING);
 
-	const slicedImageName = getImageNameWithoutDomain(box.spec['image-name']);
+	const slicedImageName = getImageNameWithoutDomain(box.spec['imageName']);
 
 	return (
 		<div
@@ -151,15 +151,13 @@ function Box(props: Props) {
 				[classes.selectable]: typeof onSelect === 'function',
 				[classes.selected]: isSelected,
 			})}
-			onClick={() => onSelect && onSelect(box)}
-		>
+			onClick={() => onSelect && onSelect(box)}>
 			<div className={classes.header}>
 				<Status status={status.current} />
 				<span
 					style={{ backgroundColor: color }}
 					className={classNames(classes.bodyValue, classes.type)}
-					title={getBoxType(box)}
-				>
+					title={getBoxType(box)}>
 					{getBoxType(box)}
 				</span>
 				<h5 className={classes.name} title={box.name}>

@@ -38,8 +38,8 @@ export function convertToExtendedLink(
 	convertedLink = addAdditionalDetailsToLink(convertedLink, {
 		fromStrategy: link.from?.strategy,
 		toStrategy: link.to?.strategy,
-		fromServiceClass: link.from?.['service-class'],
-		toServiceClass: link.to?.['service-class'],
+		fromServiceClass: link.from?.['serviceClass'],
+		toServiceClass: link.to?.['serviceClass'],
 	}) as Link<ExtendedConnectionOwner>;
 
 	return convertedLink;
@@ -61,8 +61,8 @@ export function convertToOriginLink(link: Link<ExtendedConnectionOwner>): Link<C
 	convertedLink = addAdditionalDetailsToLink(convertedLink, {
 		fromStrategy: link.from?.strategy,
 		toStrategy: link.to?.strategy,
-		fromServiceClass: link.from?.['service-class'],
-		toServiceClass: link.to?.['service-class'],
+		fromServiceClass: link.from?.['serviceClass'],
+		toServiceClass: link.to?.['serviceClass'],
 	}) as Link<ExtendedConnectionOwner>;
 
 	return convertedLink;
@@ -84,7 +84,7 @@ export function addAdditionalDetailsToLink(
 			tempLink.from.strategy = details.fromStrategy;
 		}
 		if (details.fromServiceClass) {
-			tempLink.from['service-class'] = details.fromServiceClass;
+			tempLink.from['serviceClass'] = details.fromServiceClass;
 		}
 	}
 
@@ -93,7 +93,7 @@ export function addAdditionalDetailsToLink(
 			tempLink.to.strategy = details.toStrategy;
 		}
 		if (details.toServiceClass) {
-			tempLink.to['service-class'] = details.toServiceClass;
+			tempLink.to['serviceClass'] = details.toServiceClass;
 		}
 	}
 

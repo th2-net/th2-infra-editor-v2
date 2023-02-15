@@ -16,7 +16,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { ExtendedConnectionOwner, isBoxEntity, Pin } from '../../models/Box';
+import { ExtendedConnectionOwner, getPins, isBoxEntity, Pin } from '../../models/Box';
 import { Theme } from '../../styles/theme';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
@@ -209,7 +209,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 				.filter(box => box.name === owner.box)
 				.uniqBy('name')
 				.filter(isBoxEntity)
-				.map(box => box.spec?.pins || [])
+				.map(box => getPins(box.spec.pins))
 				.flatten()
 				.filter(pin => pin.name === owner.pin)
 				.head()
@@ -220,11 +220,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 			}
 
 			return chain(boxesStore.boxes)
-				.filter(
-					box =>
-						(box.spec?.pins || []).filter(box => box['connection-type'] === pin['connection-type'])
-							.length > 0,
-				)
+				.filter(box => getPins(box.spec.pins, owner.connectionType).length > 0)
 				.map(box => box.name)
 				.value();
 		},
@@ -321,8 +317,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 			<div className={classes.actions}>
 				<button
 					onClick={cancelOrDelete}
-					className={classNames(classes.button, classes.deleteButton)}
-				>
+					className={classNames(classes.button, classes.deleteButton)}>
 					{editableLink ? 'Delete' : 'Cancel'}
 				</button>
 				<button onClick={submit} className={submitButtonClassName}>

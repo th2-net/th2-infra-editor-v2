@@ -48,8 +48,8 @@ const ConfigEditor = ({ value, setValue, schema, pinsConnectionsLenses = false }
 	const setLens = () => {
 		const lenses: monacoEditor.languages.CodeLens[] = [];
 		const pinsConnections = getCountPinsConnections(
-			boxesStore.selectedBox?.spec.pins,
 			boxUpdater.selectedBoxConnections,
+			boxesStore.selectedBox?.spec.pins,
 		);
 		const pinsPositions: PinsPositions[] = [];
 		if (pinsConnections) {

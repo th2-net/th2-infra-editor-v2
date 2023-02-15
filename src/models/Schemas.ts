@@ -20,45 +20,163 @@ export type schemaTemplate = {
 	schema: any;
 };
 
-const _pinSchema = {
+const _filterProps = {
 	type: 'array',
 	items: {
 		type: 'object',
 		properties: {
-			name: { type: 'string' },
-			'connection-type': { enum: ['mq', 'grpc'] },
-			filters: {
-				type: 'array',
-				items: {
-					type: 'object',
-					properties: {
-						metadata: {
-							type: 'array',
-							items: {
+			fieldName: { type: 'string' },
+			expectedValue: { type: 'string' },
+			operation: { type: 'string' },
+		},
+		additionalProperties: false,
+		required: ['fieldName', 'expectedValue', 'operation'],
+	},
+};
+
+const _filtersSchema = {
+	type: 'array',
+	items: {
+		type: 'object',
+		properties: {
+			metadata: _filterProps,
+			message: _filterProps,
+			properties: _filterProps,
+		},
+		additionalProperties: false,
+	},
+};
+
+const _pinSchema = {
+	type: 'object',
+	properties: {
+		mq: {
+			type: 'object',
+			properties: {
+				subscribers: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							attributes: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							settings: {
 								type: 'object',
 								properties: {
-									'field-name': { type: 'string' },
-									'expected-value': { type: 'string' },
-									operation: { type: 'string' },
+									storageOnDemand: { type: 'boolean' },
+									overloadStrategy: { type: 'string' },
+									queueLength: { type: 'string' },
 								},
 								additionalProperties: false,
-								required: ['field-name', 'expected-value', 'operation'],
 							},
+							linkTo: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+										box: { type: 'string' },
+										pin: { type: 'string' },
+										additionalProperties: false,
+										required: ['box', 'pin'],
+									},
+								},
+							},
+							filters: _filtersSchema,
+							additionalProperties: false,
+							required: ['name'],
 						},
 					},
-					additionalProperties: false,
-					required: ['metadata'],
 				},
-			},
-			attributes: {
-				type: 'array',
-				items: {
-					type: 'string',
+				publishers: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							attributes: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							filters: _filtersSchema,
+							additionalProperties: false,
+							required: ['name'],
+						},
+					},
 				},
 			},
 		},
+		grpc: {
+			type: 'object',
+			properties: {
+				server: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							serviceClasses: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							additionalProperties: false,
+							required: ['name'],
+						},
+					},
+				},
+				client: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							serviceClass: { type: 'string' },
+							strategy: { type: 'string' },
+							linkTo: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+										box: { type: 'string' },
+										pin: { type: 'string' },
+										additionalProperties: false,
+										required: ['box', 'pin'],
+									},
+								},
+							},
+							attributes: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							filters: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+										properties: _filterProps,
+									},
+									additionalProperties: false,
+								},
+							},
+							additionalProperties: false,
+							required: ['name'],
+						},
+					},
+				},
+				additionalProperties: false,
+			},
+		},
 		additionalProperties: false,
-		required: ['name', 'connection-type'],
 	},
 };
 
