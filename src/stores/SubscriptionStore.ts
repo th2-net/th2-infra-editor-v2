@@ -18,7 +18,7 @@ export default class SubscriptionStore {
 		reaction(
 			() => schemasStore.schemaSettings,
 			schemaSettings => {
-				const propagation = schemaSettings?.spec['k8s-propagation'];
+				const propagation = schemaSettings?.spec['k8sPropagation'];
 				if (propagation) {
 					this.closeConnection();
 					if (['sync', 'rule'].includes(propagation)) {

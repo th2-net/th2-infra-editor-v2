@@ -106,7 +106,7 @@ function Links() {
 			.filter(link => link[direction]?.box === boxesStore.selectedBox?.name)
 			.filter(link => link[direction === 'from' ? 'to' : 'from']?.box === box?.name)
 			.filter(link => link[direction]?.pin === pin?.name)
-			.filter(link => link[direction]?.connectionType === pin?.['connection-type'])
+			.filter(link => link[direction]?.connectionType === pin?.['connectionType'])
 			.head()
 			.value();
 

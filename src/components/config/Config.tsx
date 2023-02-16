@@ -57,32 +57,32 @@ function Config() {
 	const boxUpdater = useBoxUpdater();
 
 	const customConfig = useInput({
-		initialValue: selectedBox?.spec['custom-config']
-			? JSON.stringify(selectedBox?.spec['custom-config'], null, 4)
+		initialValue: selectedBox?.spec['customConfig']
+			? JSON.stringify(selectedBox?.spec['customConfig'], null, 4)
 			: '',
-		id: 'custom-config',
+		id: 'customConfig',
 	});
 
 	const pinsConfig = useInput({
 		initialValue: selectedBox?.spec.pins ? JSON.stringify(selectedBox.spec.pins, null, 4) : '',
-		id: 'custom-config',
+		id: 'customConfig',
 	});
 
 	const extendedSettings = useInput({
-		initialValue: selectedBox?.spec['extended-settings']
-			? JSON.stringify(selectedBox.spec['extended-settings'], null, 4)
+		initialValue: selectedBox?.spec['extendedSettings']
+			? JSON.stringify(selectedBox.spec['extendedSettings'], null, 4)
 			: '',
-		id: 'extended-settings',
+		id: 'extendedSettings',
 	});
 
 	const imageName = useInput({
-		initialValue: selectedBox?.spec['image-name'] || '',
+		initialValue: selectedBox?.spec['imageName'] || '',
 		id: 'imageName',
 		label: 'Image name',
 	});
 
 	const imageVersion = useInput({
-		initialValue: selectedBox?.spec['image-version'] || '',
+		initialValue: selectedBox?.spec['imageVersion'] || '',
 		id: 'imageVersion',
 		label: 'Image version',
 	});
@@ -116,10 +116,10 @@ function Config() {
 				name: name.value,
 				spec: {
 					...originalBox.spec,
-					'custom-config': customConfig.value ? JSON.parse(customConfig.value) : '',
-					'image-name': imageName.value,
-					'image-version': imageVersion.value,
-					'extended-settings': extendedSettings.value ? JSON.parse(extendedSettings.value) : '',
+					customConfig: customConfig.value ? JSON.parse(customConfig.value) : '',
+					imageName: imageName.value,
+					imageVersion: imageVersion.value,
+					extendedSettings: extendedSettings.value ? JSON.parse(extendedSettings.value) : '',
 					pins: JSON.parse(pinsConfig.value),
 				},
 			});
@@ -163,10 +163,10 @@ interface ConfigurableBoxOptions {
 	kind: BoxEntity['kind'];
 	name: BoxEntity['name'];
 	spec: {
-		'custom-config': BoxEntity['spec']['custom-config'];
-		'image-name': BoxEntity['spec']['image-name'];
-		'image-version': BoxEntity['spec']['image-version'];
-		'extended-settings': BoxEntity['spec']['extended-settings'];
+		customConfig: BoxEntity['spec']['customConfig'];
+		imageName: BoxEntity['spec']['imageName'];
+		imageVersion: BoxEntity['spec']['imageVersion'];
+		extendedSettings: BoxEntity['spec']['extendedSettings'];
 		pins: BoxEntity['spec']['pins'];
 	};
 }

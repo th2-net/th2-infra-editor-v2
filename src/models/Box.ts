@@ -19,11 +19,11 @@ import { DictionaryRelation } from './Dictionary';
 
 export interface BoxEntity extends FileBase {
 	spec: {
-		['custom-config']?: {
+		['customConfig']?: {
 			[prop: string]: string;
 		};
-		['extended-settings']: {
-			['chart-cfg']?: {
+		['extendedSettings']: {
+			['chartCfg']?: {
 				path: string;
 				ref: string;
 			};
@@ -42,10 +42,10 @@ export interface BoxEntity extends FileBase {
 				targetPort?: string;
 			};
 		};
-		['image-name']: string;
-		['image-version']: string;
-		['node-port']?: number;
-		['dictionaries-relation']?: Array<DictionaryRelation>;
+		['imageName']: string;
+		['imageVersion']: string;
+		['nodePort']?: number;
+		['dictionariesRelation']?: Array<DictionaryRelation>;
 		data?: string;
 		pins?: Array<Pin>;
 		type: string;
@@ -54,15 +54,15 @@ export interface BoxEntity extends FileBase {
 
 export interface Pin {
 	attributes?: Array<string>;
-	['connection-type']: 'mq' | 'grpc';
+	['connectionType']: 'mq' | 'grpc';
 	filters?: Array<Filter>;
 	name: string;
 }
 
 export interface Filter {
 	metadata: {
-		['field-name']: string;
-		['expected-value']: string;
+		['fieldName']: string;
+		['expectedValue']: string;
 		['operation']: string;
 	}[];
 }
@@ -86,7 +86,7 @@ export interface ConnectionOwner {
 	box: string;
 	pin: string;
 	strategy?: string;
-	['service-class']?: string;
+	['serviceClass']?: string;
 }
 
 export interface ExtendedConnectionOwner extends ConnectionOwner {
@@ -106,9 +106,7 @@ export function isBoxEntity(object: unknown): object is BoxEntity {
 
 export function isPin(object: unknown): object is Pin {
 	return (
-		typeof object === 'object' &&
-		object !== null &&
-		(object as Pin)['connection-type'] !== undefined
+		typeof object === 'object' && object !== null && (object as Pin)['connectionType'] !== undefined
 	);
 }
 

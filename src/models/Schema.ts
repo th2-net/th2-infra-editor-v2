@@ -23,7 +23,7 @@ export interface Schema {
 
 export interface SchemaSettings extends FileBase {
 	spec: {
-		'k8s-propagation': 'off' | 'deny' | 'sync' | 'rule';
+		k8sPropagation: 'off' | 'deny' | 'sync' | 'rule';
 	};
 }
 

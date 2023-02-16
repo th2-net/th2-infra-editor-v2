@@ -113,7 +113,7 @@ function SelectedBox(props: Props) {
 	// TODO: fix status
 	const status = useMemo(() => Object.values(BoxStatus)[box.name.length % 2], [box.name.length]);
 
-	const slicedImageName = getImageNameWithoutDomain(box.spec['image-name']);
+	const slicedImageName = getImageNameWithoutDomain(box.spec['imageName']);
 
 	return (
 		<div className={classes.container}>

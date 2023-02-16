@@ -45,8 +45,8 @@ export interface DictionaryLinksEntity extends FileBase {
 	name: string;
 	kind: string;
 	spec: {
-		['dictionaries-relation']: DictionaryRelation[];
-		['multi-dictionaries-relation']: MultiDictionaryRelation[];
+		['dictionariesRelation']: DictionaryRelation[];
+		['multiDictionariesRelation']: MultiDictionaryRelation[];
 	};
 }
 
@@ -58,6 +58,6 @@ export function isDictionaryLinksEntity(file: unknown): file is DictionaryLinksE
 	return (
 		typeof file === 'object' &&
 		file !== null &&
-		(file as DictionaryLinksEntity).spec['dictionaries-relation'] !== undefined
+		(file as DictionaryLinksEntity).spec['dictionariesRelation'] !== undefined
 	);
 }

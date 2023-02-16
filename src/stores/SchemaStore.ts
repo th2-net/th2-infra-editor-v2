@@ -92,7 +92,6 @@ export class SchemaStore {
 		this.rootStore.notificationsStore.addMessage(error);
 	};
 
-	
 	public checkBoxExistingByName = (boxName: string) => {
 		return this.boxesStore.boxes.find(_box => _box.name === boxName) !== undefined;
 	};
@@ -103,7 +102,9 @@ export class SchemaStore {
 			...this.dictionaryLinksStore.dictionaryLinksEntity,
 			spec: {
 				...this.dictionaryLinksStore.dictionaryLinksEntity.spec,
-				'multi-dictionaries-relation': this.dictionaryLinksStore.dictionaryLinksEntity.spec['multi-dictionaries-relation']
+				multiDictionariesRelation: this.dictionaryLinksStore.dictionaryLinksEntity.spec[
+					'multiDictionariesRelation'
+				]
 					.filter(relation => this.checkBoxExistingByName(relation.box))
 					.map(link => {
 						return {
@@ -118,7 +119,7 @@ export class SchemaStore {
 			},
 		};
 		this.requestsStore.saveEntityChanges(this.dictionaryLinksStore.dictionaryLinksEntity, 'update');
-	}
+	};
 
 	public get invalidLinks(): InvalidLink[] {
 		const invalidLinks: InvalidLink[] = [];

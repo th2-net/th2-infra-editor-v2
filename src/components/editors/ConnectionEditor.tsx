@@ -222,7 +222,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 			return chain(boxesStore.boxes)
 				.filter(
 					box =>
-						(box.spec?.pins || []).filter(box => box['connection-type'] === pin['connection-type'])
+						(box.spec?.pins || []).filter(box => box['connectionType'] === pin['connectionType'])
 							.length > 0,
 				)
 				.map(box => box.name)
@@ -321,8 +321,7 @@ function ConnectionEditor(props: ConnectionsEditorProps) {
 			<div className={classes.actions}>
 				<button
 					onClick={cancelOrDelete}
-					className={classNames(classes.button, classes.deleteButton)}
-				>
+					className={classNames(classes.button, classes.deleteButton)}>
 					{editableLink ? 'Delete' : 'Cancel'}
 				</button>
 				<button onClick={submit} className={submitButtonClassName}>

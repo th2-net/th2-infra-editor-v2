@@ -40,14 +40,15 @@ import { BoxesStore } from './BoxesStore';
 import HistoryStore from './HistoryStore';
 import { RequestsStore } from './RequestsStore';
 import { DictionaryLinksStore } from './DictionaryLinksStore';
+import { capitalizeFirstLetter } from '../helpers/string';
 
 const editorLink: Readonly<LinksDefinition> = {
 	kind: 'Th2Link',
 	name: 'editor-generated-links',
 	spec: {
-		'boxes-relation': {
-			'router-grpc': [],
-			'router-mq': [],
+		boxesRelation: {
+			routerGrpc: [],
+			routerMq: [],
 		},
 	},
 };
@@ -77,15 +78,15 @@ export class BoxUpdater {
 		if (this.linkDefinitions === null) return [];
 
 		return this.linkDefinitions.flatMap(linkBox => {
-			if (linkBox.spec['boxes-relation']) {
+			if (linkBox.spec['boxesRelation']) {
 				return [
-					...(linkBox.spec['boxes-relation']['router-mq']
-						? linkBox.spec['boxes-relation']['router-mq'].map(link =>
+					...(linkBox.spec['boxesRelation']['routerMq']
+						? linkBox.spec['boxesRelation']['routerMq'].map(link =>
 								convertToExtendedLink(link, 'mq'),
 						  )
 						: []),
-					...(linkBox.spec['boxes-relation']['router-grpc']
-						? linkBox.spec['boxes-relation']['router-grpc'].map(link =>
+					...(linkBox.spec['boxesRelation']['routerGrpc']
+						? linkBox.spec['boxesRelation']['routerGrpc'].map(link =>
 								convertToExtendedLink(link, 'grpc'),
 						  )
 						: []),
@@ -197,10 +198,12 @@ export class BoxUpdater {
 		const changedLink = this.findBoxRelationLink(linkToRemove);
 
 		if (changedLink) {
-			if (changedLink.spec['boxes-relation'] && linkToRemove.from) {
-				const connectionType = `router-${linkToRemove.from.connectionType}` as const;
+			if (changedLink.spec['boxesRelation'] && linkToRemove.from) {
+				const connectionType = `router${capitalizeFirstLetter(
+					linkToRemove.from.connectionType,
+				)}` as 'routerMq' | 'routerGrpc';
 				remove(
-					changedLink.spec['boxes-relation'][connectionType],
+					changedLink.spec['boxesRelation'][connectionType],
 					link => link.name === linkToRemove.name,
 				);
 			}
@@ -219,15 +222,17 @@ export class BoxUpdater {
 		let editorGeneratedLink = this.linkDefinitions.find(
 			linkBox => linkBox.name === editorLink.name,
 		);
-		const linkConnectionType = `router-${link.from.connectionType}` as const;
+		const linkConnectionType = `router${capitalizeFirstLetter(link.from.connectionType)}` as
+			| 'routerMq'
+			| 'routerGrpc';
 		let oprationType: 'add' | 'update';
 
-		if (editorGeneratedLink && editorGeneratedLink.spec['boxes-relation']) {
-			editorGeneratedLink.spec['boxes-relation'][linkConnectionType].push(link);
+		if (editorGeneratedLink && editorGeneratedLink.spec['boxesRelation']) {
+			editorGeneratedLink.spec['boxesRelation'][linkConnectionType].push(link);
 			oprationType = 'update';
 		} else {
 			editorGeneratedLink = cloneDeep(editorLink);
-			editorGeneratedLink.spec!['boxes-relation']![linkConnectionType].push(link);
+			editorGeneratedLink.spec!['boxesRelation']![linkConnectionType].push(link);
 			this.linkDefinitions.push(editorGeneratedLink);
 			oprationType = 'add';
 		}
@@ -288,8 +293,10 @@ export class BoxUpdater {
 		return (
 			this.linkDefinitions.find(linkBox => {
 				const links = targetLink.from
-					? linkBox.spec['boxes-relation']?.[
-							`router-${targetLink.from.connectionType}` as 'router-mq' | 'router-grpc'
+					? linkBox.spec['boxesRelation']?.[
+							`router${capitalizeFirstLetter(targetLink.from.connectionType)}` as
+								| 'routerMq'
+								| 'routerGrpc'
 					  ]
 					: [];
 				return links?.some(link => link.name === targetLink.name);

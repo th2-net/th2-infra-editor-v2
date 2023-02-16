@@ -145,12 +145,12 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 	const isPinSupportedServiceClassOption = useCallback(() => {
 		return (
 			pinValidate(pinInput.value) &&
-			pins.filter(item => item.name === pinInput.value)[0]['connection-type'] === 'mq'
+			pins.filter(item => item.name === pinInput.value)[0]['connectionType'] === 'mq'
 		);
 	}, [pinInput.value, pinValidate, pins]);
 
 	const serviceClassInput = useInput({
-		initialValue: owner?.['service-class'] || '',
+		initialValue: owner?.['serviceClass'] || '',
 		id: `${id}ServiceClass`,
 		label: 'Service class',
 		disabled: disabled || isPinSupportedServiceClassOption(),
@@ -176,8 +176,8 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 			box: boxInput.value,
 			pin: pinInput.value,
 			strategy: strategyInput.value,
-			'service-class': serviceClassInput.value,
-			connectionType: pins.filter(item => item.name === pinInput.value)[0]['connection-type'],
+			serviceClass: serviceClassInput.value,
+			connectionType: pins.filter(item => item.name === pinInput.value)[0]['connectionType'],
 		});
 	}, [
 		boxInput.isValid,

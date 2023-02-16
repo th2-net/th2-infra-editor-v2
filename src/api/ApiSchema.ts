@@ -29,10 +29,10 @@ export interface SchemaRequest {
 	resources: null | Array<Object>;
 	validationErrors: null | {
 		linkErrorMessages: {
-			'codec-links': Array<Link>;
-			'dictionary-links': Array<Link>;
-			'editor-generated-links': Array<Link>;
-			'links-live': Array<Link>;
+			codecLinks: Array<Link>;
+			dictionaryLinks: Array<Link>;
+			editorGeneratedLinks: Array<Link>;
+			linksLive: Array<Link>;
 		};
 		boxResourceErrorMessages: Array<{
 			box: string;

@@ -20,12 +20,12 @@ import { DictionaryRelation } from './Dictionary';
 
 export interface LinksDefinition extends FileBase {
 	spec: {
-		['boxes-relation']?: {
-			['router-mq']: Link<ConnectionOwner>[];
-			['router-grpc']: Link<ConnectionOwner>[];
+		['boxesRelation']?: {
+			['routerMq']: Link<ConnectionOwner>[];
+			['routerGrpc']: Link<ConnectionOwner>[];
 		};
-		['dictionaries-relation']?: DictionaryRelation[];
-		['multi-dictionaries-relation']?: DictionaryRelation[];
+		['dictionariesRelation']?: DictionaryRelation[];
+		['multi-dictionariesRelation']?: DictionaryRelation[];
 	};
 }
 
@@ -44,7 +44,7 @@ export interface LinkArrow {
 }
 
 export function isBoxLinksDefinition(file: FileBase): file is LinksDefinition {
-	return file.kind === 'Th2Link' && (file as LinksDefinition).spec['boxes-relation'] !== undefined;
+	return file.kind === 'Th2Link' && (file as LinksDefinition).spec['boxesRelation'] !== undefined;
 }
 
 export function isLink(object: unknown): object is Link<ConnectionOwner | ExtendedConnectionOwner> {

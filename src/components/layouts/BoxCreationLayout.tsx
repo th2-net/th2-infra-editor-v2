@@ -101,10 +101,10 @@ const BoxCreationLayout = () => {
 
 			const spec: BoxEntity['spec'] = {
 				pins: [],
-				'image-name': imageName,
-				'image-version': imageVersion,
+				imageName: imageName,
+				imageVersion: imageVersion,
 				type,
-				'extended-settings': {
+				extendedSettings: {
 					service: {
 						enabled: false,
 					},
@@ -141,8 +141,7 @@ const BoxCreationLayout = () => {
 			<button
 				disabled={inputs.some(input => !input.isValid)}
 				className={classes.submitButton}
-				onClick={createNewBox}
-			>
+				onClick={createNewBox}>
 				Create
 			</button>
 		</div>
