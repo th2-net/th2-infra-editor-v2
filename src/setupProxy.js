@@ -5,7 +5,7 @@ module.exports = function (app) {
 		.use(
 			'/backend',
 			createProxyMiddleware({
-				target: 'http://th2-qa:30000/editor/',
+				target: 'http://de-th2-qa:30000/editor/',
 				changeOrigin: true,
 				secure: false,
 			}),
@@ -13,7 +13,7 @@ module.exports = function (app) {
 		.use(
 			'/grafana',
 			createProxyMiddleware({
-				target: 'http://th2-qa:30000/',
+				target: 'http://de-th2-qa:30000/',
 				changeOrigin: true,
 				secure: false,
 			}),
