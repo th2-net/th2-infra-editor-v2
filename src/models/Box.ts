@@ -19,7 +19,7 @@ import FileBase from './FileBase';
 export interface BoxEntity extends FileBase {
 	spec: {
 		['customConfig']?: {
-			[prop: string]: string;
+			[prop: string]: object;
 		};
 		['mqRouter']?: {
 			[prop: string]: string;
