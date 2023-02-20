@@ -26,7 +26,7 @@ import { SelectedDictionaryStore } from './SelectedDictionaryStore';
 import HistoryStore from './HistoryStore';
 import { isDictionaryEntity } from '../models/Dictionary';
 import { RootStore } from './RootStore';
-import { isBoxEntity } from '../models/Box';
+import { getPins, isBoxEntity } from '../models/Box';
 import SubscriptionStore from './SubscriptionStore';
 import { chain } from 'lodash';
 import { InvalidLink } from '../helpers/pinConnections';
@@ -92,7 +92,6 @@ export class SchemaStore {
 		this.rootStore.notificationsStore.addMessage(error);
 	};
 
-	
 	public checkBoxExistingByName = (boxName: string) => {
 		return this.boxesStore.boxes.find(_box => _box.name === boxName) !== undefined;
 	};
@@ -103,7 +102,9 @@ export class SchemaStore {
 			...this.dictionaryLinksStore.dictionaryLinksEntity,
 			spec: {
 				...this.dictionaryLinksStore.dictionaryLinksEntity.spec,
-				'multi-dictionaries-relation': this.dictionaryLinksStore.dictionaryLinksEntity.spec['multi-dictionaries-relation']
+				'multi-dictionaries-relation': this.dictionaryLinksStore.dictionaryLinksEntity.spec[
+					'multi-dictionaries-relation'
+				]
 					.filter(relation => this.checkBoxExistingByName(relation.box))
 					.map(link => {
 						return {
@@ -118,7 +119,7 @@ export class SchemaStore {
 			},
 		};
 		this.requestsStore.saveEntityChanges(this.dictionaryLinksStore.dictionaryLinksEntity, 'update');
-	}
+	};
 
 	public get invalidLinks(): InvalidLink[] {
 		const invalidLinks: InvalidLink[] = [];
@@ -137,7 +138,7 @@ export class SchemaStore {
 						box: i === 0 ? link.from?.box || '' : link.to?.box || '',
 					});
 				} else {
-					const pins = box.spec.pins?.find(
+					const pins = getPins(box.spec.pins).find(
 						pin => pin.name === (i === 0 ? link.from?.pin : link.to?.pin),
 					);
 					if (pins === undefined) {
@@ -257,7 +258,7 @@ export class SchemaStore {
 			await this.selectSchema(schema);
 			this.selectEntityFromURLParams();
 		} else if (this.schemas.length > 0) {
-			this.selectSchema(this.schemas[0]);
+			this.selectSchema(this.schemas[1]);
 		}
 	}
 }

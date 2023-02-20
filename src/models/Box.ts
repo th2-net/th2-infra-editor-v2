@@ -15,15 +15,20 @@
  ***************************************************************************** */
 
 import FileBase from './FileBase';
-import { DictionaryRelation } from './Dictionary';
 
 export interface BoxEntity extends FileBase {
 	spec: {
-		['custom-config']?: {
+		['customConfig']?: {
+			[prop: string]: object;
+		};
+		['mqRouter']?: {
 			[prop: string]: string;
 		};
-		['extended-settings']: {
-			['chart-cfg']?: {
+		['grpcRouter']?: {
+			[prop: string]: string;
+		};
+		['extendedSettings']: {
+			['chartCfg']?: {
 				path: string;
 				ref: string;
 			};
@@ -42,27 +47,37 @@ export interface BoxEntity extends FileBase {
 				targetPort?: string;
 			};
 		};
-		['image-name']: string;
-		['image-version']: string;
-		['node-port']?: number;
-		['dictionaries-relation']?: Array<DictionaryRelation>;
-		data?: string;
-		pins?: Array<Pin>;
+		['imageName']: string;
+		['imageVersion']: string;
+		['versionRange']?: string;
+		['bookName']?: string;
+		pins?: Pins;
+		disabled?: boolean;
 		type: string;
 	};
 }
 
+export interface Pins {
+	mq?: {
+		subscribers?: Array<Pin>;
+		publishers?: Array<Pin>;
+	};
+	grpc?: {
+		server?: Array<Pin>;
+		client?: Array<Pin>;
+	};
+}
+
 export interface Pin {
-	attributes?: Array<string>;
-	['connection-type']: 'mq' | 'grpc';
-	filters?: Array<Filter>;
 	name: string;
+	attributes?: Array<string>;
+	filters?: Array<Filter>;
 }
 
 export interface Filter {
 	metadata: {
-		['field-name']: string;
-		['expected-value']: string;
+		['fieldName']: string;
+		['expectedValue']: string;
 		['operation']: string;
 	}[];
 }
@@ -86,7 +101,7 @@ export interface ConnectionOwner {
 	box: string;
 	pin: string;
 	strategy?: string;
-	['service-class']?: string;
+	['serviceClass']?: string;
 }
 
 export interface ExtendedConnectionOwner extends ConnectionOwner {
@@ -105,11 +120,43 @@ export function isBoxEntity(object: unknown): object is BoxEntity {
 }
 
 export function isPin(object: unknown): object is Pin {
-	return (
-		typeof object === 'object' &&
-		object !== null &&
-		(object as Pin)['connection-type'] !== undefined
-	);
+	return typeof object === 'object' && object !== null && (object as Pin).name !== undefined;
+}
+
+export function getPins(pins?: Pins, connectionType?: 'mq' | 'grpc'): Pin[] {
+	let result: Pin[] = [];
+
+	if (pins) {
+		if (connectionType === 'mq') {
+			result = [...(pins.mq?.publishers || []), ...(pins.mq?.subscribers || [])];
+		} else if (connectionType === 'grpc') {
+			result = [...(pins.grpc?.client || []), ...(pins.grpc?.server || [])];
+		} else {
+			result = [
+				...(pins.mq?.publishers || []),
+				...(pins.mq?.subscribers || []),
+				...(pins.grpc?.client || []),
+				...(pins.grpc?.server || []),
+			];
+		}
+	}
+
+	return result;
+}
+
+export function getPinConnectionType(pin?: Pin, pins?: Pins): 'mq' | 'grpc' {
+	const mqPins = getPins(pins, 'mq');
+	const grpcPins = getPins(pins, 'grpc');
+
+	if (mqPins.length > 0 && pin && mqPins.some(mqPin => mqPin.name === pin.name)) {
+		return 'mq';
+	}
+
+	if (grpcPins.length > 0 && pin && grpcPins.some(grpcPin => grpcPin.name === pin.name)) {
+		return 'grpc';
+	}
+
+	return 'mq';
 }
 
 export enum BoxStatus {

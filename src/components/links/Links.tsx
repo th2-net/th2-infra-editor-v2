@@ -22,7 +22,7 @@ import { useBoxUpdater } from '../../hooks/useBoxUpdater';
 import { useBoxesStore } from '../../hooks/useBoxesStore';
 import { useEffect, useMemo, useState } from 'react';
 import ConnectionEditor from '../editors/ConnectionEditor';
-import { BoxEntity, ExtendedConnectionOwner, Pin } from '../../models/Box';
+import { BoxEntity, ExtendedConnectionOwner, getPinConnectionType, Pin } from '../../models/Box';
 import SelectedBox from '../resources/SelectedBox';
 import { ConnectionDirection, Link } from '../../models/LinksDefinition';
 import { chain } from 'lodash';
@@ -106,7 +106,7 @@ function Links() {
 			.filter(link => link[direction]?.box === boxesStore.selectedBox?.name)
 			.filter(link => link[direction === 'from' ? 'to' : 'from']?.box === box?.name)
 			.filter(link => link[direction]?.pin === pin?.name)
-			.filter(link => link[direction]?.connectionType === pin?.['connection-type'])
+			.filter(link => link[direction]?.connectionType === getPinConnectionType(pin, box?.spec.pins))
 			.head()
 			.value();
 

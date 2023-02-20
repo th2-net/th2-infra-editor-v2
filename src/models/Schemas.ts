@@ -20,85 +20,220 @@ export type schemaTemplate = {
 	schema: any;
 };
 
-const _pinSchema = {
+const _filterProps = {
 	type: 'array',
 	items: {
 		type: 'object',
 		properties: {
-			name: { type: 'string' },
-			'connection-type': { enum: ['mq', 'grpc'] },
-			filters: {
-				type: 'array',
-				items: {
-					type: 'object',
-					properties: {
-						metadata: {
-							type: 'array',
-							items: {
+			fieldName: { type: 'string' },
+			expectedValue: { type: 'string' },
+			operation: { type: 'string' },
+		},
+		additionalProperties: false,
+		required: ['fieldName', 'expectedValue', 'operation'],
+	},
+};
+
+const _filtersSchema = {
+	type: 'array',
+	items: {
+		type: 'object',
+		properties: {
+			metadata: _filterProps,
+			message: _filterProps,
+			properties: _filterProps,
+		},
+		additionalProperties: false,
+	},
+};
+
+const _pinSchema = {
+	type: 'object',
+	properties: {
+		mq: {
+			type: 'object',
+			properties: {
+				subscribers: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							attributes: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							settings: {
 								type: 'object',
 								properties: {
-									'field-name': { type: 'string' },
-									'expected-value': { type: 'string' },
-									operation: { type: 'string' },
+									storageOnDemand: { type: 'boolean' },
+									overloadStrategy: { type: 'string' },
+									queueLength: { type: 'string' },
 								},
 								additionalProperties: false,
-								required: ['field-name', 'expected-value', 'operation'],
 							},
+							linkTo: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+										box: { type: 'string' },
+										pin: { type: 'string' },
+										additionalProperties: false,
+										required: ['box', 'pin'],
+									},
+								},
+							},
+							filters: _filtersSchema,
+							additionalProperties: false,
+							required: ['name'],
 						},
 					},
-					additionalProperties: false,
-					required: ['metadata'],
 				},
-			},
-			attributes: {
-				type: 'array',
-				items: {
-					type: 'string',
+				publishers: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							attributes: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							filters: _filtersSchema,
+							additionalProperties: false,
+							required: ['name'],
+						},
+					},
 				},
 			},
 		},
+		grpc: {
+			type: 'object',
+			properties: {
+				server: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							serviceClasses: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							additionalProperties: false,
+							required: ['name'],
+						},
+					},
+				},
+				client: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							serviceClass: { type: 'string' },
+							strategy: { type: 'string' },
+							linkTo: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+										box: { type: 'string' },
+										pin: { type: 'string' },
+										additionalProperties: false,
+										required: ['box', 'pin'],
+									},
+								},
+							},
+							attributes: {
+								type: 'array',
+								items: {
+									type: 'string',
+								},
+							},
+							filters: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+										properties: _filterProps,
+									},
+									additionalProperties: false,
+								},
+							},
+							additionalProperties: false,
+							required: ['name'],
+						},
+					},
+				},
+				additionalProperties: false,
+			},
+		},
 		additionalProperties: false,
-		required: ['name', 'connection-type'],
 	},
 };
 
 const _extenedSettingsSchema = {
 	type: 'object',
 	properties: {
+		nodeName: { type: 'string' },
+		sharedMemory: {
+			type: 'object',
+			properties: {
+				enabled: { type: 'boolean' },
+			},
+			additionalProperties: false,
+			required: ['enabled'],
+		},
+		replicas: { type: 'string' },
+		k8sProbes: { type: 'boolean' },
 		service: {
 			type: 'object',
 			properties: {
 				enabled: { type: 'boolean' },
-				type: { type: 'string' },
-				endpoints: {
+				nodePort: {
 					type: 'array',
 					items: {
 						type: 'object',
 						properties: {
 							name: { type: 'string' },
-							targetPort: { type: 'number' },
-							nodePort: { type: 'number' },
+							exposedPort: { type: 'number' },
+							containerPort: { type: 'number' },
 						},
 						additionalProperties: false,
-						required: ['name', 'targetPort', 'nodePort'],
+						required: ['name', 'exposedPort'],
+					},
+				},
+				clusterIP: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: { name: { type: 'string' }, containerPort: { type: 'number' } },
+						additionalProperties: false,
+						required: ['name'],
 					},
 				},
 				ingress: {
 					type: 'object',
 					properties: {
-						urlPathes: {
+						urlPaths: {
 							type: 'array',
 							items: {
 								type: 'string',
 							},
 						},
 					},
-					additionalProperties: false,
-					required: ['urlPathes'],
 				},
 			},
 			additionalProperties: false,
-			required: ['enabled', 'type', 'endpoints', 'ingress'],
+			required: ['enabled'],
 		},
 		envVariables: {
 			type: 'object',
@@ -120,7 +255,6 @@ const _extenedSettingsSchema = {
 						cpu: { type: 'string' },
 					},
 					additionalProperties: false,
-					required: ['cpu', 'memory'],
 				},
 				requests: {
 					type: 'object',
@@ -129,15 +263,56 @@ const _extenedSettingsSchema = {
 						cpu: { type: 'string' },
 					},
 					additionalProperties: false,
-					required: ['cpu', 'memory'],
 				},
 			},
 			additionalProperties: false,
-			required: ['limits', 'requests'],
+		},
+		externalBox: {
+			type: 'object',
+			properties: {
+				enabled: { type: 'boolean' },
+				address: { type: 'string' },
+				endpoints: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							targetPort: { type: 'string' },
+							port: { type: 'string' },
+						},
+						additionalProperties: false,
+						required: ['name', 'targetPort'],
+					},
+				},
+			},
+			additionalProperties: false,
+		},
+		hostAliases: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					ip: { type: 'boolean' },
+					hostnames: { type: 'array', items: { type: 'string' } },
+				},
+				additionalProperties: false,
+			},
+		},
+		hostNetwork: { type: 'boolean' },
+		mounting: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					path: { type: 'string' },
+					pvcName: { type: 'string' },
+				},
+				additionalProperties: false,
+			},
 		},
 	},
 	additionalProperties: false,
-	required: ['service', 'envVariables', 'resources'],
 };
 
 const getSchemaURI = (schema: any): string => {

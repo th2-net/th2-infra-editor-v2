@@ -16,7 +16,7 @@
 
 import { createUseStyles } from 'react-jss';
 import { Theme } from '../../styles/theme';
-import { ExtendedConnectionOwner } from '../../models/Box';
+import { ExtendedConnectionOwner, getPinConnectionType, getPins } from '../../models/Box';
 import { useInput } from '../../hooks/useInput';
 import Input from '../util/Input';
 import { observer } from 'mobx-react-lite';
@@ -118,7 +118,7 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 			return [];
 		}
 
-		return box.spec.pins ?? [];
+		return getPins(box.spec.pins);
 	}, [box]);
 
 	const pinValidate = useCallback(pin => pins.map(pin => pin.name).includes(pin), [pins]);
@@ -145,12 +145,13 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 	const isPinSupportedServiceClassOption = useCallback(() => {
 		return (
 			pinValidate(pinInput.value) &&
-			pins.filter(item => item.name === pinInput.value)[0]['connection-type'] === 'mq'
+			getPinConnectionType(pins.filter(item => item.name === pinInput.value)[0], box?.spec.pins) ===
+				'mq'
 		);
 	}, [pinInput.value, pinValidate, pins]);
 
 	const serviceClassInput = useInput({
-		initialValue: owner?.['service-class'] || '',
+		initialValue: owner?.['serviceClass'] || '',
 		id: `${id}ServiceClass`,
 		label: 'Service class',
 		disabled: disabled || isPinSupportedServiceClassOption(),
@@ -176,8 +177,11 @@ function ConnectionConfig(props: ConnectionConfigProps) {
 			box: boxInput.value,
 			pin: pinInput.value,
 			strategy: strategyInput.value,
-			'service-class': serviceClassInput.value,
-			connectionType: pins.filter(item => item.name === pinInput.value)[0]['connection-type'],
+			serviceClass: serviceClassInput.value,
+			connectionType: getPinConnectionType(
+				pins.filter(item => item.name === pinInput.value)[0],
+				box?.spec.pins,
+			),
 		});
 	}, [
 		boxInput.isValid,

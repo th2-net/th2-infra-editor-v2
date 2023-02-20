@@ -16,7 +16,7 @@
 
 import { IPosition } from 'monaco-editor';
 import { IPinConnections } from '../components/links/BoxConnections';
-import { ExtendedConnectionOwner, Pin } from '../models/Box';
+import { ExtendedConnectionOwner, getPins, Pin, Pins } from '../models/Box';
 import { Link } from '../models/LinksDefinition';
 import { IBoxConnections } from '../components/links/BoxConnections';
 
@@ -42,14 +42,14 @@ export type InvalidLink = {
 };
 
 export function getCountPinsConnections(
-	selectedBoxPins: any,
 	selectedBoxConnections: [IBoxConnections, IBoxConnections] | [null, null],
+	selectedBoxPins?: Pins,
 ): PinsInfo[] | null {
 	const [toConnections, fromConnections] = selectedBoxConnections;
 	const allConnections = [...(toConnections?.pins || []), ...(fromConnections?.pins || [])];
 	if (selectedBoxPins && allConnections) {
 		const pinsInfoArray: PinsInfo[] = [];
-		selectedBoxPins.forEach((pin: Pin, index: number) => {
+		getPins(selectedBoxPins).forEach((pin: Pin, index: number) => {
 			pinsInfoArray[index] = { name: pin.name, numOfConnections: 0 };
 			allConnections.forEach((iPinConnection: IPinConnections) => {
 				if (JSON.stringify(iPinConnection.pin) === JSON.stringify(pin)) {
